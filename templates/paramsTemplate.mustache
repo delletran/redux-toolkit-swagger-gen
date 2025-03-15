@@ -1,0 +1,12 @@
+{{#imports}}
+import { {{name}} } from '../models/{{fileName}}';
+{{/imports}}
+
+{{#interfaces}}
+export type {{name}} = {
+{{#properties}}
+  {{name}}{{#optional}}?{{/optional}}: {{type}};
+{{/properties}}
+}
+
+{{/interfaces}}

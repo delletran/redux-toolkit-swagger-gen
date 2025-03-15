@@ -1,0 +1,39 @@
+import { createSlice } from '@reduxjs/toolkit/react'
+{{#uniqueImports}}
+import { {{interface}} } from '../models/{{modelName}}'
+{{/uniqueImports}}
+import { REDUX } from '../redux/constants'
+import {
+  clearFormErrorAction,
+  editFormErrorAction,
+  processFormAction,
+  setFormAction,
+  setFormErrorAction
+} from '../redux/actions'
+
+export type I{{sliceNamePascalCase}}SliceState = IReduxFormState<{{interfaceName}}>
+
+export const INITIAL_STATE: I{{sliceNamePascalCase}}SliceState = {}
+
+export const {{sliceNameCamelCase}}Slice = createSlice({
+  name: REDUX.SLICE.{{formSliceName}},
+  initialState: INITIAL_STATE,
+  reducers: {
+    set{{sliceNamePascalCase}}Form: setFormAction<I{{sliceNamePascalCase}}SliceState>,
+    edit{{sliceNamePascalCase}}Form: processFormAction<I{{sliceNamePascalCase}}SliceState>(INITIAL_STATE),
+    set{{sliceNamePascalCase}}FormError: setFormErrorAction,
+    edit{{sliceNamePascalCase}}FormError: editFormErrorAction,
+    clear{{sliceNamePascalCase}}FormError: clearFormErrorAction,
+    clear{{sliceNamePascalCase}}Form: () => INITIAL_STATE
+  }
+})
+
+export const {
+  set{{sliceNamePascalCase}}Form,
+  edit{{sliceNamePascalCase}}Form,
+  set{{sliceNamePascalCase}}FormError,
+  edit{{sliceNamePascalCase}}FormError,
+  clear{{sliceNamePascalCase}}FormError,
+  clear{{sliceNamePascalCase}}Form
+} = {{sliceNameCamelCase}}Slice.actions
+export default {{sliceNameCamelCase}}Slice.reducer

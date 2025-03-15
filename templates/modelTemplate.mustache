@@ -1,0 +1,12 @@
+import { z } from 'zod';
+{{#nestedModels}}
+import { {{.}} } from './{{.}}';
+{{/nestedModels}}
+
+export const {{modelName}} = z.object({
+{{#properties}}
+  {{name}}: {{#isRef}}{{refName}}{{/isRef}}{{^isRef}}{{{zodType}}}{{/isRef}},
+{{/properties}}
+});
+
+export type I{{modelName}}Serializer = z.infer<typeof {{modelName}}>;

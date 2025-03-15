@@ -1,0 +1,63 @@
+/* eslint-disable */
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { transformErrorResponse} from '../../redux/response';
+import { toQueryString } from '../../redux/query';
+import { TAGS } from '../../constants/tags';
+import { IList, IFilters } from '../../redux/types';
+
+{{#uniqueImports}}
+{{#modelName}}
+import { {{interface}} } from '../../models/{{modelName}}';
+{{/modelName}}
+{{/uniqueImports}}
+
+{{#uniqueParamImports}}
+{{#iNameParam}}
+import { {{iNameParam}} } from '../../params/{{pathGroup}}';
+{{/iNameParam}}
+{{/uniqueParamImports}}
+
+export const {{sliceName}} = createApi({
+  reducerPath: {{{slicePath}}},
+  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
+  tagTypes: Object.values(TAGS),
+  endpoints: (builder) => ({
+  {{#endpoints}}
+    {{name}}: builder.{{method}}<{{#isListEndpoint}}IList<{{interface}}>{{/isListEndpoint}}{{^isListEndpoint}}{{interface}}{{/isListEndpoint}}, {{{types}}}>({
+      {{^isMutation}}{{#isListEndpoint}}
+      query: ({{params}}) => {
+        const qs = toQueryString(params)
+        return `{{{path}}}?${qs}`
+      },
+      transformErrorResponse: transformErrorResponse,
+      providesTags: [TAGS.{{tag}}],
+    }),
+    {{/isListEndpoint}}
+    {{^isListEndpoint}}
+      query: ({{params}}) => `{{{path}}}`,
+      transformErrorResponse: transformErrorResponse,
+      providesTags: [TAGS.{{tag}}],
+    }),
+    {{/isListEndpoint}}
+    {{/isMutation}}
+    {{#isMutation}}
+      query: ({{#params}}{{params}}{{/params}}) => ({
+        url: `{{{path}}}`,
+        method: '{{httpMethod}}',{{#body}}
+        body: {{body}},{{/body}}
+      }),
+      transformErrorResponse: transformErrorResponse,
+      invalidatesTags: [TAGS.{{tag}}],
+    }),
+    {{/isMutation}}
+  {{/endpoints}}
+  }),
+});
+
+export const {
+  {{#endpoints}}{{#isQuery}}
+  use{{exportName}}Query,{{/isQuery}}{{#isQuery}}
+  useLazy{{exportName}}Query,{{/isQuery}}{{#isMutation}}
+  use{{exportName}}Mutation,{{/isMutation}}
+  {{/endpoints}}
+} = {{sliceName}};
