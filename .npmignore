@@ -1,0 +1,14 @@
+.git
+.gitignore
+node_modules
+*.log
+*.tgz
+.npmignore
+tsconfig.json
+generate.ts
+
+# temporary files 
+tmp
+temp
+temp/*
+.temp

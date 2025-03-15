@@ -2,15 +2,16 @@ node_modules
 dist
 out
 .DS_Store
-*.log*
+*.log
 .env*
 
 # temporary files 
 tmp
 temp
+temp/*
 .temp
-src/lib/react-swagger-gen/temp
 
 # build files
 
 src/api
+*.tgz
