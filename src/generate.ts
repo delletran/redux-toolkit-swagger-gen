@@ -235,19 +235,19 @@ const main = async () => {
 
     reduxGlobalFiles.forEach((file) => {
       fs.copyFileSync(
-        path.resolve(__dirname, `./redux/${file}`),
+        path.resolve(__dirname, `../src/redux/${file}`),
         path.join(sliceDir, file)
       )
     })
     reduxFiles.forEach((file) => {
       fs.copyFileSync(
-        path.resolve(__dirname, `./redux/${file}`),
+        path.resolve(__dirname, `../src/redux/${file}`),
         path.join(reduxDir, file)
       )
     })
 
     fs.copyFileSync(
-      path.resolve(__dirname, "./schema/api.ts"),
+      path.resolve(__dirname, "../src/schema/api.ts"),
       path.join(schemaDir, "api.ts")
     )
 

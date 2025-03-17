@@ -2,12 +2,13 @@
   "name": "redux-toolkit-swagger-gen",
   "version": "0.1.8",
   "description": "Redux Toolkit API client generator from Swagger/OpenAPI specifications",
-  "main": "dist/src/index.js",
+  "main": "dist/src/generate.js",
   "type": "commonjs",
-  "types": "dist/src/index.d.ts",
+  "types": "dist/src/generate.d.ts",
   "files": [
     "dist",
     "src",
+    "bin",
     "README.md"
   ],
   "scripts": {
