@@ -13,13 +13,14 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "generate": "node dist/generate.js",
+    "generate": "node dist/bin/cli.js",
     "swagger-gen": "./dist/bin/cli.js",
-    "dev": "ts-node --files src/generate.ts",
+    "generate-api": "node dist/bin/cli.js",
+    "dev": "ts-node --files src/bin/cli.ts",
     "start": "node dist/generate.js"
   },
   "bin": {
-    "swagger-gen": "./dist/bin/cli.js"
+    "swagger-gen": "dist/bin/cli.js"
   },
   "peerDependencies": {
     "react": ">=16.8.0"

@@ -1,6 +1,6 @@
 # Redux Toolkit Swagger Generator
 
-Generate Redux Toolkit API clients from Swagger/OpenAPI specifications automatically.
+Generate Redux Toolkit API clients from Swagger/OpenAPI specifications.
 
 ## Features
 
@@ -14,28 +14,54 @@ Generate Redux Toolkit API clients from Swagger/OpenAPI specifications automatic
 ## Installation
 
 ```bash
-# Using npm
+# Local installation (recommended)
 npm install redux-toolkit-swagger-gen --save-dev
-
-# Using yarn
-yarn add -D redux-toolkit-swagger-gen
 
 # Global installation
 npm install -g redux-toolkit-swagger-gen
+
+# Or use directly with npx
+npx redux-toolkit-swagger-gen
 ```
 
-## Quick Start
+## Usage
+
+### Command Line
 
 ```bash
-# Basic usage
+# Using locally installed version
 npx swagger-gen --url http://your-api/swagger.json
 
+# Using global installation
+swagger-gen --url http://your-api/swagger.json
+
+# Local swagger file
+swagger-gen --url ./swagger.json --output ./src/api
+
 # With all options
-npx swagger-gen --url http://your-api/swagger.json \
-                --output src/api \
-                --clean \
-                --verbose \
-                --prettier
+swagger-gen \
+  --url http://your-api/swagger.json \
+  --output src/api \
+  --clean \
+  --verbose \
+  --prettier
+```
+
+### NPM Script (Recommended)
+
+Add to your package.json:
+```json
+{
+  "scripts": {
+    "generate-api": "swagger-gen --url ./swagger.json",
+    "generate-api:watch": "nodemon --watch ./swagger.json --exec 'npm run generate-api'"
+  }
+}
+```
+
+Then run:
+```bash
+npm run generate-api
 ```
 
 ## CLI Options
@@ -49,18 +75,6 @@ npx swagger-gen --url http://your-api/swagger.json \
 | --skipValidation| -s    | Skip swagger schema validation        | false                            |
 | --prettier      | -p    | Format generated code with prettier   | true                             |
 | --help          | -h    | Show help                            | -                                |
-
-## Package.json Configuration
-
-Add to your package.json:
-
-```json
-{
-  "scripts": {
-    "generate-api": "swagger-gen --url ./swagger.json --output src/api --clean --verbose"
-  }
-}
-```
 
 ## Output Structure
 
@@ -104,14 +118,31 @@ function UserComponent() {
 
 ## Troubleshooting
 
-### CORS Issues
-When fetching remote swagger files, you might encounter CORS issues. Solutions:
-1. Use a local swagger file
-2. Configure your API server to allow CORS
-3. Use a proxy server
+### Command Not Found
+If you get "command not found", try:
+1. Use `npx swagger-gen` instead
+2. Check if package is installed (`npm list redux-toolkit-swagger-gen`)
+3. Try reinstalling the package
 
-### Type Generation Fails
-Check that your swagger file is valid using a [Swagger Validator](https://validator.swagger.io/)
+### CORS Issues
+When fetching remote swagger files:
+1. Use a local swagger file instead
+2. Add CORS headers to your API server
+3. Use a proxy server
+4. Download the swagger file first then use local path
+
+### Permission Errors
+On Unix systems, you might need to:
+```bash
+chmod +x node_modules/.bin/swagger-gen
+```
+
+### Watch Mode
+For development, use nodemon:
+```bash
+npm install nodemon --save-dev
+nodemon --watch swagger.json --exec "swagger-gen --url ./swagger.json"
+```
 
 ## Contributing
 
