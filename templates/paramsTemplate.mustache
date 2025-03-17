@@ -3,10 +3,9 @@ import { {{name}} } from '../models/{{fileName}}';
 {{/imports}}
 
 {{#interfaces}}
-export type {{name}} = {
+export interface {{name}} {
 {{#properties}}
   {{name}}{{#optional}}?{{/optional}}: {{type}};
 {{/properties}}
 }
-
 {{/interfaces}}

@@ -1,12 +1,13 @@
-import { PayloadAction } from "@reduxjs/toolkit"
+
+import { PayloadAction } from '@reduxjs/toolkit'
 import {
   clearDataArrayOf,
   IDsOfList,
   RemoveItemFromListWithID,
-  RemoveItemsFromListWithIDs,
-} from "./helper/array"
-import { IWithError, IWithID } from "./types"
-import { REDUX } from "./constants"
+  RemoveItemsFromListWithIDs
+} from './helper/array'
+import { IWithError, IWithID } from './types'
+import { REDUX } from './constants'
 
 /**
  * Generates a function to set a specific field in the state.
@@ -15,9 +16,7 @@ import { REDUX } from "./constants"
  * @param field - The field to be set in the state.
  * @returns A function that takes the state and action, and sets the specified field.
  */
-export const setAction = <T extends Record<string, IValue>, D = unknown>(
-  field: keyof T
-) => {
+export const setAction = <T extends Record<string, IValue>, D = unknown>(field: keyof T) => {
   return (state: T, action: PayloadAction<D>) => {
     state[field] = action.payload as T[keyof T]
   }
@@ -65,7 +64,7 @@ export const editFormAction = <T>(
   action: PayloadAction<Record<string, IValue>>
 ) => {
   const { payload } = action
-  const error = { ...state.error, [payload[REDUX.FIELD.KEY]]: "" }
+  const error = { ...state.error, [payload[REDUX.FIELD.KEY]]: '' }
   return { ...state, error, ...payload }
 }
 
@@ -115,10 +114,7 @@ export const clearFormErrorAction = <T>(state: IReduxFormState<T>) => {
  * @returns {Function} The set field action function.
  */
 export const setFieldAction = <T>(field: keyof T) => {
-  const setField = (
-    state: T,
-    action: PayloadAction<Record<string, IValue>>
-  ) => {
+  const setField = (state: T, action: PayloadAction<Record<string, IValue>>) => {
     const { payload } = action
     state[field] = { ...state[field], ...payload, error: {} }
   }
@@ -145,9 +141,7 @@ export const clearFieldAction = <T>(initialState: T, field: keyof T) => {
  * Set array of object to object array field.
  * @param field Object array field name.
  */
-export const setArrayAction = <T extends Record<string, unknown>>(
-  field: keyof T
-) => {
+export const setArrayAction = <T extends Record<string, unknown>>(field: keyof T) => {
   return (state: T, action: PayloadAction<IWithID[]>) => {
     const { payload } = action
     state[field] = payload as T[keyof T]
@@ -159,10 +153,7 @@ export const setArrayAction = <T extends Record<string, unknown>>(
  * @note Object to add / remove must have `id` field
  * @param  field Array field name.
  */
-export const selectItemAction = <
-  T extends Record<string, unknown>,
-  D extends IWithID
->(
+export const selectItemAction = <T extends Record<string, unknown>, D extends IWithID>(
   field: keyof T
 ) => {
   return (state: T, action: PayloadAction<{ item: D; select?: boolean }>) => {
@@ -185,10 +176,7 @@ export const selectItemAction = <
  * @note Items to add / select must have `id` field
  * @param field Array field name.
  */
-export const selectItemsAction = <
-  T extends Record<string, any>,
-  D extends { id: number | string }
->(
+export const selectItemsAction = <T extends Record<string, any>, D extends { id: number | string }>(
   field: keyof T
 ) => {
   return (state: T, action: PayloadAction<{ items: D[]; select: boolean }>) => {
@@ -212,15 +200,12 @@ export const selectItemsAction = <
  * @note Item to unselect / remove must have `id` field
  * @param field Array field name.
  */
-export const unselectItemAction = <
-  T extends Record<string, any> & IWithError<T>
->(
+export const unselectItemAction = <T extends Record<string, any> & IWithError<T>>(
   field: keyof T,
   errorField?: string
 ) => {
   return (state: T, action: PayloadAction<number | string>) => {
-    if (errorField && state.error)
-      state.error = { ...state.error, [errorField]: undefined }
+    if (errorField && state.error) state.error = { ...state.error, [errorField]: undefined }
     const { payload } = action
     const cleanList = RemoveItemFromListWithID(state[field], payload)
     state[field] = cleanList as T[keyof T]
@@ -232,9 +217,7 @@ export const unselectItemAction = <
  * @note Items to unselect / remove must have `id` field
  * @param field Array field name.
  */
-export const unselectItemsAction = <T extends Record<string, any>>(
-  field: keyof T
-) => {
+export const unselectItemsAction = <T extends Record<string, any>>(field: keyof T) => {
   return (state: T, action: PayloadAction<number[]>) => {
     const { payload } = action
     const cleanList = RemoveItemsFromListWithIDs(state[field], payload)
@@ -259,10 +242,7 @@ type IProcessFormActionOptions<T> = {
  * If `campus` is passed as latest key, clears the `building_id` and `room_id` fields base on their `initialState` value
  */
 
-export const processFormAction = <T>(
-  initialState: T,
-  options?: IProcessFormActionOptions<T>
-) => {
+export const processFormAction = <T>(initialState: T, options?: IProcessFormActionOptions<T>) => {
   const keysToClear = options?.keyRelations
   const setFormFunction = (
     state: IReduxFormState<T>,
@@ -280,7 +260,7 @@ export const processFormAction = <T>(
         fieldToClears = { ...fieldToClears, [item]: initialState[item] }
       })
     }
-    const error = { ...state.error, [key]: "", ...fieldToClears }
+    const error = { ...state.error, [key]: '', ...fieldToClears }
     return { ...state, error, ...payload, ...fieldToClears }
   }
   return setFormFunction

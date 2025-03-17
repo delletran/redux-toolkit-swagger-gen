@@ -36,7 +36,7 @@ export const getPathParamsTyped = (
     .filter((param) => param.in === 'path')
     .map((param) => {
       const paramType = _parsePathParamType(param);
-      return `${param.name}: ${param.required ? '' : '?'}${paramType}`;
+      return `${param.name}${param.required ? '' : '?'}: ${paramType}`;
     });
   return params
 };
@@ -49,7 +49,7 @@ export const getParamsTyped = (
   const params = parameters
     .map((param) => {
       const paramType = _parseQueryParamType(param as IQueryParameter);
-      return `${param.name}: ${param.required ? '' : '?'}${paramType}`;
+      return `${param.name}${param.required ? '' : '?'}: ${paramType}`;
     });
   return params;
 };

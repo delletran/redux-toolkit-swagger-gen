@@ -1,5 +1,6 @@
 type IValue = string | number
 type RCE<T> = React.ChangeEvent<T>
+type RCEH<T> = React.ChangeEventHandler<T>
 type RME<T> = React.MouseEvent<T>
 
 type ItemActionProps<T = unknown> = {
@@ -8,3 +9,5 @@ type ItemActionProps<T = unknown> = {
   onView?: (arg: T) => void
   disabled?: boolean
 }
+
+type ErrorRecord = Record<string, string>

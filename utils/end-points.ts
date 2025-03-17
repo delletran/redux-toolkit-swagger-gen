@@ -39,7 +39,6 @@ const getServiceEndpoint = (path: string, httpMethod: MethodType, details: Redux
     name: endpoint.name,
     method: endpoint.method,
     path: endpoint.path,
-    pathGroup: endpoint.path.split('/')[1] || '',
     httpMethod: endpoint.httpMethod,
     params: endpoint.params,
     body: endpoint.body,
@@ -47,7 +46,6 @@ const getServiceEndpoint = (path: string, httpMethod: MethodType, details: Redux
     isMutation: endpoint.isMutation,
     isQuery: endpoint.isQuery,
     interface: endpoint.interface,
-    iNameParam: endpoint.iNameParam,
     hasInterface: endpoint.hasInterface,
     isListEndpoint: endpoint.isListEndpoint,
     modelName: endpoint.modelName,
@@ -84,7 +82,6 @@ const getThunkEndpoint = (path: string, httpMethod: MethodType, details: any): a
   return {
     operationId: endpoint.name,
     url: endpoint.path,
-    pathGroup: endpoint.path.split('/')[1] || '',
     method: endpoint.httpMethod,
     parameters: details.methodObj.parameters || [],
     isListEndpoint: endpoint.isListEndpoint,
@@ -92,7 +89,6 @@ const getThunkEndpoint = (path: string, httpMethod: MethodType, details: any): a
     slicePath: path,
     interface: endpoint.interface,
     modelName: endpoint.modelName,
-    iNameParam: endpoint.iNameParam,
     queryParams: endpoint.queryParams,
     bodyParam: endpoint.body,
     pathParamsTyped: endpoint.pathParamsTyped,
@@ -132,7 +128,7 @@ class Endpoint {
     this._details = details;
     this._name = toCamelCase(details.id);
     this._exportName = toPascalCase(this._name);
-    this._isListEndpoint = details.url.toLowerCase().includes('/list')
+    this._isListEndpoint = details.url.toLowerCase().includes('/list') || details.id.toLowerCase().includes('list')
     this._isDeleteEndpoint = httpMethod === 'delete';
     this._isQuery = httpMethod === 'get';
 
@@ -206,11 +202,9 @@ class Endpoint {
 
 
   get params(): string | null {
-    let param: string | null = this._isListEndpoint
-      ? 'params'
-      : this._joinedParams.length > 1
-        ? `{ ${this._joinedParams.join(', ')} }`
-        : this._joinedParams[0];
+    let param: string | null = this._joinedParams.length > 1
+      ? `{ ${this._joinedParams.join(', ')}}`
+      : this._joinedParams[0];
     if (param in ['{  }', '', null]) param = this._isDeleteEndpoint ? 'data' : null;
 
     return param;
@@ -247,13 +241,13 @@ class Endpoint {
         ? `${this._pathParamsTyped.join(', ')}`
         : null;
   }
-  
+
   get types(): string {
-    return !this._isListEndpoint
+    return !this._isListEndpoint || this._joinedParamsTyped.length > 1
       ? `{ ${this._joinedParamsTyped.join(', ')} }`
-      // : 'IFilters'
-      : this._INameParam
-        ? `Record<string, unknown> & ${this._INameParam}`
-        : 'Record<string, unknown>';
+      : 'IFilters'
+    // : this._INameParam
+    //   ? `Record<string, unknown> & ${this._INameParam}`
+    //   : 'Record<string, unknown>';
   }
 }

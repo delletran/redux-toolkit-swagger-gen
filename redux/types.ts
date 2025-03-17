@@ -1,11 +1,11 @@
 
 export type ReduxErrorResType<T = unknown> = {
-  status?: number;
-  message?: string;
-  detail?: string;
-  hint?: string;
-  error: T;
-};
+  status?: number
+  message?: string
+  detail?: string
+  hint?: string
+  error: T
+}
 
 export type RCE<T> = React.ChangeEvent<T>
 export type RME<T> = React.MouseEvent<T>

@@ -1,4 +1,5 @@
 type ID = number | string
+type IValue = string | number
 
 /**
  * Wrapper for Form

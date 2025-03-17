@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 // import type { PayloadAction } from '@reduxjs/toolkit';
-import { IFilters } from '../../redux/types';
+// import { IFilters } from '../../redux/types';
 import { toQueryString } from '../../redux/query';
 
 {{#uniqueImports}}
@@ -8,12 +8,6 @@ import { toQueryString } from '../../redux/query';
 import { {{interface}} } from '../../models/{{modelName}}';
 {{/modelName}}
 {{/uniqueImports}}
-
-{{#uniqueParamImports}}
-{{#iNameParam}}
-import { {{iNameParam}} } from '../../params/{{pathGroup}}.params';
-{{/iNameParam}}
-{{/uniqueParamImports}}
 
 interface {{sliceName}}State {
   entities: Record<string, any>[];
@@ -30,7 +24,7 @@ const initialState: {{sliceName}}State = {
 {{#endpoints}}
 export const {{operationId}} = createAsyncThunk(
   '{{slicePath}}/{{operationId}}',
-  async ({{#params}}{{#types}}{{params}}: {{{types}}}{{/types}}{{/params}}, { rejectWithValue }) => {
+  async ({{#params}}{{#types}}{{params}}: {{types}}{{/types}}{{/params}}, { rejectWithValue }) => {
     try { {{#params}}
       const qs = toQueryString({{{params}}}){{/params}}
       const url = `{{{url}}}{{#params}}?${qs}{{/params}}`

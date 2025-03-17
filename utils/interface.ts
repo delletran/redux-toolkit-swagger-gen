@@ -17,13 +17,11 @@ export const getNames = (details: ReduxApiEndpointType): { interfaceName: string
       if (ref) break;
     }
   };
-  let parameters = details.methodObj.parameters[0] as IQueryParameter
-  // const routeIdentifier = route.split('/').slice(1).map(part => part.replace(/{|}/g, '')).join('_');
-  
+
   const paramModelName = ref?.split('/').pop();
   const modelName = paramModelName || '';
   const interfaceName = ref ? `I${paramModelName}Serializer` : 'unknown';
-  const paramName = ref ? `I${paramModelName}${parameters?.type == 'array' ? 'List' : ''}Params` : '';
+  const paramName = ref ? `I${paramModelName}Param` : 'unknown';
 
   return { interfaceName, modelName, paramName };
 };
