@@ -15,12 +15,11 @@
     "swagger-gen": "npm --prefix . run generate"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": ">=1.6.0",
     "react": ">=16.8.0"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "github:apidevtools/json-schema-ref-parser",
-    "@reduxjs/toolkit": "^1.6.2",
+    "@reduxjs/toolkit": "^2.4.0",
     "@types/react": "^19.0.10",
     "axios": "^1.8.3",
     "mustache": "^4.2.0",

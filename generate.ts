@@ -10,7 +10,7 @@ import { generateReduxSlices } from './generators/redux-slice-generator';
 import { ParamsGenerator } from './generators/params-generator';
 
 export const swaggerPath = process.argv[2] || 'http://localhost:8000/swagger.json';
-export const baseOutPath = path.resolve(__dirname, '../../api');
+export const baseOutPath = path.resolve(__dirname, 'src/api');
 
 export const outputDir = baseOutPath;
 export const sliceDir = baseOutPath;
