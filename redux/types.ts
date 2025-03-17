@@ -1,4 +1,3 @@
-
 export type ReduxErrorResType<T = unknown> = {
   status?: number
   message?: string
@@ -11,7 +10,7 @@ export type RCE<T> = React.ChangeEvent<T>
 export type RME<T> = React.MouseEvent<T>
 
 export type IOrdering = Record<string, unknown> & {
-  order?: 'asc' | 'desc' | false
+  order?: "asc" | "desc" | false
   orderBy?: string
 }
 
@@ -42,7 +41,7 @@ export type IApiProps = {
 export type IApiParams = Record<string, unknown>
 
 export type IApiSuccessResponse<T> = {
-  status: 'ok'
+  status: "ok"
   code: number
   data: T
   error?: null

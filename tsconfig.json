@@ -7,7 +7,9 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "allowJs": true
   },
   "include": ["generate.ts", "./**/*.ts","./**/*.d.ts"],
   "exclude": ["node_modules", "dist"]

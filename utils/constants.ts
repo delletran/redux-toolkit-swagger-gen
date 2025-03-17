@@ -1,4 +1,4 @@
-export enum ResponseStatus {
+enum ResponseStatus {
   OK = 200,
   CREATED = 201,
   ACCEPTED = 202,
@@ -13,5 +13,9 @@ export enum ResponseStatus {
   NOT_IMPLEMENTED = 501,
   BAD_GATEWAY = 502,
   SERVICE_UNAVAILABLE = 503,
-  GATEWAY_TIMEOUT = 504
+  GATEWAY_TIMEOUT = 504,
+}
+
+module.exports = {
+  ResponseStatus,
 }

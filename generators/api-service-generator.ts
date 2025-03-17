@@ -1,23 +1,44 @@
-import Mustache from 'mustache';
+const serviceTemplate = fsRead("../templates/serviceTemplate.mustache")
 
-import { EndpointFactory } from '../utils/end-points';
-import { toCamelCase } from '../utils/formater';
-import { fsRead } from '../utils/helpers';
+const generateApiService = (
+  path: string,
+  methods: Record<string, ReduxApiEndpointType>
+): string => {
+  const endpoints = EndpointFactory.getEndpoints("service", path, methods)
+  interface UniqueImport {
+    interface: string
+    modelName: string
+  }
 
-const serviceTemplate = fsRead('../templates/serviceTemplate.mustache');
+  interface UniqueParamImport {
+    interface: string
+    paramName: string
+  }
 
-export const apiServiceGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>): string => {
-  const endpoints = EndpointFactory.getEndpoints('service', path, methods);
-  const uniqueImports = Array.from(
-    new Map(
-      endpoints.map(ep => [`${ep.interface}|${ep.modelName}`, { interface: ep.interface, modelName: ep.modelName }])
+  const uniqueImports: UniqueImport[] = Array.from(
+    new Map<string, UniqueImport>(
+      endpoints.map((ep: { interface: string; modelName: string }) => [
+        `${ep.interface}|${ep.modelName}`,
+        { interface: ep.interface, modelName: ep.modelName },
+      ])
     ).values()
-  );
-  const uniqueParamImports = Array.from(
-    new Map(
-      endpoints.map(ep => [`${ep.iNameParam}|${ep.modelName}`, { interface: ep.paramInterface, paramName: ep.paramName }])
+  )
+
+  const uniqueParamImports: UniqueParamImport[] = Array.from(
+    new Map<string, UniqueParamImport>(
+      endpoints.map(
+        (ep: {
+          iNameParam: string
+          modelName: string
+          paramInterface: string
+          paramName: string
+        }) => [
+          `${ep.iNameParam}|${ep.modelName}`,
+          { interface: ep.paramInterface, paramName: ep.paramName },
+        ]
+      )
     ).values()
-  );
+  )
 
   return Mustache.render(serviceTemplate, {
     endpoints,
@@ -25,5 +46,7 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     uniqueParamImports,
     sliceName: toCamelCase(path),
     slicePath: '"' + `${path}-api` + '"',
-  });
-};
+  })
+}
+
+module.exports = { generateApiService }

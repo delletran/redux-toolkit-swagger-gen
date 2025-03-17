@@ -1,11 +1,11 @@
-import { ID, IWithID } from '../types'
+import { ID, IWithID } from "../types"
 
 /**
  * Returns array of ID.
  * @param {Array<string>} list List of Data with `id`.
  * @returns {Array<string>} An array of IDs.
  */
-export const toIdsOfDataArray = <T extends IWithID>(list: T[]): Array<ID> => {
+const toIdsOfDataArray = <T extends IWithID>(list: T[]): Array<ID> => {
   return list.map((item) => item.id)
 }
 
@@ -13,7 +13,7 @@ export const toIdsOfDataArray = <T extends IWithID>(list: T[]): Array<ID> => {
  * Returns array of ID.
  * @param list List of Objects with `id`.
  */
-export const IDsOfList = <T>(list: IWithID[]) => {
+const IDsOfList = <T>(list: IWithID[]) => {
   return list.map((item) => item.id) as T[]
 }
 
@@ -22,7 +22,10 @@ export const IDsOfList = <T>(list: IWithID[]) => {
  * @param list List of Objects with `id`.
  * @param idToRemove List of `id` to remove from the list.
  */
-export const RemoveItemFromListWithID = <T>(list: (IWithID & T)[], idToRemove: number | string) => {
+const RemoveItemFromListWithID = <T>(
+  list: (IWithID & T)[],
+  idToRemove: number | string
+) => {
   return list.filter((item) => item.id !== idToRemove) as T[]
 }
 
@@ -31,7 +34,7 @@ export const RemoveItemFromListWithID = <T>(list: (IWithID & T)[], idToRemove: n
  * @param list List of Objects with `id`.
  * @param idsToRemove List of `id` to remove from the list.
  */
-export const RemoveItemsFromListWithIDs = <T>(
+const RemoveItemsFromListWithIDs = <T>(
   list: (IWithID & T)[],
   idsToRemove: (number | string)[]
 ) => {
@@ -44,7 +47,10 @@ export const RemoveItemsFromListWithIDs = <T>(
  * @param  {Array<IWithID>} toClear - The list of objects with `id` properties to be subtracted from the original list.
  * @returns {Array<IWithID>} An array of objects.
  */
-export const clearDataArrayOf = <T extends IWithID>(list: T[], toClear: T[]): Array<IWithID> => {
+const clearDataArrayOf = <T extends IWithID>(
+  list: T[],
+  toClear: T[]
+): Array<IWithID> => {
   const ids = toIdsOfDataArray(toClear)
   return list.filter((item) => !ids.includes(item.id))
 }
@@ -55,7 +61,7 @@ export const clearDataArrayOf = <T extends IWithID>(list: T[], toClear: T[]): Ar
  * @param  {Array<IWithID>} ids - The list of `id` to be selected from the original list.
  * @returns {Array<IWithID>} An array of objects.
  */
-export const selectDataArrayOfByIDs = <T extends IWithID>(
+const selectDataArrayOfByIDs = <T extends IWithID>(
   list: T[] | undefined,
   ids: ID[]
 ): Array<T> => {
@@ -69,7 +75,10 @@ export const selectDataArrayOfByIDs = <T extends IWithID>(
  * @param field - The key of the field to extract values from.
  * @returns An array of values corresponding to the specified field.
  */
-export const extractFieldValues = <T extends Record<string, unknown>, K extends keyof T>(
+const extractFieldValues = <
+  T extends Record<string, unknown>,
+  K extends keyof T
+>(
   list: T[] | undefined,
   field: K
 ): T[K][] => {
@@ -77,7 +86,7 @@ export const extractFieldValues = <T extends Record<string, unknown>, K extends 
   return list.map((item) => item[field])
 }
 
-export const toKeyValuePairArray = (obj: object) =>
+const toKeyValuePairArray = (obj: object) =>
   Object.entries(obj).map(([name, id]) => ({ id, name }))
 
 /**
@@ -97,8 +106,24 @@ export const toKeyValuePairArray = (obj: object) =>
  * const noDefaultIndex = getIndexOf(list, 'orange'); // Output: -1 (since neither 'orange' nor a default value are found)
  * ```
  */
-export const getIndexOf = (list: unknown[], value: unknown, defaultValue?: unknown) => {
+const getIndexOf = (
+  list: unknown[],
+  value: unknown,
+  defaultValue?: unknown
+) => {
   const index = list.indexOf(value)
   if (index === -1) return list.indexOf(defaultValue)
   return index
+}
+
+module.exports = {
+  toIdsOfDataArray,
+  IDsOfList,
+  RemoveItemFromListWithID,
+  RemoveItemsFromListWithIDs,
+  clearDataArrayOf,
+  selectDataArrayOfByIDs,
+  extractFieldValues,
+  toKeyValuePairArray,
+  getIndexOf,
 }

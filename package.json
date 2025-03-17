@@ -1,6 +1,6 @@
 {
   "name": "redux-toolkit-swagger-gen",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Redux Toolkit API client generator from Swagger/OpenAPI specifications",
   "main": "dist/generate.js",
   "types": "dist/generate.d.ts",

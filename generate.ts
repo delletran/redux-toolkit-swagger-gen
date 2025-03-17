@@ -1,24 +1,25 @@
-const fs = require("fs")
-const path = require("path")
 const axios = require("axios")
-const { parseSwagger } = require("./swagger-parser")
-const { generateModels } = require("./generators/model-generator")
-const { apiServiceGenerator } = require("./generators/api-service-generator")
-const { thunkGenerator } = require("./generators/thunk-generator")
-const { generateTags } = require("./generators/tag-generator")
-const { generateReduxSlices } = require("./generators/redux-slice-generator")
-const { ParamsGenerator } = require("./generators/params-generator")
 
-export const swaggerPath =
-  process.argv[2] || "http://localhost:8000/swagger.json"
-export const baseOutPath = path.resolve(__dirname, "src/api")
+const swaggerPath = process.argv[2] || "http://localhost:8000/swagger.json"
+const baseOutPath = path.resolve(__dirname, "src/api")
 
-export const outputDir = baseOutPath
-export const sliceDir = baseOutPath
-export const reduxDir = path.join(baseOutPath, "redux")
-export const thunkDir = path.join(baseOutPath, "thunks")
-export const schemaDir = path.join(baseOutPath, "schema")
-export const constantsDir = path.join(baseOutPath, "constants")
+const outputDir = baseOutPath
+const sliceDir = baseOutPath
+const reduxDir = path.join(baseOutPath, "redux")
+const thunkDir = path.join(baseOutPath, "thunks")
+const schemaDir = path.join(baseOutPath, "schema")
+const constantsDir = path.join(baseOutPath, "constants")
+
+module.exports = {
+  swaggerPath,
+  baseOutPath,
+  outputDir,
+  sliceDir,
+  reduxDir,
+  thunkDir,
+  schemaDir,
+  constantsDir,
+}
 
 // Ensure all directories exist
 ;[
@@ -78,7 +79,7 @@ const generateServices = (
     fs.mkdirSync(servicesDir, { recursive: true })
     fs.mkdirSync(thunksDir, { recursive: true })
 
-    const service = apiServiceGenerator(route, methods)
+    const service = generateApiService(route, methods)
     const thunk = thunkGenerator(route, methods)
 
     const fileName = route.replace(/\W/g, "_") // Simplified filename formatting
@@ -108,7 +109,7 @@ const generateServices = (
   // }
 }
 
-const main = async () => {
+const generateMain = async () => {
   let swagger
   if (swaggerPath.startsWith("http")) {
     swagger = await fetchSwagger(swaggerPath)
@@ -167,4 +168,4 @@ const main = async () => {
   console.log(`APIs generated to ${baseOutPath}`)
 }
 
-main().catch(console.error)
+generateMain().catch(console.error)
