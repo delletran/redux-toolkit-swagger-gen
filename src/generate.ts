@@ -1,6 +1,8 @@
 import * as fs from "fs"
 import * as path from "path"
 import axios from "axios"
+import yargs from "yargs"
+import { hideBin } from "yargs/helpers"
 import { parseSwagger } from "./utils/swagger-parser"
 import { generateModels } from "./generators/model-generator"
 import { apiServiceGenerator } from "./generators/api-service-generator"
@@ -9,9 +11,29 @@ import { generateTags } from "./generators/tag-generator"
 import { generateReduxSlices } from "./generators/redux-slice-generator"
 import { ParamsGenerator } from "./generators/params-generator"
 
-export const swaggerPath =
-  process.argv[2] || "http://localhost:8000/swagger.json"
-export const baseOutPath = path.resolve(__dirname, "src/api")
+const argv = yargs(hideBin(process.argv))
+  .usage("Usage: $0 [options]")
+  .option("url", {
+    alias: "u",
+    describe: "Swagger JSON URL or file path",
+    type: "string",
+    default: "http://localhost:8000/swagger.json",
+  })
+  .option("output", {
+    alias: "o",
+    describe: "Output directory",
+    type: "string",
+    default: "src/api",
+  })
+  .option("verbose", {
+    alias: "v",
+    type: "boolean",
+    description: "Run with verbose logging",
+  })
+  .help().argv
+
+const swaggerPath = argv.url
+const baseOutPath = path.resolve(process.cwd(), argv.output)
 
 export const outputDir = baseOutPath
 export const sliceDir = baseOutPath
@@ -20,23 +42,40 @@ export const thunkDir = path.join(baseOutPath, "thunks")
 export const schemaDir = path.join(baseOutPath, "schema")
 export const constantsDir = path.join(baseOutPath, "constants")
 
-// Ensure all directories exist
-;[
-  reduxDir,
-  sliceDir,
-  schemaDir,
-  thunkDir,
-  path.join(reduxDir, "helper"),
-  constantsDir,
-].forEach((dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
+const log = (message: string) => {
+  if (argv.verbose) {
+    console.log(`[swagger-gen] ${message}`)
   }
-})
+}
+
+const ensureDirectories = () => {
+  ;[
+    reduxDir,
+    sliceDir,
+    schemaDir,
+    thunkDir,
+    path.join(reduxDir, "helper"),
+    constantsDir,
+  ].forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+      log(`Created directory: ${dir}`)
+    }
+  })
+}
 
 const fetchSwagger = async (url: string): Promise<any> => {
-  const response = await axios.get(url)
-  return response.data
+  log(`Fetching swagger from: ${url}`)
+  try {
+    if (url.startsWith("http")) {
+      const response = await axios.get(url)
+      return response.data
+    }
+    return JSON.parse(fs.readFileSync(url, "utf-8"))
+  } catch (error) {
+    console.error(`Failed to fetch swagger from ${url}:`, error)
+    process.exit(1)
+  }
 }
 
 const generateServices = (
@@ -109,62 +148,70 @@ const generateServices = (
 }
 
 const main = async () => {
-  let swagger
-  if (swaggerPath.startsWith("http")) {
-    swagger = await fetchSwagger(swaggerPath)
-  } else {
-    swagger = JSON.parse(fs.readFileSync(swaggerPath, "utf-8"))
-  }
-  const { definitions, paths } = parseSwagger(swagger)
+  try {
+    log("Starting API generation...")
+    ensureDirectories()
 
-  await generateModels(definitions, outputDir)
+    const swagger = await fetchSwagger(swaggerPath)
+    const { definitions, paths } = parseSwagger(swagger)
 
-  // Generate tags
-  const tagsContent = generateTags(paths)
-  const tagsDir = path.resolve(__dirname, constantsDir)
-  if (!fs.existsSync(tagsDir)) {
-    fs.mkdirSync(tagsDir, { recursive: true })
-  }
-  fs.writeFileSync(path.join(tagsDir, "tags.ts"), tagsContent)
+    log("Generating models...")
+    await generateModels(definitions, outputDir)
 
-  // Generate services for paths that do not have 'object' type attributes
-  generateServices(paths, definitions, true) // Pass true to generate index files
+    log("Generating tags...")
+    const tagsContent = generateTags(paths)
+    fs.writeFileSync(path.join(constantsDir, "tags.ts"), tagsContent)
 
-  // Update params generation to use the new class
-  const paramsGenerator = new ParamsGenerator(paths, outputDir)
-  paramsGenerator.generate()
+    log("Generating services and thunks...")
+    generateServices(paths, definitions, true)
 
-  // Generate Redux slices
-  await generateReduxSlices(definitions, outputDir)
+    log("Generating parameters...")
+    const paramsGenerator = new ParamsGenerator(paths, outputDir)
+    paramsGenerator.generate()
 
-  // Copy dependency files to the output directory
-  const reduxGlobalFiles = ["redux.d.ts", "index.d.ts"]
-  const reduxFiles = [
-    "response.ts",
-    "types.ts",
-    "query.ts",
-    "actions.ts",
-    "helper/array.ts",
-  ]
+    log("Generating Redux slices...")
+    await generateReduxSlices(definitions, outputDir)
 
-  reduxGlobalFiles.forEach((file) => {
+    log("Copying dependency files...")
+    const reduxGlobalFiles = ["redux.d.ts", "index.d.ts"]
+    const reduxFiles = [
+      "response.ts",
+      "types.ts",
+      "query.ts",
+      "actions.ts",
+      "helper/array.ts",
+    ]
+
+    reduxGlobalFiles.forEach((file) => {
+      fs.copyFileSync(
+        path.resolve(__dirname, `./redux/${file}`),
+        path.join(sliceDir, file)
+      )
+    })
+    reduxFiles.forEach((file) => {
+      fs.copyFileSync(
+        path.resolve(__dirname, `./redux/${file}`),
+        path.join(reduxDir, file)
+      )
+    })
+
     fs.copyFileSync(
-      path.resolve(__dirname, `./redux/${file}`),
-      path.join(sliceDir, file)
+      path.resolve(__dirname, "./schema/api.ts"),
+      path.join(schemaDir, "api.ts")
     )
-  })
-  reduxFiles.forEach((file) => {
-    fs.copyFileSync(
-      path.resolve(__dirname, `./redux/${file}`),
-      path.join(reduxDir, file)
-    )
-  })
 
-  fs.copyFileSync(
-    path.resolve(__dirname, "./schema/api.ts"),
-    path.join(schemaDir, "api.ts")
-  )
-  console.log(`APIs generated to ${baseOutPath}`)
+    console.log(`✨ APIs successfully generated to ${baseOutPath}`)
+  } catch (error) {
+    console.error("Failed to generate API client:", error)
+    process.exit(1)
+  }
 }
 
-main().catch(console.error)
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
+}
+
+export { main }

@@ -1,6 +1,6 @@
 {
   "name": "redux-toolkit-swagger-gen",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "Redux Toolkit API client generator from Swagger/OpenAPI specifications",
   "main": "dist/generate.js",
   "type": "commonjs",
@@ -15,10 +15,12 @@
     "prepare": "npm run build",
     "generate": "node dist/generate.js",
     "swagger-gen": "node dist/generate.js",
-    "dev": "ts-node --files src/generate.ts"
+    "dev": "ts-node --files src/generate.ts",
+    "start": "node dist/generate.js"
   },
   "bin": {
-    "swagger-gen": "./dist/generate.js"
+    "swagger-gen": "./dist/generate.js",
+    "redux-toolkit-swagger-gen": "./dist/generate.js"
   },
   "peerDependencies": {
     "react": ">=16.8.0"
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@types/mustache": "^4.2.5",
     "@types/node": "^16.11.7",
+    "@types/yargs": "^17.0.32",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   },
@@ -43,7 +46,10 @@
     "redux-toolkit",
     "swagger",
     "openapi",
-    "generator"
+    "generator",
+    "typescript",
+    "api-client",
+    "code-generator"
   ],
   "author": "Rodel Letran",
   "license": "MIT",
