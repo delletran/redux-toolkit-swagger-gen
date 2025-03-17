@@ -161,6 +161,121 @@ function UserComponent() {
 }
 ```
 
+## Usage Examples
+
+### Store Setup
+
+```typescript
+// store.ts
+import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
+import { user } from './api/services/user/user';
+import userReducer from './api/thunks/user/user.thunk';
+
+export const store = configureStore({
+  reducer: {
+    // RTK Query service
+    [user.reducerPath]: user.reducer,
+    // Redux Thunk
+    userThunk: userReducer,
+  },
+  middleware: (getDefault) => 
+    getDefault().concat(user.middleware),
+});
+
+// Enable refetchOnFocus/refetchOnReconnect
+setupListeners(store.dispatch);
+```
+
+### Using RTK Query Services
+
+```typescript
+// UserList.tsx
+import { useGetUserListQuery } from './api/services/user/user';
+
+function UserList() {
+  const { data, error, isLoading } = useGetUserListQuery({
+    page: 1,
+    page_size: 10
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error</div>;
+
+  return (
+    <ul>
+      {data?.results.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
+
+// UserForm.tsx
+import { usePutUserUpdateMutation } from './api/services/user/user';
+
+function UserForm({ userId }) {
+  const [updateUser, { isLoading }] = usePutUserUpdateMutation();
+
+  const handleSubmit = async (data) => {
+    try {
+      await updateUser({ id: userId, data }).unwrap();
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    }
+  };
+}
+```
+
+### Using Redux Thunks
+
+```typescript
+// UserListThunk.tsx
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserList } from './api/thunks/user/user.thunk';
+
+function UserListThunk() {
+  const dispatch = useDispatch();
+  const { entities, loading, error } = useSelector((state) => state.userThunk);
+
+  useEffect(() => {
+    dispatch(getUserList({ page: 1, page_size: 10 }));
+  }, [dispatch]);
+
+  if (loading === 'pending') return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
+  return (
+    <ul>
+      {entities.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
+
+// UserFormThunk.tsx
+import { putUserUpdate } from './api/thunks/user/user.thunk';
+
+function UserFormThunk({ userId }) {
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (data) => {
+    try {
+      await dispatch(putUserUpdate({ id: userId, data })).unwrap();
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    }
+  };
+}
+```
+
+### Choosing Between Services and Thunks
+
+- **RTK Query Services**: Best for data fetching with automatic caching, polling, and cache invalidation
+- **Redux Thunks**: Better for complex state management and side effects
+
 ## Requirements
 
 - Node.js 14+
