@@ -12,7 +12,11 @@
     "build": "tsc",
     "prepare": "npm run build",
     "generate": "ts-node --files generate.ts",
-    "swagger-gen": "npm --prefix . run generate"
+    "swagger-gen": "npm --prefix . run generate",
+    "postinstall": "npm run generate"
+  },
+  "bin": {
+    "swagger-gen": "./generate.ts"
   },
   "peerDependencies": {
     "react": ">=16.8.0"
