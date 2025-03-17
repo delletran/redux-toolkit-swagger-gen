@@ -14,54 +14,14 @@ Generate Redux Toolkit API clients from Swagger/OpenAPI specifications.
 ## Installation
 
 ```bash
-# Local installation (recommended)
 npm install redux-toolkit-swagger-gen --save-dev
-
-# Global installation
-npm install -g redux-toolkit-swagger-gen
-
-# Or use directly with npx
-npx redux-toolkit-swagger-gen
 ```
 
-## Usage
-
-### Command Line
+## Quick Start
 
 ```bash
-# Using locally installed version
-npx swagger-gen --url http://your-api/swagger.json
-
-# Using global installation
-swagger-gen --url http://your-api/swagger.json
-
-# Local swagger file
-swagger-gen --url ./swagger.json --output ./src/api
-
-# With all options
-swagger-gen \
-  --url http://your-api/swagger.json \
-  --output src/api \
-  --clean \
-  --verbose \
-  --prettier
-```
-
-### NPM Script (Recommended)
-
-Add to your package.json:
-```json
-{
-  "scripts": {
-    "generate-api": "swagger-gen --url ./swagger.json",
-    "generate-api:watch": "nodemon --watch ./swagger.json --exec 'npm run generate-api'"
-  }
-}
-```
-
-Then run:
-```bash
-npm run generate-api
+# Generate API client
+swagger-gen --url http://your-api/swagger.json --output src/api
 ```
 
 ## CLI Options
@@ -76,89 +36,15 @@ npm run generate-api
 | --prettier      | -p    | Format generated code with prettier   | true                             |
 | --help          | -h    | Show help                            | -                                |
 
-## Output Structure
+## Generated Structure
 
 ```
 src/api/
 ├── constants/      # API constants and enums
 ├── redux/         # Redux toolkit setup
-│   └── helper/    # Redux utilities
 ├── schema/        # API schemas and types
 ├── services/      # API service definitions
 └── thunks/        # Redux thunks
-```
-
-## Project Structure
-```
-src/
-├── templates/        # Template files
-├── redux/       # Redux related templates
-│   ├── redux.d.ts
-│   ├── types.ts
-│   └── helper/
-├── schema/      # Schema templates
-├── generators/      # Code generators
-├── utils/          # Utility functions
-└── generate.ts     # Main entry point
-```
-
-## Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/redux-toolkit-swagger-gen.git
-cd redux-toolkit-swagger-gen
-
-# Install dependencies
-npm install
-
-# Create template directories
-mkdir -p src/templates/{redux,schema}
-mkdir -p src/templates/redux/helper
-
-# Build the project
-npm run build
-
-# Create symlink for local development
-npm link
-
-# Test the CLI
-swagger-gen --help
-```
-
-## Template Files
-The following template files are required:
-
-### Redux Templates
-- `src/templates/redux/redux.d.ts` - Redux type definitions
-- `src/templates/redux/types.ts` - Common type definitions
-- `src/templates/redux/query.ts` - Query utilities
-- `src/templates/redux/actions.ts` - Action creators
-- `src/templates/redux/helper/array.ts` - Array utilities
-
-### Schema Templates
-- `src/templates/schema/api.ts` - API schema definitions
-
-## Usage Example
-
-```typescript
-// In your Redux store setup
-import { configureStore } from '@reduxjs/toolkit';
-import { userSlice } from './api/redux/slices/user.slice';
-
-export const store = configureStore({
-  reducer: {
-    user: userSlice.reducer,
-  },
-});
-
-// In your components
-import { useGetUserQuery } from './api/services/user';
-
-function UserComponent() {
-  const { data, isLoading } = useGetUserQuery();
-  return isLoading ? <div>Loading...</div> : <div>{data.name}</div>;
-}
 ```
 
 ## Usage Examples
@@ -169,161 +55,60 @@ function UserComponent() {
 // store.ts
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import { user } from './api/services/user/user';
-import userReducer from './api/thunks/user/user.thunk';
+import { userApi } from './api/services/user';
+import userThunks from './api/thunks/user';
 
 export const store = configureStore({
   reducer: {
     // RTK Query service
-    [user.reducerPath]: user.reducer,
+    [userApi.reducerPath]: userApi.reducer,
     // Redux Thunk
-    userThunk: userReducer,
+    user: userThunks,
   },
   middleware: (getDefault) => 
-    getDefault().concat(user.middleware),
+    getDefault().concat(userApi.middleware),
 });
 
-// Enable refetchOnFocus/refetchOnReconnect
 setupListeners(store.dispatch);
 ```
 
-### Using RTK Query Services
+### Using Generated Services
 
 ```typescript
-// UserList.tsx
-import { useGetUserListQuery } from './api/services/user/user';
+// RTK Query hooks
+import { useGetUserListQuery, usePutUserUpdateMutation } from './api/services/user';
 
+// Redux Thunks
+import { getUserList, putUserUpdate } from './api/thunks/user';
+
+// RTK Query Example
 function UserList() {
-  const { data, error, isLoading } = useGetUserListQuery({
-    page: 1,
-    page_size: 10
-  });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error</div>;
-
-  return (
-    <ul>
-      {data?.results.map(user => (
-        <li key={user.id}>{user.name}</li>
-      ))}
-    </ul>
-  );
+  const { data, isLoading } = useGetUserListQuery({ page: 1 });
+  return isLoading ? <div>Loading...</div> : <div>{data.results.length}</div>;
 }
 
-// UserForm.tsx
-import { usePutUserUpdateMutation } from './api/services/user/user';
-
-function UserForm({ userId }) {
-  const [updateUser, { isLoading }] = usePutUserUpdateMutation();
-
-  const handleSubmit = async (data) => {
-    try {
-      await updateUser({ id: userId, data }).unwrap();
-    } catch (error) {
-      console.error('Failed to update user:', error);
-    }
-  };
-}
-```
-
-### Using Redux Thunks
-
-```typescript
-// UserListThunk.tsx
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getUserList } from './api/thunks/user/user.thunk';
-
+// Thunk Example
 function UserListThunk() {
   const dispatch = useDispatch();
-  const { entities, loading, error } = useSelector((state) => state.userThunk);
-
   useEffect(() => {
-    dispatch(getUserList({ page: 1, page_size: 10 }));
+    dispatch(getUserList({ page: 1 }));
   }, [dispatch]);
-
-  if (loading === 'pending') return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-
-  return (
-    <ul>
-      {entities.map(user => (
-        <li key={user.id}>{user.name}</li>
-      ))}
-    </ul>
-  );
-}
-
-// UserFormThunk.tsx
-import { putUserUpdate } from './api/thunks/user/user.thunk';
-
-function UserFormThunk({ userId }) {
-  const dispatch = useDispatch();
-
-  const handleSubmit = async (data) => {
-    try {
-      await dispatch(putUserUpdate({ id: userId, data })).unwrap();
-    } catch (error) {
-      console.error('Failed to update user:', error);
-    }
-  };
 }
 ```
-
-### Choosing Between Services and Thunks
-
-- **RTK Query Services**: Best for data fetching with automatic caching, polling, and cache invalidation
-- **Redux Thunks**: Better for complex state management and side effects
-
-## Requirements
-
-- Node.js 14+
-- React 16.8+
-- @reduxjs/toolkit 2.0+
 
 ## Troubleshooting
 
-### Command Not Found
-If you get "command not found", try:
-1. Use `npx swagger-gen` instead
-2. Check if package is installed (`npm list redux-toolkit-swagger-gen`)
-3. Try reinstalling the package
-
 ### CORS Issues
-When fetching remote swagger files:
-1. Use a local swagger file instead
-2. Add CORS headers to your API server
+1. Use a local swagger file
+2. Configure API server CORS
 3. Use a proxy server
-4. Download the swagger file first then use local path
 
-### Permission Errors
-On Unix systems, you might need to:
-```bash
-chmod +x node_modules/.bin/swagger-gen
-```
+### Command Not Found
+1. Use `npx swagger-gen`
+2. Check installation: `npm list redux-toolkit-swagger-gen`
+3. Reinstall package
 
-### Watch Mode
-For development, use nodemon:
-```bash
-npm install nodemon --save-dev
-nodemon --watch swagger.json --exec "swagger-gen --url ./swagger.json"
-```
-
-## Publishing
-
-```bash
-# Update version
-npm version patch
-
-# Build and publish
-npm run build
-npm publish
-```
-
-## Contributing
-
-PRs welcome! Please read our contributing guidelines first.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
 
 ## License
 
