@@ -30,14 +30,14 @@ src/
 ## Required Template Files
 
 ### Redux Templates
-- `src/templates/redux/redux.d.ts` - Type definitions
-- `src/templates/redux/types.ts` - Common types
-- `src/templates/redux/query.ts` - Query utilities
-- `src/templates/redux/actions.ts` - Action creators
-- `src/templates/redux/helper/array.ts` - Array utilities
+- `src/redux/redux.d.ts` - Type definitions
+- `src/redux/types.ts` - Common types
+- `src/redux/query.ts` - Query utilities
+- `src/redux/actions.ts` - Action creators
+- `src/redux/helper/array.ts` - Array utilities
 
 ### Schema Templates
-- `src/templates/schema/api.ts` - API schema definitions
+- `src/schema/api.ts` - API schema definitions
 
 ## Development Workflow
 
