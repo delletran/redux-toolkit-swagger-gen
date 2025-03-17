@@ -2,9 +2,9 @@
   "name": "redux-toolkit-swagger-gen",
   "version": "0.1.8",
   "description": "Redux Toolkit API client generator from Swagger/OpenAPI specifications",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "type": "commonjs",
-  "types": "dist/generate.d.ts",
+  "types": "dist/src/index.d.ts",
   "files": [
     "dist",
     "src",
@@ -13,14 +13,13 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "generate": "node dist/bin/cli.js",
-    "swagger-gen": "./dist/bin/cli.js",
-    "generate-api": "node dist/bin/cli.js",
-    "dev": "ts-node --files src/bin/cli.ts",
+    "generate": "node ./bin/swagger-gen.js",
+    "swagger-gen": "node ./bin/swagger-gen.js",
+    "dev": "ts-node --files src/generate.ts",
     "start": "node dist/generate.js"
   },
   "bin": {
-    "swagger-gen": "dist/bin/cli.js"
+    "swagger-gen": "./bin/swagger-gen.js"
   },
   "peerDependencies": {
     "react": ">=16.8.0"
