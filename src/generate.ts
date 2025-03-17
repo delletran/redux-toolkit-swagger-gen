@@ -1,13 +1,13 @@
-const fs = require("fs")
-const path = require("path")
-const axios = require("axios")
-const { parseSwagger } = require("./swagger-parser")
-const { generateModels } = require("./generators/model-generator")
-const { apiServiceGenerator } = require("./generators/api-service-generator")
-const { thunkGenerator } = require("./generators/thunk-generator")
-const { generateTags } = require("./generators/tag-generator")
-const { generateReduxSlices } = require("./generators/redux-slice-generator")
-const { ParamsGenerator } = require("./generators/params-generator")
+import * as fs from "fs"
+import * as path from "path"
+import axios from "axios"
+import { parseSwagger } from "./utils/swagger-parser"
+import { generateModels } from "./generators/model-generator"
+import { apiServiceGenerator } from "./generators/api-service-generator"
+import { thunkGenerator } from "./generators/thunk-generator"
+import { generateTags } from "./generators/tag-generator"
+import { generateReduxSlices } from "./generators/redux-slice-generator"
+import { ParamsGenerator } from "./generators/params-generator"
 
 export const swaggerPath =
   process.argv[2] || "http://localhost:8000/swagger.json"
@@ -92,19 +92,19 @@ const generateServices = (
   // Generate index.ts files if required
   // if (generateIndex) {
   //   ;["services", "thunks"].forEach((type) => {
-  //     const folders = Array.from(subFolders).filter((f) => f.includes(type))
-  //     let indexContent = ""
+  //     const folders = Array.from(subFolders).filter((f) => f.includes(type));
+  //     let indexContent = "";
   //     folders.forEach((folder) => {
   //       const files = fs
   //         .readdirSync(folder)
-  //         .filter((file) => file.endsWith(".ts"))
+  //         .filter((file) => file.endsWith(".ts"));
   //       // indexContent = indexContent.concat(files.map(file => `export * from './${file.replace('.thunk.ts', '')}/${file.replace('', '')}';`).join('\n'), '\n');
-  //     })
+  //     });
   //     fs.writeFileSync(
   //       path.join(type === "services" ? outputDir : thunkDir, "index.ts"),
   //       indexContent
-  //     )
-  //   })
+  //     );
+  //   });
   // }
 }
 

@@ -3,21 +3,22 @@
   "version": "0.1.4",
   "description": "Redux Toolkit API client generator from Swagger/OpenAPI specifications",
   "main": "dist/generate.js",
-  "type": "module",
+  "type": "commonjs",
   "types": "dist/generate.d.ts",
   "files": [
     "dist",
+    "src",
     "README.md"
   ],
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "generate": "ts-node --files generate.ts",
-    "swagger-gen": "npm --prefix . run generate",
-    "postinstall": "npm run generate"
+    "generate": "node dist/generate.js",
+    "swagger-gen": "node dist/generate.js",
+    "dev": "ts-node --files src/generate.ts"
   },
   "bin": {
-    "swagger-gen": "./generate.ts"
+    "swagger-gen": "./dist/generate.js"
   },
   "peerDependencies": {
     "react": ">=16.8.0"
