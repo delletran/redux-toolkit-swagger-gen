@@ -90,7 +90,7 @@ export const thunkDir = path.join(baseOutPath, "thunks")
 export const schemaDir = path.join(baseOutPath, "schema")
 export const constantsDir = path.join(baseOutPath, "constants")
 
-const main = async () => {
+export const main = async () => {
   try {
     const log = (message: string) => {
       if (argv.verbose) {
@@ -258,11 +258,4 @@ const main = async () => {
   }
 }
 
-if (require.main === module) {
-  main().catch((error) => {
-    console.error(error)
-    process.exit(1)
-  })
-}
-
-export { main }
+export { parseArgs, Arguments }
