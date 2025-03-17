@@ -133,6 +133,7 @@ const main = async () => {
   });
 
   fs.copyFileSync(path.resolve(__dirname, './schema/api.ts'), path.join(schemaDir, 'api.ts'));
+  console.log(`APIs generated to ${baseOutPath}`)
 
 };
 
