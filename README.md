@@ -88,6 +88,57 @@ src/api/
 └── thunks/        # Redux thunks
 ```
 
+## Project Structure
+```
+src/
+├── templates/        # Template files
+├── redux/       # Redux related templates
+│   ├── redux.d.ts
+│   ├── types.ts
+│   └── helper/
+├── schema/      # Schema templates
+├── generators/      # Code generators
+├── utils/          # Utility functions
+└── generate.ts     # Main entry point
+```
+
+## Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/redux-toolkit-swagger-gen.git
+cd redux-toolkit-swagger-gen
+
+# Install dependencies
+npm install
+
+# Create template directories
+mkdir -p src/templates/{redux,schema}
+mkdir -p src/templates/redux/helper
+
+# Build the project
+npm run build
+
+# Create symlink for local development
+npm link
+
+# Test the CLI
+swagger-gen --help
+```
+
+## Template Files
+The following template files are required:
+
+### Redux Templates
+- `src/templates/redux/redux.d.ts` - Redux type definitions
+- `src/templates/redux/types.ts` - Common type definitions
+- `src/templates/redux/query.ts` - Query utilities
+- `src/templates/redux/actions.ts` - Action creators
+- `src/templates/redux/helper/array.ts` - Array utilities
+
+### Schema Templates
+- `src/templates/schema/api.ts` - API schema definitions
+
 ## Usage Example
 
 ```typescript
@@ -142,6 +193,17 @@ For development, use nodemon:
 ```bash
 npm install nodemon --save-dev
 nodemon --watch swagger.json --exec "swagger-gen --url ./swagger.json"
+```
+
+## Publishing
+
+```bash
+# Update version
+npm version patch
+
+# Build and publish
+npm run build
+npm publish
 ```
 
 ## Contributing
