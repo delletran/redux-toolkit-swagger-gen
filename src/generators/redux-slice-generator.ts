@@ -3,7 +3,6 @@ import * as path from "path"
 import Mustache from "mustache"
 
 import { fsRead } from "../utils/helpers"
-import { outputDir } from "../generate"
 
 const sliceTemplate = fsRead("../templates/sliceTemplate.mustache")
 

@@ -1,3 +1,4 @@
+// File with modified generate.ts
 import * as fs from "fs"
 import * as path from "path"
 import axios from "axios"
@@ -10,6 +11,7 @@ import { thunkGenerator } from "./generators/thunk-generator"
 import { generateTags } from "./generators/tag-generator"
 import { generateReduxSlices } from "./generators/redux-slice-generator"
 import { ParamsGenerator } from "./generators/params-generator"
+import { generateReduxHooks, generateReduxStore } from "./generators/redux-hooks-generator"
 
 interface Arguments {
   url: string
@@ -132,7 +134,7 @@ const main = async () => {
       paths: ExtendedPathType[],
       definitions: DefinitionType,
       generateIndex = false
-    ): void => {
+    ) => {
       const subFolders = new Set<string>()
       const mainRoutes: Record<
         string,
@@ -142,7 +144,7 @@ const main = async () => {
       // Group routes by main endpoint
       for (const [route, methods] of Object.entries(paths)) {
         const subDir = route.split("/")[1]
-        const method = (["get", "put", "patch", "delete"] as MethodType[]).find(
+        const method = (["get", "post", "put", "patch", "delete"] as MethodType[]).find(
           (m) => methods[m]
         )
         const methodObject = method ? methods[method] : undefined
@@ -162,6 +164,7 @@ const main = async () => {
           }
         }
       }
+      
       // Generate service and thunk files
       for (const [route, methods] of Object.entries(mainRoutes)) {
         const servicesDir = path.join(outputDir, "services", route)
@@ -198,6 +201,8 @@ const main = async () => {
       //     );
       //   });
       // }
+      
+      return mainRoutes;
     }
 
     log("Starting API generation...")
@@ -214,7 +219,7 @@ const main = async () => {
     fs.writeFileSync(path.join(constantsDir, "tags.ts"), tagsContent)
 
     log("Generating services and thunks...")
-    generateServices(paths, definitions, true)
+    const mainRoutes = generateServices(paths, definitions, true)
 
     log("Generating parameters...")
     const paramsGenerator = new ParamsGenerator(paths, outputDir)
@@ -222,6 +227,10 @@ const main = async () => {
 
     log("Generating Redux slices...")
     await generateReduxSlices(definitions, outputDir)
+
+    log("Generating Redux hooks and store...")
+    generateReduxHooks(outputDir)
+    generateReduxStore(outputDir, mainRoutes)
 
     log("Copying dependency files...")
     const reduxGlobalFiles = ["redux.d.ts", "index.d.ts"]

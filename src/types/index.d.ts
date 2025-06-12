@@ -73,17 +73,47 @@ interface IResponse {
   [status: string]: {
     description: string;
     schema?: { '$ref': string } | ResponseSchemaType;
+    // OpenAPI 3.x style
+    content?: {
+      [contentType: string]: {
+        schema: {
+          '$ref'?: string;
+          type?: string;
+          properties?: any;
+          items?: any;
+        }
+      }
+    }
   };
 };
+// #endregion
+
+// #region RequestBodyType
+interface RequestBodyType {
+  description?: string;
+  required?: boolean;
+  content: {
+    [contentType: string]: {
+      schema: {
+        '$ref'?: string;
+        type?: string;
+        properties?: any;
+        items?: any;
+      }
+    }
+  }
+}
 // #endregion
 
 // #region MethodObjectType
 type MethodObjectType = {
   operationId: string;
-  description: string;
-  parameters: (IBodyParameter | IQueryParameter)[];
+  description?: string;
+  parameters?: (IBodyParameter | IQueryParameter)[];
   responses: IResponse;
   tags: string[];
+  // OpenAPI 3.x style
+  requestBody?: RequestBodyType;
 };
 
 // #region PathType

@@ -1,0 +1,5965 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Gym-CMS APIs",
+    "description": "Update API Description here...",
+    "termsOfService": "http://gym-cms.local:8000/terms/",
+    "contact": { "email": "mail@codellsoftwares.com" },
+    "license": { "name": "Codell Software Gym-CMS License" },
+    "version": "v1"
+  },
+  "host": "gym-cms.local:8000",
+  "schemes": ["http"],
+  "basePath": "/api",
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "Bearer": { "type": "apiKey", "name": "Authorization", "in": "header" }
+  },
+  "security": [{ "Bearer": [] }],
+  "paths": {
+    "/access_band/bulk-delete": {
+      "delete": {
+        "operationId": "delete_access_band_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AccessBandBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": []
+    },
+    "/access_band/create": {
+      "post": {
+        "operationId": "post_access_band_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AccessBandUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AccessBandUpsert" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": []
+    },
+    "/access_band/day/list": {
+      "get": {
+        "operationId": "get_day_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Day" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": []
+    },
+    "/access_band/duration/bulk-delete": {
+      "delete": {
+        "operationId": "delete_duration_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/DurationBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": []
+    },
+    "/access_band/duration/create": {
+      "post": {
+        "operationId": "post_duration_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/DurationUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/DurationUpsert" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": []
+    },
+    "/access_band/duration/list": {
+      "get": {
+        "operationId": "get_duration_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "description": "count",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "type",
+            "required": false,
+            "type": "string",
+            "enum": ["day", "week", "month", "year"]
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Duration" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": []
+    },
+    "/access_band/duration/{id}": {
+      "get": {
+        "operationId": "get_duration_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/Duration" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Duration.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/access_band/duration/{id}/delete": {
+      "delete": {
+        "operationId": "delete_duration_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["access_band"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Duration.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/access_band/duration/{id}/to-alter": {
+      "get": {
+        "operationId": "get_duration_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/DurationGetToAlter" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Duration.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/access_band/duration/{id}/update": {
+      "put": {
+        "operationId": "put_duration_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/DurationUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/DurationUpsert" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "patch": {
+        "operationId": "patch_duration_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/DurationUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/DurationUpsert" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Duration.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/access_band/list": {
+      "get": {
+        "operationId": "get_access_band_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/AccessBand" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": []
+    },
+    "/access_band/{id}": {
+      "get": {
+        "operationId": "get_access_band_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AccessBand" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Access Band.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/access_band/{id}/delete": {
+      "delete": {
+        "operationId": "delete_access_band_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["access_band"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Access Band.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/access_band/{id}/to-alter": {
+      "get": {
+        "operationId": "get_access_band_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AccessBandGetToAlter" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Access Band.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/access_band/{id}/update": {
+      "put": {
+        "operationId": "put_access_band_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AccessBandUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AccessBandUpsert" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "patch": {
+        "operationId": "patch_access_band_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AccessBandUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AccessBandUpsert" }
+          }
+        },
+        "tags": ["access_band"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Access Band.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-group/bulk-activate-deactivate": {
+      "post": {
+        "operationId": "post_auth_user_group_bulk_toggle",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthUserGroupBulkToggle" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthUserGroupBulkToggle" }
+          }
+        },
+        "tags": ["auth-group"]
+      },
+      "parameters": []
+    },
+    "/auth-group/bulk-delete": {
+      "delete": {
+        "operationId": "delete_auth_user_group_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthUserGroupBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["auth-group"]
+      },
+      "parameters": []
+    },
+    "/auth-group/create": {
+      "post": {
+        "operationId": "post_auth_user_group_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthUserGroupUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthUserGroupUpsert" }
+          }
+        },
+        "tags": ["auth-group"]
+      },
+      "parameters": []
+    },
+    "/auth-group/list": {
+      "get": {
+        "operationId": "get_auth_user_group_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/AuthUserGroup" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth-group"]
+      },
+      "parameters": []
+    },
+    "/auth-group/{id}": {
+      "get": {
+        "operationId": "get_auth_user_group_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthUserGroup" }
+          }
+        },
+        "tags": ["auth-group"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Auth User Group.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-group/{id}/delete": {
+      "delete": {
+        "operationId": "delete_auth_user_group_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["auth-group"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Auth User Group.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-group/{id}/to-alter": {
+      "get": {
+        "operationId": "get_auth_user_group_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthUserGroupGetToAlter" }
+          }
+        },
+        "tags": ["auth-group"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Auth User Group.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-group/{id}/update": {
+      "put": {
+        "operationId": "put_auth_user_group_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthUserGroupUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthUserGroupUpsert" }
+          }
+        },
+        "tags": ["auth-group"]
+      },
+      "patch": {
+        "operationId": "patch_auth_user_group_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthUserGroupUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthUserGroupUpsert" }
+          }
+        },
+        "tags": ["auth-group"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Auth User Group.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-mod_permission/create": {
+      "post": {
+        "operationId": "post_mod_permission_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ModPermissionUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/ModPermissionUpsert" }
+          }
+        },
+        "tags": ["auth-mod_permission"]
+      },
+      "parameters": []
+    },
+    "/auth-mod_permission/get-user-permssions": {
+      "get": {
+        "operationId": "get_get_user_mod_permissions_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/ModPermission" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth-mod_permission"]
+      },
+      "parameters": []
+    },
+    "/auth-mod_permission/list": {
+      "get": {
+        "operationId": "get_mod_permission_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "id",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "codename",
+            "in": "query",
+            "description": "codename",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "module__name",
+            "in": "query",
+            "description": "module__name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sub_module__name",
+            "in": "query",
+            "description": "sub_module__name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "description": "method",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "access",
+              "create",
+              "read",
+              "update",
+              "delete",
+              "export",
+              "generate_and_print"
+            ]
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/ModPermission" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth-mod_permission"]
+      },
+      "parameters": []
+    },
+    "/auth-mod_permission/{id}": {
+      "get": {
+        "operationId": "get_mod_permission_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/ModPermission" }
+          }
+        },
+        "tags": ["auth-mod_permission"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Module Permission.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-mod_permission/{id}/delete": {
+      "delete": {
+        "operationId": "delete_mod_permission_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["auth-mod_permission"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Module Permission.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-mod_permission/{id}/to-alter": {
+      "get": {
+        "operationId": "get_mod_permission_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/ModPermissionGetToAlter" }
+          }
+        },
+        "tags": ["auth-mod_permission"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Module Permission.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-mod_permission/{id}/update": {
+      "put": {
+        "operationId": "put_mod_permission_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ModPermissionUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/ModPermissionUpsert" }
+          }
+        },
+        "tags": ["auth-mod_permission"]
+      },
+      "patch": {
+        "operationId": "patch_mod_permission_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ModPermissionUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/ModPermissionUpsert" }
+          }
+        },
+        "tags": ["auth-mod_permission"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Module Permission.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-permission/bulk-delete": {
+      "delete": {
+        "operationId": "delete_auth_permission_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthPermissionBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["auth-permission"]
+      },
+      "parameters": []
+    },
+    "/auth-permission/create": {
+      "post": {
+        "operationId": "post_auth_permission_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthPermissionUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthPermissionUpsert" }
+          }
+        },
+        "tags": ["auth-permission"]
+      },
+      "parameters": []
+    },
+    "/auth-permission/list": {
+      "get": {
+        "operationId": "get_auth_permission_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "permission__module__name",
+            "in": "query",
+            "description": "permission__module__name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "permission__codename",
+            "in": "query",
+            "description": "permission__codename",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "permission_type__code",
+            "in": "query",
+            "description": "permission_type__code",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/AuthPermission" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth-permission"]
+      },
+      "parameters": []
+    },
+    "/auth-permission/{id}": {
+      "get": {
+        "operationId": "get_auth_permission_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthPermission" }
+          }
+        },
+        "tags": ["auth-permission"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Auth Permission.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-permission/{id}/delete": {
+      "delete": {
+        "operationId": "delete_auth_permission_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["auth-permission"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Auth Permission.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-permission/{id}/to-alter": {
+      "get": {
+        "operationId": "get_auth_permission_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthPermissionGetToAlter" }
+          }
+        },
+        "tags": ["auth-permission"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Auth Permission.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-permission/{id}/update": {
+      "put": {
+        "operationId": "put_auth_permission_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthPermissionUpdate" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthPermissionUpdate" }
+          }
+        },
+        "tags": ["auth-permission"]
+      },
+      "patch": {
+        "operationId": "patch_auth_permission_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AuthPermissionUpdate" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AuthPermissionUpdate" }
+          }
+        },
+        "tags": ["auth-permission"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Auth Permission.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth-permission_type/list": {
+      "get": {
+        "operationId": "get_permission_type_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "description": "description",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/PermissionType" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth-permission_type"]
+      },
+      "parameters": []
+    },
+    "/auth-permission_type/{id}": {
+      "get": {
+        "operationId": "get_permission_type_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/PermissionType" }
+          }
+        },
+        "tags": ["auth-permission_type"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Permission Type.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/branch/bulk-delete": {
+      "delete": {
+        "operationId": "delete_branch_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/BranchBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["branch"]
+      },
+      "parameters": []
+    },
+    "/branch/create": {
+      "post": {
+        "operationId": "post_branch_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/BranchUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/BranchUpsert" }
+          }
+        },
+        "tags": ["branch"]
+      },
+      "parameters": []
+    },
+    "/branch/list": {
+      "get": {
+        "operationId": "get_branch_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Branch" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["branch"]
+      },
+      "parameters": []
+    },
+    "/branch/{id}": {
+      "get": {
+        "operationId": "get_branch_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/Branch" }
+          }
+        },
+        "tags": ["branch"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Branch.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/branch/{id}/delete": {
+      "delete": {
+        "operationId": "delete_branch_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["branch"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Branch.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/branch/{id}/to-alter": {
+      "get": {
+        "operationId": "get_branch_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/BranchGetToAlter" }
+          }
+        },
+        "tags": ["branch"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Branch.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/branch/{id}/update": {
+      "put": {
+        "operationId": "put_branch_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/BranchUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/BranchUpsert" }
+          }
+        },
+        "tags": ["branch"]
+      },
+      "patch": {
+        "operationId": "patch_branch_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/BranchUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/BranchUpsert" }
+          }
+        },
+        "tags": ["branch"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Branch.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/goal/bulk-delete": {
+      "delete": {
+        "operationId": "delete_goal_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/GoalBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": []
+    },
+    "/goal/create": {
+      "post": {
+        "operationId": "post_goal_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/GoalUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/GoalUpsert" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": []
+    },
+    "/goal/list": {
+      "get": {
+        "operationId": "get_goal_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Goal" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": []
+    },
+    "/goal/unit/create": {
+      "post": {
+        "operationId": "post_unit_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UnitUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UnitUpsert" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": []
+    },
+    "/goal/unit/list": {
+      "get": {
+        "operationId": "get_unit_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Unit" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": []
+    },
+    "/goal/unit/{id}": {
+      "get": {
+        "operationId": "get_unit_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/Unit" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Unit.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/goal/unit/{id}/delete": {
+      "delete": {
+        "operationId": "delete_unit_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["goal"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Unit.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/goal/unit/{id}/update": {
+      "put": {
+        "operationId": "put_unit_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UnitUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UnitUpsert" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "patch": {
+        "operationId": "patch_unit_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UnitUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UnitUpsert" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Unit.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/goal/{id}": {
+      "get": {
+        "operationId": "get_goal_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/Goal" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Goal.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/goal/{id}/delete": {
+      "delete": {
+        "operationId": "delete_goal_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["goal"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Goal.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/goal/{id}/to-alter": {
+      "get": {
+        "operationId": "get_goal_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/GoalGetToAlter" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Goal.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/goal/{id}/update": {
+      "put": {
+        "operationId": "put_goal_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/GoalUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/GoalUpsert" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "patch": {
+        "operationId": "patch_goal_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/GoalUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/GoalUpsert" }
+          }
+        },
+        "tags": ["goal"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Goal.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/locations/municipalities/{city_mun_code}/barangays/": {
+      "get": {
+        "operationId": "get_barangay_list_a_p_i",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Barangay" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["locations"]
+      },
+      "parameters": [
+        {
+          "name": "city_mun_code",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/locations/provinces/{prov_code}/municipalities/": {
+      "get": {
+        "operationId": "get_city_mun_list_a_p_i",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/CityMun" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["locations"]
+      },
+      "parameters": [
+        {
+          "name": "prov_code",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/locations/regions/": {
+      "get": {
+        "operationId": "get_region_list_a_p_i",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Region" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["locations"]
+      },
+      "parameters": []
+    },
+    "/locations/regions/{reg_code}/provinces/": {
+      "get": {
+        "operationId": "get_province_list_a_p_i",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Province" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["locations"]
+      },
+      "parameters": [
+        { "name": "reg_code", "in": "path", "required": true, "type": "string" }
+      ]
+    },
+    "/membership_plan/bulk-delete": {
+      "delete": {
+        "operationId": "delete_membership_plan_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/MembershipPlanBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["membership_plan"]
+      },
+      "parameters": []
+    },
+    "/membership_plan/create": {
+      "post": {
+        "operationId": "post_membership_plan_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/MembershipPlanUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/MembershipPlanUpsert" }
+          }
+        },
+        "tags": ["membership_plan"]
+      },
+      "parameters": []
+    },
+    "/membership_plan/list": {
+      "get": {
+        "operationId": "get_membership_plan_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "is_promo",
+            "in": "query",
+            "description": "is_promo",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "is_discount_enabled",
+            "in": "query",
+            "description": "is_discount_enabled",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/MembershipPlan" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["membership_plan"]
+      },
+      "parameters": []
+    },
+    "/membership_plan/{id}": {
+      "get": {
+        "operationId": "get_membership_plan_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/MembershipPlan" }
+          }
+        },
+        "tags": ["membership_plan"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Membership Plan.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/membership_plan/{id}/delete": {
+      "delete": {
+        "operationId": "delete_membership_plan_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["membership_plan"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Membership Plan.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/membership_plan/{id}/to-alter": {
+      "get": {
+        "operationId": "get_membership_plan_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/MembershipPlanGetToAlter" }
+          }
+        },
+        "tags": ["membership_plan"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Membership Plan.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/membership_plan/{id}/update": {
+      "put": {
+        "operationId": "put_membership_plan_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/MembershipPlanUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/MembershipPlanUpsert" }
+          }
+        },
+        "tags": ["membership_plan"]
+      },
+      "patch": {
+        "operationId": "patch_membership_plan_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/MembershipPlanUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/MembershipPlanUpsert" }
+          }
+        },
+        "tags": ["membership_plan"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Membership Plan.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/payment/method/bulk-delete": {
+      "delete": {
+        "operationId": "delete_payment_method_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/PaymentMethodBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["payment"]
+      },
+      "parameters": []
+    },
+    "/payment/method/create": {
+      "post": {
+        "operationId": "post_payment_method_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/PaymentMethodUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/PaymentMethodUpsert" }
+          }
+        },
+        "tags": ["payment"]
+      },
+      "parameters": []
+    },
+    "/payment/method/list": {
+      "get": {
+        "operationId": "get_payment_method_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "description": "code",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/PaymentMethod" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["payment"]
+      },
+      "parameters": []
+    },
+    "/payment/method/{id}": {
+      "get": {
+        "operationId": "get_payment_method_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/PaymentMethod" }
+          }
+        },
+        "tags": ["payment"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Payment Method.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/payment/method/{id}/delete": {
+      "delete": {
+        "operationId": "delete_payment_method_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["payment"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Payment Method.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/payment/method/{id}/to-alter": {
+      "get": {
+        "operationId": "get_payment_method_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/PaymentMethodGetToAlter" }
+          }
+        },
+        "tags": ["payment"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Payment Method.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/payment/method/{id}/update": {
+      "put": {
+        "operationId": "put_payment_method_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/PaymentMethodUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/PaymentMethodUpsert" }
+          }
+        },
+        "tags": ["payment"]
+      },
+      "patch": {
+        "operationId": "patch_payment_method_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/PaymentMethodUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/PaymentMethodUpsert" }
+          }
+        },
+        "tags": ["payment"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Payment Method.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/token/": {
+      "post": {
+        "operationId": "post_custom_token_obtain_pair",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ObtainTokenPair" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/ObtainTokenPair" }
+          }
+        },
+        "tags": ["token"]
+      },
+      "parameters": []
+    },
+    "/token/refresh/": {
+      "post": {
+        "operationId": "post_custom_token_refresh",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ObtainTokenRefresh" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/ObtainTokenRefresh" }
+          }
+        },
+        "tags": ["token"]
+      },
+      "parameters": []
+    },
+    "/training_plan/bulk-delete": {
+      "delete": {
+        "operationId": "delete_training_plan_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/TrainingPlanBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["training_plan"]
+      },
+      "parameters": []
+    },
+    "/training_plan/create": {
+      "post": {
+        "operationId": "post_training_plan_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/TrainingPlanUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/TrainingPlanUpsert" }
+          }
+        },
+        "tags": ["training_plan"]
+      },
+      "parameters": []
+    },
+    "/training_plan/list": {
+      "get": {
+        "operationId": "get_training_plan_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/TrainingPlan" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["training_plan"]
+      },
+      "parameters": []
+    },
+    "/training_plan/{id}": {
+      "get": {
+        "operationId": "get_training_plan_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/TrainingPlan" }
+          }
+        },
+        "tags": ["training_plan"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Training Plan.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/training_plan/{id}/delete": {
+      "delete": {
+        "operationId": "delete_training_plan_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["training_plan"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Training Plan.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/training_plan/{id}/to-alter": {
+      "get": {
+        "operationId": "get_training_plan_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/TrainingPlanGetToAlter" }
+          }
+        },
+        "tags": ["training_plan"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Training Plan.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/training_plan/{id}/update": {
+      "put": {
+        "operationId": "put_training_plan_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/TrainingPlanUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/TrainingPlanUpsert" }
+          }
+        },
+        "tags": ["training_plan"]
+      },
+      "patch": {
+        "operationId": "patch_training_plan_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/TrainingPlanUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/TrainingPlanUpsert" }
+          }
+        },
+        "tags": ["training_plan"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Training Plan.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/upload/file_id": {
+      "post": {
+        "operationId": "post_file_id_upload",
+        "description": "Upload a file for document ID purposes",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "Document ID file",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "id_type",
+            "in": "formData",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "phil_health",
+              "sss",
+              "pag_ibig",
+              "tin",
+              "driver_license",
+              "postal",
+              "passport",
+              "voter",
+              "nbi",
+              "umid",
+              "pwd",
+              "senior_citizen",
+              "birth_certificate",
+              "others"
+            ]
+          },
+          {
+            "name": "user",
+            "in": "formData",
+            "required": false,
+            "type": "integer",
+            "x-nullable": true
+          },
+          {
+            "name": "id_number",
+            "in": "formData",
+            "required": false,
+            "type": "string",
+            "maxLength": 12,
+            "x-nullable": true
+          }
+        ],
+        "responses": {
+          "400": { "description": "Invalid data in uploaded file" },
+          "200": { "description": "Success" }
+        },
+        "consumes": ["multipart/form-data"],
+        "tags": ["upload"]
+      },
+      "parameters": []
+    },
+    "/upload/file_id/bulk/": {
+      "post": {
+        "operationId": "post_file_id_bulk",
+        "description": "",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "name": "id_type",
+            "in": "formData",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "phil_health",
+              "sss",
+              "pag_ibig",
+              "tin",
+              "driver_license",
+              "postal",
+              "passport",
+              "voter",
+              "nbi",
+              "umid",
+              "pwd",
+              "senior_citizen",
+              "birth_certificate",
+              "others"
+            ]
+          },
+          {
+            "name": "id_number",
+            "in": "formData",
+            "required": false,
+            "type": "string",
+            "maxLength": 12,
+            "x-nullable": true
+          },
+          {
+            "name": "user",
+            "in": "formData",
+            "required": false,
+            "type": "integer",
+            "x-nullable": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/FileIdBulk" }
+          }
+        },
+        "consumes": ["multipart/form-data"],
+        "tags": ["upload"]
+      },
+      "parameters": []
+    },
+    "/user/bulk-delete": {
+      "delete": {
+        "operationId": "delete_user_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["user"]
+      },
+      "parameters": []
+    },
+    "/user/list": {
+      "get": {
+        "operationId": "get_user_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "description": "username",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/User" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["user"]
+      },
+      "parameters": []
+    },
+    "/user/signup": {
+      "post": {
+        "operationId": "post_user_signup",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserSignup" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserSignup" }
+          }
+        },
+        "tags": ["user"]
+      },
+      "parameters": []
+    },
+    "/user/signup/form": {
+      "post": {
+        "operationId": "post_user_signup_form",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserUpdateForm" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserUpdateForm" }
+          }
+        },
+        "tags": ["user"]
+      },
+      "parameters": []
+    },
+    "/user/{id}": {
+      "get": {
+        "operationId": "get_user_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["user"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this User.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user/{id}/delete": {
+      "delete": {
+        "operationId": "delete_user_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["user"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this User.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user/{id}/to-alter": {
+      "get": {
+        "operationId": "get_user_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserGetToAlter" }
+          }
+        },
+        "tags": ["user"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this User.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user/{id}/update": {
+      "put": {
+        "operationId": "put_user_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserUpdate" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserUpdate" }
+          }
+        },
+        "tags": ["user"]
+      },
+      "patch": {
+        "operationId": "patch_user_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserUpdate" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserUpdate" }
+          }
+        },
+        "tags": ["user"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this User.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user/{id}/update/form": {
+      "put": {
+        "operationId": "put_user_update_form",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserUpdateForm" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserUpdateForm" }
+          }
+        },
+        "tags": ["user"]
+      },
+      "patch": {
+        "operationId": "patch_user_update_form",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserUpdateForm" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserUpdateForm" }
+          }
+        },
+        "tags": ["user"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this User.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user_account/list": {
+      "get": {
+        "operationId": "get_account_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "account_number",
+            "in": "query",
+            "description": "account_number",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Account" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["user_account"]
+      },
+      "parameters": []
+    },
+    "/user_account/{id}": {
+      "get": {
+        "operationId": "get_account_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/Account" }
+          }
+        },
+        "tags": ["user_account"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Account.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user_account/{id}/update": {
+      "put": {
+        "operationId": "put_account_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AccountUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AccountUpsert" }
+          }
+        },
+        "tags": ["user_account"]
+      },
+      "patch": {
+        "operationId": "patch_account_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/AccountUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/AccountUpsert" }
+          }
+        },
+        "tags": ["user_account"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Account.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user_profile/list": {
+      "get": {
+        "operationId": "get_user_profile_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "first_name__icontains",
+            "in": "query",
+            "description": "first_name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "last_name__icontains",
+            "in": "query",
+            "description": "last_name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/UserProfile" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["user_profile"]
+      },
+      "parameters": []
+    },
+    "/user_profile/{id}": {
+      "get": {
+        "operationId": "get_user_profile_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserProfile" }
+          }
+        },
+        "tags": ["user_profile"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this UserProfile.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user_profile/{id}/update": {
+      "put": {
+        "operationId": "put_user_profile_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserProfileUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserProfileUpsert" }
+          }
+        },
+        "tags": ["user_profile"]
+      },
+      "patch": {
+        "operationId": "patch_user_profile_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserProfileUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/UserProfileUpsert" }
+          }
+        },
+        "tags": ["user_profile"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this UserProfile.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user_role/bulk-delete": {
+      "delete": {
+        "operationId": "delete_role_bulk_destroy",
+        "description": "Bulk delete instances",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/RoleBulkDelete" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "HTTP_204_NO_CONTENT" },
+          "207": { "description": "HTTP_207_MULTI_STATUS" },
+          "400": { "description": "HTTP_400_BAD_REQUEST" },
+          "403": { "description": "HTTP_403_FORBIDDEN" }
+        },
+        "tags": ["user_role"]
+      },
+      "parameters": []
+    },
+    "/user_role/create": {
+      "post": {
+        "operationId": "post_role_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/RoleUpsert" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/RoleUpsert" }
+          }
+        },
+        "tags": ["user_role"]
+      },
+      "parameters": []
+    },
+    "/user_role/list": {
+      "get": {
+        "operationId": "get_role_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name__icontains",
+            "in": "query",
+            "description": "name__icontains",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Role" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["user_role"]
+      },
+      "parameters": []
+    },
+    "/user_role/{id}": {
+      "get": {
+        "operationId": "get_role_detail",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/Role" }
+          }
+        },
+        "tags": ["user_role"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Role.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user_role/{id}/delete": {
+      "delete": {
+        "operationId": "delete_role_destroy",
+        "description": "",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["user_role"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Role.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user_role/{id}/to-alter": {
+      "get": {
+        "operationId": "get_role_get_to_alter",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/RoleGetToAlter" }
+          }
+        },
+        "tags": ["user_role"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Role.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/user_role/{id}/update": {
+      "put": {
+        "operationId": "put_role_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/RoleUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/RoleUpsert" }
+          }
+        },
+        "tags": ["user_role"]
+      },
+      "patch": {
+        "operationId": "patch_role_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/RoleUpsert" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/RoleUpsert" }
+          }
+        },
+        "tags": ["user_role"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this Role.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "AccessBandBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "DayTimeUpsert": {
+      "required": ["start_time", "end_time"],
+      "type": "object",
+      "properties": {
+        "day": { "title": "Day", "type": "integer", "x-nullable": true },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "start_time": { "title": "Start time", "type": "string" },
+        "end_time": { "title": "End time", "type": "string" }
+      }
+    },
+    "AccessBandUpsert": {
+      "required": ["daytime", "name", "time_set"],
+      "type": "object",
+      "properties": {
+        "duration": {
+          "title": "Duration",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "daytime": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/DayTimeUpsert" }
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "time_set": {
+          "title": "Time set",
+          "type": "string",
+          "enum": ["24hours", "custom", "fixed"]
+        },
+        "fixed_start_time": {
+          "title": "Fixed start time",
+          "type": "string",
+          "x-nullable": true
+        },
+        "fixed_end_time": {
+          "title": "Fixed end time",
+          "type": "string",
+          "x-nullable": true
+        },
+        "is_active": { "title": "Is active", "type": "boolean" }
+      }
+    },
+    "Day": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "enum": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ]
+        }
+      }
+    },
+    "DurationBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "DurationUpsert": {
+      "required": ["count", "type"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "count": {
+          "title": "Count",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": ["day", "week", "month", "year"]
+        }
+      }
+    },
+    "Duration": {
+      "required": ["count", "type"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "count": {
+          "title": "Count",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": ["day", "week", "month", "year"]
+        }
+      }
+    },
+    "DurationGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "DayTime": {
+      "required": ["day", "start_time", "end_time"],
+      "type": "object",
+      "properties": {
+        "day": { "title": "Day", "type": "string", "minLength": 1 },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "start_time": { "title": "Start time", "type": "string" },
+        "end_time": { "title": "End time", "type": "string" }
+      }
+    },
+    "AccessBand": {
+      "required": ["name", "time_set"],
+      "type": "object",
+      "properties": {
+        "duration": { "$ref": "#/definitions/Duration" },
+        "daytime": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/DayTime" },
+          "readOnly": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "time_set": {
+          "title": "Time set",
+          "type": "string",
+          "enum": ["24hours", "custom", "fixed"]
+        },
+        "fixed_start_time": {
+          "title": "Fixed start time",
+          "type": "string",
+          "x-nullable": true
+        },
+        "fixed_end_time": {
+          "title": "Fixed end time",
+          "type": "string",
+          "x-nullable": true
+        },
+        "is_active": { "title": "Is active", "type": "boolean" }
+      }
+    },
+    "AccessBandGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "AuthUserGroupBulkToggle": {
+      "required": ["ids", "toggle_action"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } },
+        "toggle_action": {
+          "title": "Toggle action",
+          "type": "string",
+          "enum": ["activate", "deactivate"]
+        }
+      }
+    },
+    "AuthUserGroupBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "AuthUserGroupUpsert": {
+      "required": ["user_account_ids", "name"],
+      "type": "object",
+      "properties": {
+        "user_account_ids": { "type": "array", "items": { "type": "integer" } },
+        "user_accounts": {
+          "title": "User accounts",
+          "type": "string",
+          "readOnly": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "maxLength": 150,
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 150,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        },
+        "is_active": { "title": "Is active", "type": "boolean" }
+      }
+    },
+    "AuthUserGroup": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "user_accounts": {
+          "title": "User accounts",
+          "type": "string",
+          "readOnly": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "maxLength": 150,
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 150,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        },
+        "is_active": { "title": "Is active", "type": "boolean" }
+      }
+    },
+    "AuthUserGroupGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "ModPermissionUpsert": {
+      "required": ["module", "permission", "name", "codename"],
+      "type": "object",
+      "properties": {
+        "module": { "title": "Module", "type": "integer" },
+        "permission": { "title": "Permission", "type": "integer" },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "codename": {
+          "title": "Codename",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "BaseModule": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 254,
+          "x-nullable": true
+        }
+      }
+    },
+    "BasePermission": {
+      "required": ["name", "codename", "content_type"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "codename": {
+          "title": "Codename",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "content_type": { "title": "Content type", "type": "integer" }
+      }
+    },
+    "ModPermission": {
+      "required": ["name", "codename"],
+      "type": "object",
+      "properties": {
+        "module": { "$ref": "#/definitions/BaseModule" },
+        "permission": { "$ref": "#/definitions/BasePermission" },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "codename": {
+          "title": "Codename",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "ModPermissionGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "AuthPermissionBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "AuthUser": {
+      "required": ["username", "email"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "username": {
+          "title": "Username",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "email": {
+          "title": "Email address",
+          "type": "string",
+          "format": "email",
+          "maxLength": 64,
+          "minLength": 1
+        }
+      }
+    },
+    "BaseAuthUserGroup": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 150,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        },
+        "is_active": { "title": "Is active", "type": "boolean" }
+      }
+    },
+    "AuthPermissionUpsert": {
+      "required": ["permission", "permission_type"],
+      "type": "object",
+      "properties": {
+        "permission": { "title": "Permission", "type": "integer" },
+        "permission_type": { "title": "Permission type", "type": "integer" },
+        "users": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/AuthUser" },
+          "readOnly": true
+        },
+        "groups": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/BaseAuthUserGroup" },
+          "readOnly": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "BasePermissionType": {
+      "required": ["code"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 32,
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "AuthPermission": {
+      "type": "object",
+      "properties": {
+        "permission": { "$ref": "#/definitions/ModPermission" },
+        "permission_type": { "$ref": "#/definitions/BasePermissionType" },
+        "users": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/AuthUser" },
+          "readOnly": true
+        },
+        "groups": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/BaseAuthUserGroup" },
+          "readOnly": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "AuthPermissionGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "AuthPermissionUpdate": {
+      "required": ["permission_type", "user_ids", "group_ids"],
+      "type": "object",
+      "properties": {
+        "permission_type": { "title": "Permission type", "type": "integer" },
+        "user_ids": { "type": "array", "items": { "type": "integer" } },
+        "group_ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "PermissionType": {
+      "required": ["code"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 32,
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "BranchBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "BusinessContactUpsert": {
+      "type": "object",
+      "properties": {
+        "phone_number": {
+          "title": "Phone number",
+          "type": "string",
+          "maxLength": 128,
+          "x-nullable": true
+        },
+        "email": {
+          "title": "Email Address",
+          "type": "string",
+          "format": "email",
+          "maxLength": 64,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "website": {
+          "title": "Website",
+          "type": "string",
+          "maxLength": 256,
+          "x-nullable": true
+        }
+      },
+      "x-nullable": true
+    },
+    "PhAddressUpsert": {
+      "required": [
+        "region_id",
+        "province_id",
+        "municipality_id",
+        "barangay_district_id"
+      ],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "country": { "title": "Country", "type": "string", "enum": ["PH"] },
+        "region_id": { "title": "Region id", "type": "integer" },
+        "province_id": { "title": "Province id", "type": "integer" },
+        "municipality_id": { "title": "Municipality id", "type": "integer" },
+        "barangay_district_id": {
+          "title": "Barangay district id",
+          "type": "integer"
+        },
+        "unit_home_street": {
+          "title": "Unit home street",
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "zip_code": {
+          "title": "Zip code",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      },
+      "x-nullable": true
+    },
+    "ContactUpsert": {
+      "type": "object",
+      "properties": {
+        "mobile_number": {
+          "title": "Mobile number",
+          "type": "string",
+          "maxLength": 128,
+          "x-nullable": true
+        }
+      },
+      "x-nullable": true
+    },
+    "UserProfileUpsert": {
+      "type": "object",
+      "properties": {
+        "photo": {
+          "title": "Photo",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "first_name": {
+          "title": "First name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "last_name": {
+          "title": "Last name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "gender": {
+          "title": "Biological Sex",
+          "type": "string",
+          "enum": ["male", "female"],
+          "x-nullable": true
+        },
+        "birth_date": {
+          "title": "Birth date",
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        },
+        "personal_contact": { "$ref": "#/definitions/ContactUpsert" },
+        "address": { "$ref": "#/definitions/PhAddressUpsert" },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "BranchUpsert": {
+      "required": ["name", "owner"],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "contact": { "$ref": "#/definitions/BusinessContactUpsert" },
+        "address": { "$ref": "#/definitions/PhAddressUpsert" },
+        "owner": { "$ref": "#/definitions/UserProfileUpsert" },
+        "branch_manager_id": {
+          "title": "Branch manager id",
+          "type": "integer",
+          "x-nullable": true
+        }
+      }
+    },
+    "BusinessContact": {
+      "type": "object",
+      "properties": {
+        "phone_number": {
+          "title": "Phone number",
+          "type": "string",
+          "maxLength": 128,
+          "x-nullable": true
+        },
+        "email": {
+          "title": "Email Address",
+          "type": "string",
+          "format": "email",
+          "maxLength": 64,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "website": {
+          "title": "Website",
+          "type": "string",
+          "maxLength": 256,
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "Region": {
+      "required": ["name", "reg_code"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "reg_code": {
+          "title": "Reg code",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        }
+      }
+    },
+    "Province": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "prov_code": {
+          "title": "Prov code",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        }
+      }
+    },
+    "CityMun": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "city_mun_code": {
+          "title": "City mun code",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        }
+      }
+    },
+    "Barangay": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "brgy_code": {
+          "title": "Brgy code",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        }
+      }
+    },
+    "PhAddress": {
+      "required": ["region", "province", "municipality", "barangay_district"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "country": { "title": "Country", "type": "string", "enum": ["PH"] },
+        "region": { "$ref": "#/definitions/Region" },
+        "province": { "$ref": "#/definitions/Province" },
+        "municipality": { "$ref": "#/definitions/CityMun" },
+        "barangay_district": { "$ref": "#/definitions/Barangay" },
+        "unit_home_street": {
+          "title": "Unit home street",
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "zip_code": {
+          "title": "Zip code",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        },
+        "district_id": {
+          "title": "District id",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "BaseUserProfile": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "photo": {
+          "title": "Photo",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "first_name": {
+          "title": "First name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "last_name": {
+          "title": "Last name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "gender": {
+          "title": "Biological Sex",
+          "type": "string",
+          "enum": ["male", "female"],
+          "x-nullable": true
+        },
+        "birth_date": {
+          "title": "Birth date",
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        }
+      }
+    },
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "mobile_number": {
+          "title": "Mobile number",
+          "type": "string",
+          "maxLength": 128,
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "UserProfile": {
+      "required": ["personal_contact", "address"],
+      "type": "object",
+      "properties": {
+        "personal_contact": { "$ref": "#/definitions/Contact" },
+        "address": { "$ref": "#/definitions/PhAddress" },
+        "full_name_lnf": {
+          "title": "Full name lnf",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "fullname": {
+          "title": "Fullname",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "photo": {
+          "title": "Photo",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "first_name": {
+          "title": "First name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "last_name": {
+          "title": "Last name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "gender": {
+          "title": "Biological Sex",
+          "type": "string",
+          "enum": ["male", "female"],
+          "x-nullable": true
+        },
+        "birth_date": {
+          "title": "Birth date",
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        }
+      }
+    },
+    "Account": {
+      "type": "object",
+      "properties": {
+        "account_type": {
+          "title": "AccountType",
+          "type": "string",
+          "enum": ["employee", "member"]
+        },
+        "branch": { "title": "Branch", "type": "integer", "x-nullable": true },
+        "role": { "title": "Role", "type": "integer", "x-nullable": true },
+        "group": {
+          "title": "Auth Group",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "UserInfo": {
+      "required": ["username", "email"],
+      "type": "object",
+      "properties": {
+        "username": {
+          "title": "Username",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "email": {
+          "title": "Email address",
+          "type": "string",
+          "format": "email",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "profile": { "$ref": "#/definitions/UserProfile" },
+        "account": { "$ref": "#/definitions/Account" },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "Branch": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "contact": { "$ref": "#/definitions/BusinessContact" },
+        "address": { "$ref": "#/definitions/PhAddress" },
+        "owner": { "$ref": "#/definitions/BaseUserProfile" },
+        "branch_manager": { "$ref": "#/definitions/UserInfo" },
+        "user_account_count": {
+          "title": "User account count",
+          "type": "string",
+          "readOnly": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "BranchGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "GoalBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "GoalUpsert": {
+      "required": ["type", "unit"],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 254,
+          "x-nullable": true
+        },
+        "user_role": {
+          "title": "User role",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": ["count", "currency", "percentage", "time"]
+        },
+        "unit": { "title": "Unit", "type": "integer" },
+        "amount": {
+          "title": "Amount",
+          "type": "string",
+          "format": "decimal",
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "Role": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 256,
+          "x-nullable": true
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        }
+      }
+    },
+    "Unit": {
+      "required": ["name", "symbol"],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 1
+        },
+        "symbol": {
+          "title": "Symbol",
+          "type": "string",
+          "maxLength": 10,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 254,
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "Goal": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 254,
+          "x-nullable": true
+        },
+        "user_role": { "$ref": "#/definitions/Role" },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": ["count", "currency", "percentage", "time"],
+          "x-nullable": true
+        },
+        "unit": { "$ref": "#/definitions/Unit" },
+        "amount": {
+          "title": "Amount",
+          "type": "string",
+          "format": "decimal",
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "UnitUpsert": {
+      "required": ["name", "symbol"],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 1
+        },
+        "symbol": {
+          "title": "Symbol",
+          "type": "string",
+          "maxLength": 10,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 254,
+          "x-nullable": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "GoalGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "MembershipPlanBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "InstallmentSettingUpsert": {
+      "required": ["term"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "term": {
+          "title": "Term",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        },
+        "frequency": {
+          "title": "Frequency",
+          "type": "string",
+          "enum": ["weekly", "monthly", "bi_monthly", "quarterly"],
+          "default": "monthly"
+        }
+      },
+      "x-nullable": true
+    },
+    "MembershipPlanUpsert": {
+      "required": ["name", "price_total"],
+      "type": "object",
+      "properties": {
+        "access_band_setting": {
+          "title": "Access band setting",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "installment_setting": {
+          "$ref": "#/definitions/InstallmentSettingUpsert"
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "is_promo": { "title": "Is promo", "type": "boolean" },
+        "price_total": {
+          "title": "Price total",
+          "type": "string",
+          "format": "decimal"
+        },
+        "payment_type": {
+          "title": "Payment type",
+          "type": "string",
+          "enum": ["straight_payment", "installment"],
+          "default": "straight_payment"
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": { "type": "integer", "x-nullable": true },
+          "uniqueItems": true
+        },
+        "is_discount_enabled": {
+          "title": "Is discount enabled",
+          "type": "boolean"
+        }
+      }
+    },
+    "InstallmentSetting": {
+      "required": ["term"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "term": {
+          "title": "Term",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        },
+        "frequency": {
+          "title": "Frequency",
+          "type": "string",
+          "enum": ["weekly", "monthly", "bi_monthly", "quarterly"]
+        }
+      }
+    },
+    "PaymentMethod": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 512,
+          "x-nullable": true
+        },
+        "is_active": { "title": "Is active", "type": "boolean" }
+      }
+    },
+    "MembershipPlan": {
+      "required": ["name", "price_total"],
+      "type": "object",
+      "properties": {
+        "access_band_setting": { "$ref": "#/definitions/AccessBand" },
+        "installment_setting": { "$ref": "#/definitions/InstallmentSetting" },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "is_promo": { "title": "Is promo", "type": "boolean" },
+        "price_total": {
+          "title": "Price total",
+          "type": "string",
+          "format": "decimal"
+        },
+        "payment_type": {
+          "title": "Payment type",
+          "type": "string",
+          "enum": ["straight_payment", "installment"]
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PaymentMethod" },
+          "readOnly": true
+        },
+        "is_discount_enabled": {
+          "title": "Is discount enabled",
+          "type": "boolean"
+        }
+      }
+    },
+    "MembershipPlanGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "PaymentMethodBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "PaymentMethodUpsert": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 512,
+          "x-nullable": true
+        },
+        "is_active": { "title": "Is active", "type": "boolean" }
+      }
+    },
+    "PaymentMethodGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "ObtainTokenPair": {
+      "required": ["username", "password"],
+      "type": "object",
+      "properties": {
+        "username": { "title": "Username", "type": "string", "minLength": 1 },
+        "password": { "title": "Password", "type": "string", "minLength": 1 }
+      }
+    },
+    "ObtainTokenRefresh": {
+      "required": ["refresh"],
+      "type": "object",
+      "properties": {
+        "refresh": { "title": "Refresh", "type": "string", "minLength": 1 },
+        "access": {
+          "title": "Access",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        }
+      }
+    },
+    "TrainingPlanBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "ValidityUpsert": {
+      "required": ["count"],
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": ["day", "week", "month", "year"],
+          "default": "month"
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "TrainingPlanUpsert": {
+      "required": ["validity", "name", "session_count", "rate"],
+      "type": "object",
+      "properties": {
+        "validity": { "$ref": "#/definitions/ValidityUpsert" },
+        "payment_methods": {
+          "type": "array",
+          "items": { "type": "integer", "x-nullable": true },
+          "uniqueItems": true
+        },
+        "installment_setting": {
+          "$ref": "#/definitions/InstallmentSettingUpsert"
+        },
+        "total_price": {
+          "title": "Total price",
+          "type": "integer",
+          "readOnly": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "session_count": {
+          "title": "Session count",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "is_active": { "title": "Is active", "type": "boolean" },
+        "is_promo": { "title": "Is promo", "type": "boolean" },
+        "rate": { "title": "Rate", "type": "string", "format": "decimal" },
+        "payment_type": {
+          "title": "Payment type",
+          "type": "string",
+          "enum": ["straight_payment", "installment"],
+          "default": "straight_payment"
+        }
+      }
+    },
+    "Validity": {
+      "required": ["count"],
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": ["day", "week", "month", "year"]
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "TrainingPlan": {
+      "required": ["name", "session_count", "rate"],
+      "type": "object",
+      "properties": {
+        "validity": { "$ref": "#/definitions/Validity" },
+        "payment_methods": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PaymentMethod" },
+          "readOnly": true
+        },
+        "installment_setting": { "$ref": "#/definitions/InstallmentSetting" },
+        "total_price": {
+          "title": "Total price",
+          "type": "integer",
+          "readOnly": true
+        },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "session_count": {
+          "title": "Session count",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "is_active": { "title": "Is active", "type": "boolean" },
+        "is_promo": { "title": "Is promo", "type": "boolean" },
+        "rate": { "title": "Rate", "type": "string", "format": "decimal" },
+        "payment_type": {
+          "title": "Payment type",
+          "type": "string",
+          "enum": ["straight_payment", "installment"]
+        }
+      }
+    },
+    "TrainingPlanGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "FileIdBulk": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "file": {
+          "title": "File",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "id_type": {
+          "title": "Id type",
+          "type": "string",
+          "enum": [
+            "phil_health",
+            "sss",
+            "pag_ibig",
+            "tin",
+            "driver_license",
+            "postal",
+            "passport",
+            "voter",
+            "nbi",
+            "umid",
+            "pwd",
+            "senior_citizen",
+            "birth_certificate",
+            "others"
+          ]
+        },
+        "id_number": {
+          "title": "Id number",
+          "type": "string",
+          "maxLength": 12,
+          "x-nullable": true
+        },
+        "user": { "title": "User", "type": "integer", "x-nullable": true }
+      }
+    },
+    "UserBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "FileId": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "title": "File",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "id_type": {
+          "title": "Id type",
+          "type": "string",
+          "enum": [
+            "phil_health",
+            "sss",
+            "pag_ibig",
+            "tin",
+            "driver_license",
+            "postal",
+            "passport",
+            "voter",
+            "nbi",
+            "umid",
+            "pwd",
+            "senior_citizen",
+            "birth_certificate",
+            "others"
+          ]
+        },
+        "file_name": {
+          "title": "File name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "extension": {
+          "title": "Extension",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "uploader": {
+          "title": "Uploader",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "doc_owner": {
+          "title": "Doc owner",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "id_number": {
+          "title": "Id number",
+          "type": "string",
+          "maxLength": 12,
+          "x-nullable": true
+        }
+      }
+    },
+    "FileContract": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "title": "File",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "file_name": {
+          "title": "File name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "extension": {
+          "title": "Extension",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "uploader": {
+          "title": "Uploader",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "doc_owner": {
+          "title": "Doc owner",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        }
+      }
+    },
+    "User": {
+      "required": ["username", "email"],
+      "type": "object",
+      "properties": {
+        "username": {
+          "title": "Username",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "email": {
+          "title": "Email address",
+          "type": "string",
+          "format": "email",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "profile": { "$ref": "#/definitions/UserProfile" },
+        "account": { "$ref": "#/definitions/Account" },
+        "file_ids": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FileId" },
+          "readOnly": true
+        },
+        "contract": { "$ref": "#/definitions/FileContract" },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "UserProfileSignup": {
+      "type": "object",
+      "properties": {
+        "personal_contact": { "$ref": "#/definitions/ContactUpsert" },
+        "currentph_address": { "$ref": "#/definitions/PhAddressUpsert" },
+        "user": { "title": "User", "type": "integer", "x-nullable": true },
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "photo": {
+          "title": "Photo",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "first_name": {
+          "title": "First name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "last_name": {
+          "title": "Last name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "gender": {
+          "title": "Biological Sex",
+          "type": "string",
+          "enum": ["male", "female"],
+          "x-nullable": true
+        },
+        "birth_date": {
+          "title": "Birth date",
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        }
+      }
+    },
+    "AccountSignup": {
+      "type": "object",
+      "properties": {
+        "account_type": {
+          "title": "AccountType",
+          "type": "string",
+          "enum": ["employee", "member"]
+        },
+        "branch": { "title": "Branch", "type": "integer", "x-nullable": true },
+        "role": { "title": "Role", "type": "integer", "x-nullable": true },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "FileContractSignup": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "title": "File",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "file_name": {
+          "title": "File name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "extension": {
+          "title": "Extension",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "uploader": {
+          "title": "Uploader",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "doc_owner": {
+          "title": "Doc owner",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        }
+      },
+      "x-nullable": true
+    },
+    "UserSignup": {
+      "required": ["username", "email", "profile", "account"],
+      "type": "object",
+      "properties": {
+        "username": {
+          "title": "Username",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "email": {
+          "title": "Email address",
+          "type": "string",
+          "format": "email",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "profile": { "$ref": "#/definitions/UserProfileSignup" },
+        "account": { "$ref": "#/definitions/AccountSignup" },
+        "file_ids": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FileId" },
+          "x-nullable": true
+        },
+        "contract": { "$ref": "#/definitions/FileContractSignup" },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "UserUpdateForm": {
+      "required": ["password"],
+      "type": "object",
+      "properties": {
+        "username": { "title": "Username", "type": "string", "minLength": 1 },
+        "email": {
+          "title": "Email",
+          "type": "string",
+          "format": "email",
+          "minLength": 1
+        },
+        "password": {
+          "title": "Password",
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1
+        },
+        "photo": {
+          "title": "Photo",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "first_name": {
+          "title": "First name",
+          "type": "string",
+          "minLength": 1
+        },
+        "last_name": { "title": "Last name", "type": "string", "minLength": 1 },
+        "gender": {
+          "title": "Gender",
+          "type": "string",
+          "enum": ["male", "female"]
+        },
+        "birth_date": {
+          "title": "Birth date",
+          "type": "string",
+          "minLength": 1
+        },
+        "mobile_number": {
+          "title": "Mobile number",
+          "type": "string",
+          "minLength": 1
+        },
+        "account_type": {
+          "title": "Account type",
+          "type": "string",
+          "minLength": 1
+        },
+        "branch": { "title": "Branch", "type": "integer" },
+        "role": { "title": "Role", "type": "string", "minLength": 1 },
+        "region_id": { "title": "Region id", "type": "integer" },
+        "province_id": { "title": "Province id", "type": "integer" },
+        "municipality_id": { "title": "Municipality id", "type": "integer" },
+        "barangay_district_id": {
+          "title": "Barangay district id",
+          "type": "integer"
+        },
+        "unit_home_street": {
+          "title": "Unit home street",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "zip_code": { "title": "Zip code", "type": "integer" },
+        "file_ids": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FileId" },
+          "x-nullable": true
+        },
+        "contract": { "$ref": "#/definitions/FileContractSignup" }
+      }
+    },
+    "UserGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    },
+    "AccountUpsert": {
+      "type": "object",
+      "properties": {
+        "account_type": {
+          "title": "AccountType",
+          "type": "string",
+          "enum": ["employee", "member"]
+        },
+        "branch": { "title": "Branch", "type": "integer", "x-nullable": true },
+        "role": { "title": "Role", "type": "integer", "x-nullable": true },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "FileIdSignup": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "title": "File",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "id_type": {
+          "title": "Id type",
+          "type": "string",
+          "enum": [
+            "phil_health",
+            "sss",
+            "pag_ibig",
+            "tin",
+            "driver_license",
+            "postal",
+            "passport",
+            "voter",
+            "nbi",
+            "umid",
+            "pwd",
+            "senior_citizen",
+            "birth_certificate",
+            "others"
+          ]
+        },
+        "file_name": {
+          "title": "File name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "extension": {
+          "title": "Extension",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "uploader": {
+          "title": "Uploader",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "doc_owner": {
+          "title": "Doc owner",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "id_number": {
+          "title": "Id number",
+          "type": "string",
+          "maxLength": 12,
+          "x-nullable": true
+        }
+      },
+      "x-nullable": true
+    },
+    "UserUpdate": {
+      "required": ["username", "email", "profile", "account"],
+      "type": "object",
+      "properties": {
+        "username": {
+          "title": "Username",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "email": {
+          "title": "Email address",
+          "type": "string",
+          "format": "email",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "profile": { "$ref": "#/definitions/UserProfileUpsert" },
+        "account": { "$ref": "#/definitions/AccountUpsert" },
+        "file_ids": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FileIdSignup" },
+          "x-nullable": true
+        },
+        "contract": { "$ref": "#/definitions/FileContractSignup" },
+        "id": { "title": "ID", "type": "integer", "readOnly": true }
+      }
+    },
+    "RoleBulkDelete": {
+      "required": ["ids"],
+      "type": "object",
+      "properties": {
+        "ids": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "RoleUpsert": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "maxLength": 256,
+          "x-nullable": true
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        }
+      }
+    },
+    "RoleGetToAlter": {
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "to_alter": { "title": "To alter", "type": "string", "readOnly": true }
+      }
+    }
+  }
+}

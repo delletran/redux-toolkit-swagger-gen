@@ -1,0 +1,55 @@
+import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { setupListeners } from '@reduxjs/toolkit/query/react'
+import { persistReducer, persistStore } from 'redux-persist'
+import storageSession from 'redux-persist/lib/storage/session'
+{{#services}}
+import { {{name}} } from '../services/{{path}}/{{name}}'
+{{/services}}
+{{#thunks}}
+import {{thunkName}} from '../thunks/{{path}}/{{thunkName}}'
+{{/thunks}}
+
+const persistConfig = {
+  key: 'root',
+  storage: storageSession,
+  whitelist: []
+}
+
+const rootReducer = combineReducers({
+  {{#services}}
+  [{{name}}.reducerPath]: {{name}}.reducer,
+  {{/services}}
+  {{#thunks}}
+  {{path}}: {{thunkName}},
+  {{/thunks}}
+})
+
+const persistedReducer = persistReducer(persistConfig, rootReducer)
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [
+          'persist/PERSIST',
+          'persist/REHYDRATE',
+          'persist/PAUSE',
+          'persist/PERSIST',
+          'persist/PURGE',
+          'persist/REGISTER'
+        ]
+      }
+    }).concat([
+      {{#services}}
+      {{name}}.middleware,
+      {{/services}}
+    ]),
+  devTools: process.env.NODE_ENV !== 'production'
+})
+
+export const persistor = persistStore(store)
+setupListeners(store.dispatch)
+
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

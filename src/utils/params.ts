@@ -1,7 +1,8 @@
 // #region getQueryParams
 export const getQueryParams = (
-  parameters: (IBodyParameter | IQueryParameter)[]
+  parameters: (IBodyParameter | IQueryParameter)[] | undefined
 ): string[] => {
+  if (!parameters || !Array.isArray(parameters)) return [];
   const params = parameters.filter((param) => param.in === 'query').map((param) => param.name);
   return params
 };
@@ -9,8 +10,9 @@ export const getQueryParams = (
 
 // #region getBodyParams
 export const getBodyParams = (
-  parameters: (IBodyParameter | IQueryParameter)[]
+  parameters: (IBodyParameter | IQueryParameter)[] | undefined
 ): string[] => {
+  if (!parameters || !Array.isArray(parameters)) return [];
   const params = parameters.filter((param) => param.in === 'body').map((param) => param.name);
   return params
 };
@@ -18,8 +20,9 @@ export const getBodyParams = (
 
 // #region getPathParams
 export const getPathParams = (
-  parameters: IEndpointParameter[]
+  parameters: IEndpointParameter[] | undefined
 ): string[] => {
+  if (!parameters || !Array.isArray(parameters)) return [];
   const params = parameters
     .filter((param) => param.in === 'path')
     .map((param) => param.name);
@@ -29,9 +32,10 @@ export const getPathParams = (
 
 // #region getPathParamsTyped
 export const getPathParamsTyped = (
-  parameters: IEndpointParameter[],
+  parameters: IEndpointParameter[] | undefined,
   method?: MethodType
 ): string[] => {
+  if (!parameters || !Array.isArray(parameters)) return [];
   const params = parameters
     .filter((param) => param.in === 'path')
     .map((param) => {
@@ -42,10 +46,11 @@ export const getPathParamsTyped = (
 };
 // #endregion
 
-// #region getPathParamsTyped
+// #region getParamsTyped
 export const getParamsTyped = (
-  parameters: (IBodyParameter | IQueryParameter)[],
+  parameters: (IBodyParameter | IQueryParameter)[] | undefined,
 ): string[] => {
+  if (!parameters || !Array.isArray(parameters)) return [];
   const params = parameters
     .map((param) => {
       const paramType = _parseQueryParamType(param as IQueryParameter);

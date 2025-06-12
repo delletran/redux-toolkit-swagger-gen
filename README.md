@@ -22,6 +22,7 @@ npm install redux-toolkit-swagger-gen --save-dev
 ```bash
 # Generate API client
 swagger-gen --url http://your-api/swagger.json --output src/api
+swagger-gen --url http://localhost:8000/openapi.json --output src/api
 ```
 
 ## CLI Options
@@ -41,9 +42,12 @@ swagger-gen --url http://your-api/swagger.json --output src/api
 ```
 src/api/
 ├── constants/      # API constants and enums
-├── redux/         # Redux toolkit setup
+├── redux/         # Redux toolkit setup and hooks
+│   ├── hooks.ts   # TypeScript hooks for Redux state & dispatch
+│   └── store.ts   # Pre-configured Redux store with services
 ├── schema/        # API schemas and types
 ├── services/      # API service definitions
+├── slices/        # Redux slices for state management
 └── thunks/        # Redux thunks
 ```
 
@@ -52,7 +56,22 @@ src/api/
 ### Store Setup
 
 ```typescript
-// store.ts
+// Use the pre-generated store
+import { store, persistor } from './api/redux/store';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+
+function App() {
+  return (
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <YourApp />
+      </PersistGate>
+    </Provider>
+  );
+}
+
+// Or customize the store
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { userApi } from './api/services/user';
@@ -72,11 +91,14 @@ export const store = configureStore({
 setupListeners(store.dispatch);
 ```
 
-### Using Generated Services
+### Using Generated Hooks and Services
 
 ```typescript
 // RTK Query hooks
 import { useGetUserListQuery, usePutUserUpdateMutation } from './api/services/user';
+
+// Use the generated hooks
+import { useAppDispatch, useAppSelector } from './api/redux/hooks';
 
 // Redux Thunks
 import { getUserList, putUserUpdate } from './api/thunks/user';
@@ -87,12 +109,16 @@ function UserList() {
   return isLoading ? <div>Loading...</div> : <div>{data.results.length}</div>;
 }
 
-// Thunk Example
+// Thunk Example with TypedHooks
 function UserListThunk() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
+  const userData = useAppSelector(state => state.user.data);
+  
   useEffect(() => {
     dispatch(getUserList({ page: 1 }));
   }, [dispatch]);
+  
+  return <div>{userData?.length || 0} users</div>;
 }
 ```
 
