@@ -60,6 +60,8 @@ const getServiceEndpoint = (
     modelName: endpoint.modelName,
     exportName: endpoint.exportName,
     types: endpoint.types,
+    requestBodyModelName: endpoint.requestBodyModelName,
+    requestBodyInterfaceName: endpoint.requestBodyInterfaceName,
   }
 }
 
@@ -135,6 +137,8 @@ class Endpoint {
   private _paramsTyped: string[]
   private _joinedParams: string[]
   private _joinedParamsTyped: string[]
+  private _requestBodyModelName: string = ""
+  private _requestBodyInterfaceName: string = ""
 
   constructor(
     endpointType: EndpointType,
@@ -158,10 +162,14 @@ class Endpoint {
       interfaceName: paramInterfaceName,
       modelName: paramModelName,
       paramName: iNameParam,
+      requestBodyModelName,
+      requestBodyInterfaceName,
     } = getNames(details)
     this._modelName = paramModelName
     this._interfaceName = paramInterfaceName
     this._INameParam = iNameParam
+    this._requestBodyModelName = requestBodyModelName
+    this._requestBodyInterfaceName = requestBodyInterfaceName
 
     this._queryParams = getQueryParams(details.methodObj.parameters)
     this._bodyParams = getBodyParams(details.methodObj.parameters)
@@ -225,6 +233,14 @@ class Endpoint {
 
   get exportName(): string {
     return this._exportName
+  }
+
+  get requestBodyModelName(): string {
+    return this._requestBodyModelName
+  }
+
+  get requestBodyInterfaceName(): string {
+    return this._requestBodyInterfaceName
   }
 
   get params(): string | null {

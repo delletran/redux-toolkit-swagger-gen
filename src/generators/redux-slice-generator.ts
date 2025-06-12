@@ -2,9 +2,9 @@ import * as fs from "fs"
 import * as path from "path"
 import Mustache from "mustache"
 
-import { fsRead } from "../utils/helpers"
+import { loadTemplate } from "../utils/template-loader"
 
-const sliceTemplate = fsRead("../templates/sliceTemplate.mustache")
+const sliceTemplate = loadTemplate("sliceTemplate.mustache")
 
 const toPascalCase = (str: string): string => {
   return str.replace(/(^\w|_\w|-\w)/g, (g) =>

@@ -1,11 +1,9 @@
 import * as fs from "fs"
 import * as path from "path"
 import Mustache from "mustache"
+import { loadTemplate } from "../utils/template-loader"
 
-const modelTemplate = fs.readFileSync(
-  path.resolve(__dirname, "../templates/modelTemplate.mustache"),
-  "utf-8"
-)
+const modelTemplate = loadTemplate("modelTemplate.mustache")
 
 const getZodType = (property: any, nestedModels: Set<string>): string => {
   if (!property) return "z.any()"

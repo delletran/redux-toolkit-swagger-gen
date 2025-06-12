@@ -144,26 +144,40 @@ const main = async () => {
       // Group routes by main endpoint
       for (const [route, methods] of Object.entries(paths)) {
         const subDir = route.split("/")[1]
-        const method = (["get", "post", "put", "patch", "delete"] as MethodType[]).find(
+        
+        // Process all available HTTP methods for this route
+        const availableMethods = (["get", "post", "put", "patch", "delete"] as MethodType[]).filter(
           (m) => methods[m]
         )
-        const methodObject = method ? methods[method] : undefined
+        
+        for (const method of availableMethods) {
+          const methodObject = methods[method]
+          console.log(`Processing route: ${route} with method: ${method}`)
 
-        if (methodObject && method) {
-          mainRoutes[subDir] = {
-            ...mainRoutes[subDir],
-            [route]: {
-              id: methodObject.operationId,
-              url: route,
-              method,
-              parentPath: subDir,
-              tags: methodObject.tags,
-              parameters: (methods as ExtendedPathType).parameters ?? [],
-              methodObj: methodObject,
-            },
+          if (methodObject) {
+            // Initialize subDir object if it doesn't exist
+            if (!mainRoutes[subDir]) {
+              mainRoutes[subDir] = {}
+            }
+            
+            // Create a unique route key that includes the method
+            const routeKey = `${route}_${method}`
+            mainRoutes[subDir] = {
+              ...mainRoutes[subDir],
+              [routeKey]: {
+                id: methodObject.operationId,
+                url: route,
+                method,
+                parentPath: subDir,
+                tags: methodObject.tags,
+                parameters: (methods as ExtendedPathType).parameters ?? [],
+                methodObj: methodObject,
+              },
+            }
           }
         }
       }
+        // Routes are now properly grouped by main endpoint and HTTP method
       
       // Generate service and thunk files
       for (const [route, methods] of Object.entries(mainRoutes)) {

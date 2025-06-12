@@ -1,9 +1,9 @@
 import Mustache from 'mustache';
 import { EndpointFactory } from '../utils/end-points';
 import { toCamelCase } from '../utils/formater';
-import { fsRead } from '../utils/helpers';
+import { loadTemplate } from '../utils/template-loader';
 
-const thunkTemplate = fsRead('../templates/thunkTemplate.mustache');
+const thunkTemplate = loadTemplate('thunkTemplate.mustache');
 
 export const thunkGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>): string => {
   const endpoints = EndpointFactory.getEndpoints('thunk', path, methods);

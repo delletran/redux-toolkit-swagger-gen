@@ -1,6 +1,6 @@
 {
   "name": "redux-toolkit-swagger-gen",
-  "version": "0.1.10",
+  "version": "0.1.12",
   "description": "Redux Toolkit API client generator from Swagger/OpenAPI specifications",
   "main": "dist/src/generate.js",
   "type": "commonjs",
@@ -9,10 +9,12 @@
     "dist",
     "src",
     "bin",
-    "README.md"
+    "README.md",
+    "src/templates",
+    "dist/src/templates"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-templates.js",
     "prepare": "npm run build",
     "generate": "node ./bin/swagger-gen.js",
     "swagger-gen": "node ./bin/swagger-gen.js",
@@ -22,11 +24,12 @@
     "start": "node dist/generate.js"
   },
   "bin": {
-    "swagger-gen": "./bin/swagger-gen.js"
+    "swagger-gen": "bin/swagger-gen.js"
   },
   "peerDependencies": {
     "react": ">=16.8.0"
-  },  "dependencies": {
+  },
+  "dependencies": {
     "@apidevtools/json-schema-ref-parser": "github:apidevtools/json-schema-ref-parser",
     "@reduxjs/toolkit": "^2.4.0",
     "@types/react": "^19.0.10",
@@ -41,7 +44,7 @@
     "@types/node": "^16.11.7",
     "@types/yargs": "^17.0.32",
     "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.9.5"
   },
   "keywords": [
     "redux",
@@ -57,5 +60,13 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delletran/redux-toolkit-swagger-gen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/delletran/redux-toolkit-swagger-gen/issues"
+  },
+  "homepage": "https://github.com/delletran/redux-toolkit-swagger-gen#readme"
 }

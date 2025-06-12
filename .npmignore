@@ -12,3 +12,11 @@ tmp
 temp
 temp/*
 .temp
+
+# Ensure templates are included
+!src/templates/**
+!dist/src/templates/**
+
+# Test files
+src/test/
+src/api*/

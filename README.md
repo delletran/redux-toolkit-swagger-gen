@@ -8,6 +8,8 @@ Generate Redux Toolkit API clients from Swagger/OpenAPI specifications.
 - Creates Redux Toolkit slices and API services
 - Generates API client with full TypeScript support
 - Supports both local and remote Swagger files
+- **Supports OpenAPI 3.1.0 format**
+- **Generates Redux hooks and store with persistence**
 - Built-in prettier formatting
 - Customizable output structure
 

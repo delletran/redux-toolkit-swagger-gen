@@ -11,6 +11,11 @@ import { IList } from '../../redux/types';
 import { {{interface}} } from '../../models/{{modelName}}';
 {{/modelName}}
 {{/uniqueImports}}
+{{#uniqueParamImports}}
+{{#modelName}}
+import { {{interface}} } from '../../models/{{modelName}}';
+{{/modelName}}
+{{/uniqueParamImports}}
 
 
 export const {{sliceName}} = createApi({
@@ -18,8 +23,7 @@ export const {{sliceName}} = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
   tagTypes: Object.values(TAGS),
   endpoints: (builder) => ({
-  {{#endpoints}}
-    {{name}}: builder.{{method}}<{{#isListEndpoint}}IList<{{interface}}>{{/isListEndpoint}}{{^isListEndpoint}}{{interface}}{{/isListEndpoint}}, {{{types}}}>({
+  {{#endpoints}}    {{name}}: builder.{{method}}<{{#isListEndpoint}}IList<{{interface}}>{{/isListEndpoint}}{{^isListEndpoint}}{{interface}}{{/isListEndpoint}}, {{#requestBodyType}}{{requestBodyType}}{{/requestBodyType}}{{^requestBodyType}}{{{types}}}{{/requestBodyType}}>({
       {{^isMutation}}{{#isListEndpoint}}
       query: ({{{params}}}) => {
         const qs = toQueryString({{{params}}})
@@ -36,11 +40,13 @@ export const {{sliceName}} = createApi({
     }),
     {{/isListEndpoint}}
     {{/isMutation}}
-    {{#isMutation}}
-      query: ({{#params}}{{params}}{{/params}}) => ({
+    {{#isMutation}}      query: (body) => ({
         url: `{{{path}}}`,
-        method: '{{httpMethod}}',{{#body}}
-        body: {{body}},{{/body}}
+        method: '{{httpMethod}}',
+        body,
+        headers: {
+          'Content-Type': '{{{contentType}}}',
+        },
       }),
       transformErrorResponse: transformErrorResponse,
       invalidatesTags: [TAGS.{{tag}}],

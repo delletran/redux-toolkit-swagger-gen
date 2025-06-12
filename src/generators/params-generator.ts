@@ -3,7 +3,7 @@ import * as path from 'path';
 import Mustache from 'mustache';
 import { toPascalCase } from '../utils/formater';
 import { _parsePathParamType, _parseQueryParamType } from '../utils/params';
-import { fsRead } from '../utils/helpers';
+import { loadTemplate } from '../utils/template-loader';
 
 interface IPaths {
   [key: string]: {
@@ -17,7 +17,7 @@ interface GroupedParams {
   };
 }
 
-const paramsTemplate = fsRead('../templates/paramsTemplate.mustache');
+const paramsTemplate = loadTemplate('paramsTemplate.mustache');
 
 export class ParamsGenerator {
   private readonly outputDir: string;

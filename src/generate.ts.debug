@@ -1,0 +1,9 @@
+// Add this debug code before the "Generate service and thunk files" section in generateServices
+      
+      console.log("===== DEBUG: MAIN ROUTES =====");
+      for (const [route, methods] of Object.entries(mainRoutes)) {
+        console.log(`Route: ${route}`);
+        console.log(`Methods:`, Object.keys(methods));
+      }
+      console.log("========================");
+      

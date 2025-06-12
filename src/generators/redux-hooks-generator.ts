@@ -1,16 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 import Mustache from "mustache";
+import { loadTemplate } from "../utils/template-loader";
 
-const hooksTemplate = fs.readFileSync(
-  path.resolve(__dirname, "../templates/hooksTemplate.mustache"),
-  "utf-8"
-);
-
-const storeTemplate = fs.readFileSync(
-  path.resolve(__dirname, "../templates/storeTemplate.mustache"),
-  "utf-8"
-);
+const hooksTemplate = loadTemplate("hooksTemplate.mustache");
+const storeTemplate = loadTemplate("storeTemplate.mustache");
 
 export const generateReduxHooks = (outputDir: string): void => {
   const reduxDir = path.resolve(outputDir, "redux");

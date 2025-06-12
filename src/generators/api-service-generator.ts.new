@@ -43,15 +43,14 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
           'application/json';
       }
       
-      // Fix HTML entities in content type (prevent & and / from being encoded)
-      ep.contentType = ep.contentType.replace(/&/g, '&amp;').replace(/\//g, '/');
-      
       // Set correct request body type
       if (ep.requestBodyModelName) {
         ep.requestBodyType = `I${ep.requestBodyModelName}Serializer`;
       } else if (ep.modelName) {
         ep.requestBodyType = `I${ep.modelName}Serializer`;
       }
+      
+      console.log(`Mutation endpoint ${ep.path}: using content type ${ep.contentType} and request body type ${ep.requestBodyType || 'none'}`);
     }
   });
   
