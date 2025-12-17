@@ -1,15 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit/react'
 {{#uniqueImports}}
-import { {{interface}} } from '../models/{{modelName}}'
+import { {{interface}} } from '../../models/{{modelName}}'
 {{/uniqueImports}}
-import { REDUX } from '../redux/constants'
+import { REDUX } from '../../redux/constants'
 import {
   clearFormErrorAction,
   editFormErrorAction,
   processFormAction,
   setFormAction,
   setFormErrorAction
-} from '../redux/actions'
+} from '../../redux/actions'
 
 export type I{{sliceNamePascalCase}}SliceState = IReduxFormState<{{interfaceName}}>
 
