@@ -1,15 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
-  token: string | null;
-  role: string | null;
-  branch_id: number | null;
+  access_token: string | null;
+  refresh_token: string | null;
 }
 
 const initialState: AuthState = {
-  token: null,
-  role: null,
-  branch_id: null,
+  access_token: null,
+  refresh_token: null,
 };
 
 const authSlice = createSlice({
@@ -17,14 +15,12 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action: PayloadAction<AuthState>) => {
-      state.token = action.payload.token;
-      state.role = action.payload.role;
-      state.branch_id = action.payload.branch_id;
+      state.access_token = action.payload.access_token;
+      state.refresh_token = action.payload.refresh_token;
     },
     logout: (state) => {
-      state.token = null;
-      state.role = null;
-      state.branch_id = null;
+      state.access_token = null;
+      state.refresh_token = null;
     },
   },
 });

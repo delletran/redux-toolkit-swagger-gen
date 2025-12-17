@@ -24,9 +24,9 @@ export const {{sliceName}} = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: API_CONFIG.BASE_URL,
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth?.token;
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
+      const access_token = (getState() as RootState).auth?.access_token;
+      if (access_token) {
+        headers.set('Authorization', `Bearer ${access_token}`);
       }
       return headers;
     },

@@ -317,10 +317,10 @@ const main = async () => {
       path.resolve(__dirname, "../src/redux/slices/authSlice.ts"),
       path.join(slicesDir, "authSlice.ts")
     )
-    fs.copyFileSync(
-      path.resolve(__dirname, "../src/redux/slices/branchStateSlice.ts"),
-      path.join(slicesDir, "branchStateSlice.ts")
-    )
+    // fs.copyFileSync(
+    //   path.resolve(__dirname, "../src/redux/slices/branchStateSlice.ts"),
+    //   path.join(slicesDir, "branchStateSlice.ts")
+    // )
 
     fs.copyFileSync(
       path.resolve(__dirname, "../src/schema/api.ts"),

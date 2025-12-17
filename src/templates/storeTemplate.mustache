@@ -8,7 +8,7 @@ import { {{name}} } from '../services/{{path}}/{{name}}'
 import {{thunkName}} from '../thunks/{{path}}/{{sanitizedPath}}.thunk'
 {{/thunks}}
 import authReducer from '../slices/authSlice'
-import branchStateReducer from '../slices/branchStateSlice'
+// import branchStateReducer from '../slices/branchStateSlice'
 
 // Create a no-op storage for server-side rendering
 const createNoopStorage = () => {
@@ -39,7 +39,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  branchState: branchStateReducer,
+  // branchState: branchStateReducer,
   {{#services}}
   [{{name}}.reducerPath]: {{name}}.reducer,
   {{/services}}
