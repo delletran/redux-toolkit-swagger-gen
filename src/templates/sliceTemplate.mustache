@@ -16,7 +16,7 @@ export type I{{sliceNamePascalCase}}SliceState = IReduxFormState<{{interfaceName
 export const INITIAL_STATE: I{{sliceNamePascalCase}}SliceState = {}
 
 export const {{sliceNameCamelCase}}Slice = createSlice({
-  name: REDUX.SLICE.{{formSliceName}},
+  name: '{{sliceNameKebabCase}}-slice',
   initialState: INITIAL_STATE,
   reducers: {
     set{{sliceNamePascalCase}}Form: setFormAction<I{{sliceNamePascalCase}}SliceState>,

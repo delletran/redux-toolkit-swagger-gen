@@ -17,10 +17,21 @@ export const thunkGenerator = (path: string, methods: Record<string, ReduxApiEnd
     ).values()
   );
 
+  // Extract unique param imports
+  const uniqueParamImports = Array.from(
+    new Set(
+      endpoints
+        .filter(ep => ep.paramInterface) // Only include endpoints with param interfaces
+        .map(ep => ep.paramInterface)
+    )
+  ).map(paramInterface => ({ paramInterface }));
+
   const modelData = {
     sliceName: toCamelCase(path),
     slicePath: `${path}-thunk`,
+    paramPath: path, // Original path for param imports
     uniqueImports,
+    uniqueParamImports,
     endpoints,
   };
 

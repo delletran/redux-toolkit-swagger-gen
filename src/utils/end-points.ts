@@ -99,6 +99,20 @@ const getThunkEndpoint = (
   details: any
 ): any => {
   const endpoint = new Endpoint("thunk", path, httpMethod, details)
+  const hasMultipleParams = endpoint.joinedParamsLength > 1
+  
+  // Generate param interface name if there are parameters
+  // Use same logic as params-generator.ts
+  let paramInterface = null;
+  if (endpoint.params && endpoint.joinedParamsLength > 0) {
+    const routeIdentifier = details.url
+      .split("/")
+      .slice(1)
+      .map((part: string) => part.replace(/{|}/g, ""))
+      .join("_");
+    paramInterface = `I${toPascalCase(routeIdentifier)}Params`;
+  }
+  
   return {
     operationId: endpoint.name,
     url: endpoint.path,
@@ -115,6 +129,10 @@ const getThunkEndpoint = (
     paramsTyped: endpoint.paramsTyped,
     params: endpoint.params,
     types: endpoint.types,
+    paramInterface: paramInterface,
+    // Add flags for template conditional logic
+    hasMultipleParams: hasMultipleParams,
+    hasSingleParam: !hasMultipleParams && endpoint.params !== null,
   }
 }
 
@@ -181,8 +199,15 @@ class Endpoint {
 
     this._queryParams = getQueryParams(details.methodObj.parameters)
     this._bodyParams = getBodyParams(details.methodObj.parameters)
-    this._pathParams = getPathParams(details.parameters)
-    this._pathParamsTyped = getPathParamsTyped(details.parameters, httpMethod)
+    // Path params should come from methodObj.parameters for OpenAPI 3.0
+    const methodPathParams = getPathParams(details.methodObj.parameters as any[])
+    const pathLevelParams = getPathParams(details.parameters)
+    this._pathParams = methodPathParams.length > 0 ? methodPathParams : pathLevelParams
+    
+    const methodPathParamsTyped = getPathParamsTyped(details.methodObj.parameters as any[], httpMethod)
+    const pathLevelParamsTyped = getPathParamsTyped(details.parameters, httpMethod)
+    this._pathParamsTyped = methodPathParamsTyped.length > 0 ? methodPathParamsTyped : pathLevelParamsTyped
+    
     this._paramsTyped = getParamsTyped(details.methodObj.parameters)
 
     this._joinedParams = this._pathParams
@@ -259,12 +284,21 @@ class Endpoint {
     return this._isResponseArray
   }
 
+  get joinedParamsLength(): number {
+    return this._joinedParams.length
+  }
+
   get params(): string | null {
+    // For single parameters, return just the name to match with types
+    // For multiple parameters, return destructured object
     let param: string | null =
       this._joinedParams.length > 1
-        ? `{ ${this._joinedParams.join(", ")}}`
-        : this._joinedParams[0]
-    if (param in ["{  }", "", null])
+        ? `{ ${this._joinedParams.join(", ")} }`
+        : this._joinedParams.length === 1
+        ? this._joinedParams[0]
+        : null
+    
+    if (param && ["{  }", ""].includes(param))
       param = this._isDeleteEndpoint ? "data" : null
 
     return param
@@ -303,11 +337,13 @@ class Endpoint {
   }
 
   get types(): string {
+    // For thunks, if we have only one param type, return it directly without wrapping
+    // This allows for cleaner function signatures like (id: string) instead of ({id}: {id: string})
+    if (this._joinedParamsTyped.length === 1) {
+      return this._joinedParamsTyped[0];
+    }
     return !this._isListEndpoint || this._joinedParamsTyped.length > 1
       ? `{ ${this._joinedParamsTyped.join(", ")} }`
       : "IFilters"
-    // : this._INameParam
-    //   ? `Record<string, unknown> & ${this._INameParam}`
-    //   : 'Record<string, unknown>';
   }
 }

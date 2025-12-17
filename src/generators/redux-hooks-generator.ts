@@ -28,7 +28,7 @@ export const generateReduxStore = (
 
   // Process services to get a list of all generated services
   const serviceList: { name: string; path: string }[] = [];
-  const thunkList: { thunkName: string; path: string }[] = [];
+  const thunkList: { thunkName: string; path: string; sanitizedPath: string }[] = [];
 
   Object.keys(services).forEach((routePath) => {
     const serviceName = routePath.replace(/\W/g, "_");
@@ -42,6 +42,7 @@ export const generateReduxStore = (
       thunkList.push({
         thunkName: `${serviceName}Thunks`,
         path: routePath,
+        sanitizedPath: serviceName, // Add sanitized version for object property names
       });
     }
   });

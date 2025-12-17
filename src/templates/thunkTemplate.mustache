@@ -8,6 +8,9 @@ import { toQueryString } from '../../redux/query';
 import { {{interface}} } from '../../models/{{modelName}}';
 {{/modelName}}
 {{/uniqueImports}}
+{{#uniqueParamImports}}
+import { {{paramInterface}} } from '../../params/{{paramPath}}.params';
+{{/uniqueParamImports}}
 
 interface {{sliceName}}State {
   entities: Record<string, any>[];
@@ -24,27 +27,20 @@ const initialState: {{sliceName}}State = {
 {{#endpoints}}
 export const {{operationId}} = createAsyncThunk(
   '{{slicePath}}/{{operationId}}',
-  
-  // async ({{#params}}{{#types}}{{#bodyParam}}params: {{types}}{{/bodyParam}}{{^bodyParam}}{{params}}: {{types}}{{/bodyParam}}{{/types}}{{/params}}{{^params}}_{{/params}}, { rejectWithValue }) => {
-  async ({{#params}}{{params}}{{#types}}: {{types}}{{/types}}{{/params}}{{^params}}_{{/params}}, { rejectWithValue }) => {
-    try {      let url = `{{{url}}}`;
-      {{#params}}
+  async ({{#paramInterface}}{{#hasSingleParam}}{{params}}{{/hasSingleParam}}{{#hasMultipleParams}}{{params}}{{/hasMultipleParams}}: {{paramInterface}}{{/paramInterface}}{{^paramInterface}}{{#hasSingleParam}}{{types}}{{/hasSingleParam}}{{#hasMultipleParams}}{{params}}: {{types}}{{/hasMultipleParams}}{{^params}}_{{/params}}{{/paramInterface}}, { rejectWithValue }) => {
+    try {
+      let url = `{{{url}}}`;
       {{#queryParams}}
       const qs = toQueryString({{queryParams}});
       if (qs) url += `?${qs}`;
       {{/queryParams}}
-      {{^queryParams}}
-      const qs = toQueryString({{#bodyParam}}params{{/bodyParam}}{{^bodyParam}}{{params}}{{/bodyParam}});
-      if (qs) url += `?${qs}`;
-      {{/queryParams}}
-      {{/params}}
       
       const response = await fetch(url, {
         method: '{{method}}',
         headers: {
           'Content-Type': 'application/json',
         },{{#bodyParam}}
-        body: JSON.stringify({{#params}}params{{/params}}),{{/bodyParam}}
+        body: JSON.stringify({{bodyParam}}),{{/bodyParam}}
       });
 
       if (!response.ok) {

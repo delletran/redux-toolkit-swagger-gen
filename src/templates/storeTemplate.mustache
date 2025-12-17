@@ -5,7 +5,7 @@ import { persistReducer, persistStore } from 'redux-persist'
 import { {{name}} } from '../services/{{path}}/{{name}}'
 {{/services}}
 {{#thunks}}
-import {{thunkName}} from '../thunks/{{path}}/{{path}}.thunk'
+import {{thunkName}} from '../thunks/{{path}}/{{sanitizedPath}}.thunk'
 {{/thunks}}
 import authReducer from '../slices/authSlice'
 import branchStateReducer from '../slices/branchStateSlice'
@@ -44,14 +44,14 @@ const rootReducer = combineReducers({
   [{{name}}.reducerPath]: {{name}}.reducer,
   {{/services}}
   {{#thunks}}
-  {{path}}: {{thunkName}},
+  {{sanitizedPath}}Thunks: {{thunkName}},
   {{/thunks}}
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 export const store = configureStore({
-  reducer: persistedReducer as typeof rootReducer,
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     (getDefaultMiddleware({
       serializableCheck: {

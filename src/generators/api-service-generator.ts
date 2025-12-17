@@ -265,7 +265,7 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
   });
 
   const modelData = {
-    sliceName: toCamelCase(path),
+    sliceName: path.replace(/-/g, '_'),
     slicePath: `"${path}-api"`,
     uniqueImports: Array.from(allImports.values()),
     uniqueParamImports: Array.from(paramImports.values()),

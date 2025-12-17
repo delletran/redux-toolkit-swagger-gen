@@ -12,6 +12,10 @@ const toPascalCase = (str: string): string => {
   )
 }
 
+const toKebabCase = (str: string): string => {
+  return str.replace(/[_\s]+/g, '-').replace(/([A-Z])/g, (g) => '-' + g.toLowerCase()).replace(/^-/, '')
+}
+
 const generateSliceFileContent = (
   sliceName: string,
   schemaName: string,
@@ -25,6 +29,7 @@ const generateSliceFileContent = (
     formSliceName: sliceName.toUpperCase(),
     sliceNameCamelCase: sliceName.charAt(0).toLowerCase() + sliceName.slice(1),
     sliceNamePascalCase: toPascalCase(sliceName),
+    sliceNameKebabCase: toKebabCase(sliceName),
     uniqueImports,
   })
 }

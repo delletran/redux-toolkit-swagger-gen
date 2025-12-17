@@ -51,7 +51,9 @@ export const getParamsTyped = (
   parameters: (IBodyParameter | IQueryParameter)[] | undefined,
 ): string[] => {
   if (!parameters || !Array.isArray(parameters)) return [];
+  // Filter out path parameters to avoid duplication - only include query and body params
   const params = parameters
+    .filter((param) => param.in !== 'path')
     .map((param) => {
       const paramType = _parseQueryParamType(param as IQueryParameter);
       return `${param.name}${param.required ? '' : '?'}: ${paramType}`;
@@ -87,8 +89,9 @@ export const _parsePathParamType = (param: IEndpointParameter): string => {
 };
 
 export const _parseQueryParamType = (param: IQueryParameter): string => {
+  // For enum/complex types (schema refs), use string since they'll be serialized anyway
   if (param.schema?.$ref) {
-    return `I${param.schema.$ref.split('/').pop()}Serializer`;
+    return 'any';  // Changed from complex type lookup to 'any' for simplicity
   }
   
   // OpenAPI 3.x: type is in schema.type
@@ -101,7 +104,7 @@ export const _parseQueryParamType = (param: IQueryParameter): string => {
     // First check for $ref (schema references)
     const refType = schema.anyOf.find((t: any) => t.$ref);
     if (refType) {
-      return `I${refType.$ref.split('/').pop()}Serializer`;
+      return 'any';  // Changed from complex type lookup to 'any'
     }
     
     // Then find the first non-null type
