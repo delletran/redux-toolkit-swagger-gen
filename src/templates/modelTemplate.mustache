@@ -1,4 +1,7 @@
 import { z } from 'zod';
+{{#hasRegexImport}}
+import { REGEX_DATE, REGEX_DECIMAL_11_4, REGEX_DECIMAL_6_4, REGEX_DECIMAL_FLEXIBLE } from '../constants/regex-constants';
+{{/hasRegexImport}}
 {{#nestedModels}}
 import { {{.}} } from './{{.}}';
 {{/nestedModels}}

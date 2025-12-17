@@ -1,21 +1,45 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query/react'
 import { persistReducer, persistStore } from 'redux-persist'
-import storageSession from 'redux-persist/lib/storage/session'
 {{#services}}
 import { {{name}} } from '../services/{{path}}/{{name}}'
 {{/services}}
 {{#thunks}}
 import {{thunkName}} from '../thunks/{{path}}/{{path}}.thunk'
 {{/thunks}}
+import authReducer from '../slices/authSlice'
+import branchStateReducer from '../slices/branchStateSlice'
+
+// Create a no-op storage for server-side rendering
+const createNoopStorage = () => {
+  return {
+    getItem(_key: string) {
+      return Promise.resolve(null)
+    },
+    setItem(_key: string, _value: any) {
+      return Promise.resolve(_value)
+    },
+    removeItem(_key: string) {
+      return Promise.resolve()
+    },
+  }
+}
+
+// Use session storage on client, noop storage on server
+const storage =
+  typeof window !== 'undefined'
+    ? require('redux-persist/lib/storage/session').default
+    : createNoopStorage()
 
 const persistConfig = {
   key: 'root',
-  storage: storageSession,
-  whitelist: []
+  storage,
+  whitelist: ['auth', 'branchState']
 }
 
 const rootReducer = combineReducers({
+  auth: authReducer,
+  branchState: branchStateReducer,
   {{#services}}
   [{{name}}.reducerPath]: {{name}}.reducer,
   {{/services}}
@@ -27,9 +51,9 @@ const rootReducer = combineReducers({
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: persistedReducer as typeof rootReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
+    (getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [
           'persist/PERSIST',
@@ -40,7 +64,7 @@ export const store = configureStore({
           'persist/REGISTER'
         ]
       }
-    }).concat([
+    }) as any).concat([
       {{#services}}
       {{name}}.middleware,
       {{/services}}

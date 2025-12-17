@@ -16,20 +16,21 @@ interface IEndpointParameter {
 interface IBodyParameter {
   name: string | "data";
   in: string | "body";
-  required: boolean;
-  schema: {
+  required?: boolean;
+  type?: string;
+  schema?: {
     '$ref': string;
   };
 }
 // #endregion
 
-// #region BodyParameter
+// #region QueryParameter
 interface IQueryParameter {
   name: string | "search";
   in: string | "query";
-  description: string;
-  required: boolean;
-  schema: {
+  description?: string;
+  required?: boolean;
+  schema?: {
     '$ref': string;
   };
   type?: string;

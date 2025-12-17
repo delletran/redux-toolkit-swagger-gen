@@ -57,15 +57,6 @@ export type IApiErrorResponse<T> = {
 
 export type IApiResponse<T> = IApiSuccessResponse<T> | IApiErrorResponse<T>
 
-export type IList<T> = {
-  count: number
-  results: T[]
-  total_count: number | null
-  total_pages: number | null
-  current_page: number | null
-  current_count: number | null
-}
-
 export type ID = number | string
 
 export type IApiPostProps<T = Record<string, unknown>> = {

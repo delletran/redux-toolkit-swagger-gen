@@ -3,5 +3,9 @@ export const toCamelCase = (str: string): string => {
 };
 
 export const toPascalCase = (str: string): string => {
-  return str.replace(/(^\w|_\w|-\w)/g, (g) => g.replace(/[_-]/, '').toUpperCase());
+  // Remove all underscores and hyphens, converting to PascalCase
+  // First remove trailing underscores/hyphens, then convert
+  return str
+    .replace(/[_-]+$/g, '') // Remove trailing underscores/hyphens
+    .replace(/(^\w|_\w|-\w)/g, (g) => g.replace(/[_-]/, '').toUpperCase());
 };

@@ -2,10 +2,19 @@ import * as fs from "fs"
 import * as path from "path"
 import Mustache from "mustache"
 import { loadTemplate } from "../utils/template-loader"
+import { toPascalCase } from "../utils/formater"
 
 const modelTemplate = loadTemplate("modelTemplate.mustache")
 
-const getZodType = (property: any, nestedModels: Set<string>): string => {
+// Common regex patterns mapped to constant names
+const REGEX_PATTERN_MAP: Record<string, string> = {
+  '^\\d{4}-\\d{2}-\\d{2}$': 'REGEX_DATE',
+  '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,16}0*$)\\d{0,11}\\.\\d{0,4}0*$)': 'REGEX_DECIMAL_11_4',
+  '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)': 'REGEX_DECIMAL_6_4',
+  '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$': 'REGEX_DECIMAL_FLEXIBLE'
+}
+
+const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<string>): string => {
   if (!property) return "z.any()"
 
   // Handle $ref references
@@ -18,7 +27,7 @@ const getZodType = (property: any, nestedModels: Set<string>): string => {
   // Handle OpenAPI 3.x anyOf and oneOf
   if (property.anyOf || property.oneOf) {
     const unionTypes = (property.anyOf || property.oneOf).map((subSchema: any) => 
-      getZodType(subSchema, nestedModels)
+      getZodType(subSchema, nestedModels, usedPatterns)
     );
     return `z.union([${unionTypes.join(', ')}])`
   }
@@ -29,8 +38,15 @@ const getZodType = (property: any, nestedModels: Set<string>): string => {
   switch (baseType) {
     case "string":
       zodType = "z.string()"
-      if (property.format === "date")
-        zodType += ".regex(/^\\d{4}-\\d{2}-\\d{2}$/)"
+      if (property.format === "date") {
+        const constName = REGEX_PATTERN_MAP['^\\d{4}-\\d{2}-\\d{2}$']
+        if (constName) {
+          usedPatterns.add(constName)
+          zodType += `.regex(${constName})`
+        } else {
+          zodType += ".regex(/^\\d{4}-\\d{2}-\\d{2}$/)"
+        }
+      }
       if (property.format === "date-time") 
         zodType += ".datetime()"
       if (property.format === "uri") zodType += ".url()"
@@ -41,7 +57,15 @@ const getZodType = (property: any, nestedModels: Set<string>): string => {
           .join(", ")}])`
       if (property.maxLength) zodType += `.max(${property.maxLength})`
       if (property.minLength) zodType += `.min(${property.minLength})`
-      if (property.pattern) zodType += `.regex(/${property.pattern}/)`
+      if (property.pattern) {
+        const constName = REGEX_PATTERN_MAP[property.pattern]
+        if (constName) {
+          usedPatterns.add(constName)
+          zodType += `.regex(${constName})`
+        } else {
+          zodType += `.regex(/${property.pattern}/)`
+        }
+      }
       break
     case "integer":
     case "number":
@@ -53,7 +77,7 @@ const getZodType = (property: any, nestedModels: Set<string>): string => {
       zodType = "z.boolean()"
       break
     case "array":
-      const itemType = getZodType(property.items, nestedModels)
+      const itemType = getZodType(property.items, nestedModels, usedPatterns)
       zodType = `z.array(${itemType})`
       break
     case "object":
@@ -61,7 +85,7 @@ const getZodType = (property: any, nestedModels: Set<string>): string => {
         // Handle nested objects
         const nestedProps = Object.entries(property.properties).map(
           ([propName, propSchema]: [string, any]) => {
-            const propType = getZodType(propSchema, nestedModels);
+            const propType = getZodType(propSchema, nestedModels, usedPatterns);
             const isRequired = Array.isArray(property.required) && property.required.includes(propName);
             return `${propName}: ${propType}${isRequired ? '' : '.optional()'}`;
           }
@@ -83,13 +107,14 @@ const getZodType = (property: any, nestedModels: Set<string>): string => {
 const generateProperties = (
   properties: any = {},
   required: string[] = [],
-  nestedModels: Set<string>
+  nestedModels: Set<string>,
+  usedPatterns: Set<string>
 ): any[] => {
   if (!properties) return []
 
   return Object.entries(properties).map(([name, prop]: [string, any]) => ({
     name,
-    zodType: getZodType(prop, nestedModels),
+    zodType: getZodType(prop, nestedModels, usedPatterns),
     isRef: prop && prop.$ref ? true : false,
     isOptional:
       !prop || prop["x-nullable"] === true || !required.includes(name),
@@ -104,20 +129,24 @@ const generateModelFileContent = (modelName: string, schema: any): string => {
       modelName,
       properties: [],
       nestedModels: [],
+      hasRegexImport: false,
     })
   }
 
   const nestedModels = new Set<string>()
+  const usedPatterns = new Set<string>()
   const properties = generateProperties(
     schema.properties,
     Array.isArray(schema.required) ? schema.required : [],
-    nestedModels
+    nestedModels,
+    usedPatterns
   )
 
   return Mustache.render(modelTemplate, {
     modelName,
     properties,
     nestedModels: Array.from(nestedModels),
+    hasRegexImport: usedPatterns.size > 0,
   })
 }
 
@@ -135,12 +164,42 @@ export const generateModels = async (
     fs.mkdirSync(modelsDir, { recursive: true })
   }
 
+  // Track all used patterns across all models with their actual regex patterns
+  const allUsedPatterns = new Map<string, string>()
+
+  // Generate models
   for (const [name, schema] of Object.entries(definitions)) {
     if (!schema) {
       console.warn(`Warning: Empty schema for ${name}`)
       continue
     }
-    const modelContent = generateModelFileContent(name, schema)
-    fs.writeFileSync(path.join(modelsDir, `${name}.ts`), modelContent)
+    const cleanName = toPascalCase(name)
+    const modelContent = generateModelFileContent(cleanName, schema)
+    fs.writeFileSync(path.join(modelsDir, `${cleanName}.ts`), modelContent)
+    
+    // Extract patterns used in this model and find their regex
+    const matches = modelContent.matchAll(/REGEX_[A-Z_0-9]+/g)
+    for (const match of matches) {
+      const constName = match[0]
+      const pattern = Object.entries(REGEX_PATTERN_MAP).find(([_, name]) => name === constName)?.[0]
+      if (pattern) {
+        allUsedPatterns.set(constName, pattern)
+      }
+    }
+  }
+
+  // Generate regex constants file if any patterns were used
+  if (allUsedPatterns.size > 0) {
+    const constantsDir = path.resolve(outputDir, "constants")
+    if (!fs.existsSync(constantsDir)) {
+      fs.mkdirSync(constantsDir, { recursive: true })
+    }
+    
+    const regexConstantsContent = `// Auto-generated regex constants
+${Array.from(allUsedPatterns.entries()).map(([constName, pattern]) => {
+  return `export const ${constName} = /${pattern}/;`
+}).join('\n')}
+`
+    fs.writeFileSync(path.join(constantsDir, 'regex-constants.ts'), regexConstantsContent)
   }
 }

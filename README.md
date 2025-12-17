@@ -24,7 +24,7 @@ npm install redux-toolkit-swagger-gen --save-dev
 ```bash
 # Generate API client
 swagger-gen --url http://your-api/swagger.json --output src/api
-swagger-gen --url http://localhost:8000/openapi.json --output src/api
+swagger-gen --url http://localhost:8000/openapi.json --output src/api --exclude thunks -- clean
 ```
 
 ## CLI Options

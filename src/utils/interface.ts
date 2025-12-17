@@ -1,16 +1,33 @@
 import { ResponseStatus } from './constants';
+import { toPascalCase } from './formater';
 
-export const getNames = (details: ReduxApiEndpointType): { interfaceName: string, modelName: string, paramName: string, requestBodyModelName: string, requestBodyInterfaceName: string } => {
+export const getNames = (details: ReduxApiEndpointType): { 
+  interfaceName: string, 
+  modelName: string, 
+  paramName: string, 
+  requestBodyModelName: string, 
+  requestBodyInterfaceName: string,
+  isRequestBodyArray: boolean,
+  isResponseArray: boolean
+} => {
   const responseStatuses = Object.values(ResponseStatus);
   let ref = '';
   let requestBodyRef = '';
+  let isRequestBodyArray = false;
+  let isResponseArray = false;
   // First check for request body ref in OpenAPI 3.x style
   if (details.methodObj?.requestBody?.content) {
     const contentTypes = Object.keys(details.methodObj.requestBody.content);
     
     for (const contentType of contentTypes) {
       const schema = details.methodObj.requestBody.content[contentType].schema;
-      requestBodyRef = schema?.$ref || '';
+      // Check if schema is an array type with items ref
+      if (schema?.type === 'array' && schema?.items?.$ref) {
+        requestBodyRef = schema.items.$ref;
+        isRequestBodyArray = true;
+      } else {
+        requestBodyRef = schema?.$ref || '';
+      }
       if (requestBodyRef) break;
     }
   }
@@ -40,13 +57,22 @@ export const getNames = (details: ReduxApiEndpointType): { interfaceName: string
     if (!schema) continue;
     
     // Use any to handle different schema formats
-    ref = (schema as any)?.['$ref'] || 
-          (schema as any)?.properties?.results?.items?.$ref || '';
+    // Check if schema is an array type with items ref
+    if ((schema as any)?.type === 'array' && (schema as any)?.items?.$ref) {
+      ref = (schema as any).items.$ref;
+      isResponseArray = true;
+    } else {
+      ref = (schema as any)?.['$ref'] || 
+            (schema as any)?.properties?.results?.items?.$ref || '';
+    }
     if (ref) break;
   }
 
-  const paramModelName = ref?.split('/').pop();
-  const requestBodyModelName = requestBodyRef?.split('/').pop() || '';
+  // const paramModelName = ref ? toPascalCase(ref.split('/').pop() || '') : '';
+  // const requestBodyModelName = requestBodyRef ? toPascalCase(requestBodyRef.split('/').pop() || '') : '';
+  
+  const paramModelName = ref ? toPascalCase(ref.split('/').pop() || '') : '';
+  const requestBodyModelName = requestBodyRef ? toPascalCase(requestBodyRef.split('/').pop() || '') : '';
   
   // If no response ref but have request body ref, use that instead
   const modelName = paramModelName || requestBodyModelName || '';
@@ -54,5 +80,5 @@ export const getNames = (details: ReduxApiEndpointType): { interfaceName: string
   const interfaceName = ref ? `I${paramModelName}Serializer` : (requestBodyModelName ? `I${requestBodyModelName}Serializer` : 'unknown');
   const requestBodyInterfaceName = requestBodyModelName ? `I${requestBodyModelName}Serializer` : interfaceName;  const paramName = ref ? `I${paramModelName}Param` : 'unknown';
 
-  return { interfaceName, modelName, paramName, requestBodyModelName, requestBodyInterfaceName };
+  return { interfaceName, modelName, paramName, requestBodyModelName, requestBodyInterfaceName, isRequestBodyArray, isResponseArray };
 };

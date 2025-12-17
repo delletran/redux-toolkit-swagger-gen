@@ -50,7 +50,7 @@ const getServiceEndpoint = (
     path: endpoint.path,
     httpMethod: endpoint.httpMethod,
     params: endpoint.params,
-    body: endpoint.body,
+    bodyParam: endpoint.body,
     tag: endpoint.tag,
     isMutation: endpoint.isMutation,
     isQuery: endpoint.isQuery,
@@ -62,6 +62,8 @@ const getServiceEndpoint = (
     types: endpoint.types,
     requestBodyModelName: endpoint.requestBodyModelName,
     requestBodyInterfaceName: endpoint.requestBodyInterfaceName,
+    isRequestBodyArray: endpoint.isRequestBodyArray,
+    isResponseArray: endpoint.isResponseArray,
   }
 }
 
@@ -97,12 +99,11 @@ const getThunkEndpoint = (
   details: any
 ): any => {
   const endpoint = new Endpoint("thunk", path, httpMethod, details)
-
   return {
     operationId: endpoint.name,
     url: endpoint.path,
     method: endpoint.httpMethod,
-    parameters: details.methodObj.parameters || [],
+    parameters: details.methodObj?.parameters || [],
     isListEndpoint: endpoint.isListEndpoint,
     sliceName: path.replace(/[^a-zA-Z0-9]/g, ""),
     slicePath: path,
@@ -118,7 +119,7 @@ const getThunkEndpoint = (
 }
 
 class Endpoint {
-  private _endpointType: string
+  private _endpointType: EndpointType
   private _path: string
   private _httpMethod: MethodType
   private _details: ReduxApiEndpointType
@@ -139,6 +140,8 @@ class Endpoint {
   private _joinedParamsTyped: string[]
   private _requestBodyModelName: string = ""
   private _requestBodyInterfaceName: string = ""
+  private _isRequestBodyArray: boolean = false
+  private _isResponseArray: boolean = false
 
   constructor(
     endpointType: EndpointType,
@@ -164,11 +167,16 @@ class Endpoint {
       paramName: iNameParam,
       requestBodyModelName,
       requestBodyInterfaceName,
+      isRequestBodyArray,
+      isResponseArray,
     } = getNames(details)
     this._modelName = paramModelName
     this._interfaceName = paramInterfaceName
     this._INameParam = iNameParam
     this._requestBodyModelName = requestBodyModelName
+    this._requestBodyInterfaceName = requestBodyInterfaceName
+    this._isRequestBodyArray = isRequestBodyArray
+    this._isResponseArray = isResponseArray
     this._requestBodyInterfaceName = requestBodyInterfaceName
 
     this._queryParams = getQueryParams(details.methodObj.parameters)
@@ -241,6 +249,14 @@ class Endpoint {
 
   get requestBodyInterfaceName(): string {
     return this._requestBodyInterfaceName
+  }
+
+  get isRequestBodyArray(): boolean {
+    return this._isRequestBodyArray
+  }
+
+  get isResponseArray(): boolean {
+    return this._isResponseArray
   }
 
   get params(): string | null {

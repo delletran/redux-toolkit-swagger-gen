@@ -61,30 +61,73 @@ export const getParamsTyped = (
 // #endregion
 
 export const _parsePathParamType = (param: IEndpointParameter): string => {
-  let paramType = param.type;
+  // OpenAPI 3.x: type is in schema.type
+  // OpenAPI 2.0: type is directly on param.type
+  let paramType = (param as any).schema?.type || param.type;
+  
   if (paramType === 'integer') {
     paramType = 'number';
   } else if (paramType === 'string') {
     paramType = 'string';
-  } else if (paramType === 'array' && param.items) {
-    paramType = `${param.items.type}[]`;
+  } else if (paramType === 'boolean') {
+    paramType = 'boolean';
+  } else if (paramType === 'array') {
+    const items = (param as any).schema?.items || param.items;
+    if (items) {
+      const itemType = items.type || 'any';
+      paramType = itemType === 'integer' ? 'number[]' : `${itemType}[]`;
+    } else {
+      paramType = 'any[]';
+    }
   } else if (paramType === 'object') {
     paramType = 'Record<string, any>';
   }
-  return paramType;
+  
+  return paramType || 'string'; // Default to string for path params
 };
 
 export const _parseQueryParamType = (param: IQueryParameter): string => {
   if (param.schema?.$ref) {
     return `I${param.schema.$ref.split('/').pop()}Serializer`;
   }
-  let paramType = param.type;
+  
+  // OpenAPI 3.x: type is in schema.type
+  // OpenAPI 2.0: type is directly on param.type
+  const schema = param.schema as any;
+  let paramType = schema?.type || (param as any).type;
+  
+  // Handle anyOf/oneOf schemas (often used for optional types like string | null)
+  if (schema?.anyOf && Array.isArray(schema.anyOf)) {
+    // First check for $ref (schema references)
+    const refType = schema.anyOf.find((t: any) => t.$ref);
+    if (refType) {
+      return `I${refType.$ref.split('/').pop()}Serializer`;
+    }
+    
+    // Then find the first non-null type
+    const nonNullType = schema.anyOf.find((t: any) => t.type && t.type !== 'null');
+    if (nonNullType) {
+      paramType = nonNullType.type;
+    }
+  }
+  
   if (paramType === 'integer') {
     paramType = 'number';
   } else if (paramType === 'string') {
     paramType = 'string';
+  } else if (paramType === 'boolean') {
+    paramType = 'boolean';
   } else if (paramType === 'object') {
     paramType = 'Record<string, any>';
+  } else if (paramType === 'array') {
+    const items = schema?.items || (param as any).items;
+    if (items) {
+      const itemType = items.type || 'any';
+      paramType = itemType === 'integer' ? 'number[]' : `${itemType}[]`;
+    } else {
+      paramType = 'any[]';
+    }
   }
+  
   return paramType || 'unknown';
 };

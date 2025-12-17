@@ -1,6 +1,6 @@
 {
   "name": "redux-toolkit-swagger-gen",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Redux Toolkit API client generator from Swagger/OpenAPI specifications",
   "main": "dist/src/generate.js",
   "type": "commonjs",
@@ -19,6 +19,7 @@
     "generate": "node ./bin/swagger-gen.js",
     "swagger-gen": "node ./bin/swagger-gen.js",
     "swagger-gen:src": "ts-node --files src/generate.ts --url src/test/swagger-files/money-exchange.json --output src/api-money-exchange.json --clean --verbose",
+    "swagger-gen:src2": "ts-node --files src/generate.ts --url src/test/swagger-files/swagger-snippet.json --output src/api-swagger-snippet.json --clean --verbose",
     "swagger-gen:dist": "node ./bin/swagger-gen.js --url src/test/swagger-files/identity.json --output src/api-identity --clean --verbose",
     "dev": "ts-node --files src/generate.ts",
     "start": "node dist/generate.js"

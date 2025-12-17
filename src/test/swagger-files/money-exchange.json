@@ -1,806 +1,2206 @@
 {
-  "openapi": "3.1.0",
-  "info": {
-    "title": "Money Exchange Service",
-    "version": "0.1.0"
-  },
-  "paths": {
-    "/token": {
-      "post": {
-        "tags": ["Authentication"],
-        "summary": "Get Token",
-        "operationId": "get_token_token_post",
-        "requestBody": {
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_get_token_token_post"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Token"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Money Exchange Service",
+        "version": "0.1.0"
     },
-    "/transactions": {
-      "post": {
-        "tags": ["Transactions"],
-        "summary": "Insert Transaction",
-        "operationId": "insert_transaction_transactions_post",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TransactionCreate"
-              }
+    "paths": {
+        "/health": {
+            "get": {
+                "summary": "Health Check",
+                "operationId": "health_check_health_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
             }
-          }
         },
-        "responses": {
-          "200": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransactionPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": ["Transactions"],
-        "summary": "List Transactions",
-        "description": "Gets the list of all Transactions",
-        "operationId": "list_transactions_transactions_get",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
+        "/token": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get Token",
+                "operationId": "get_token_token_post",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_get_token_token_post"
+                            }
+                        }
+                    },
+                    "required": true
                 },
-                {
-                  "type": "null"
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
                 }
-              ],
-              "title": "Limit"
             }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
+        },
+        "/branches": {
+            "get": {
+                "tags": [
+                    "Branches"
+                ],
+                "summary": "List Branches",
+                "description": "Gets the list of all Branches",
+                "operationId": "list_branches_branches_get",
+                "responses": {
+                    "200": {
+                        "description": "List of Branches",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/Branch"
+                                    },
+                                    "type": "array",
+                                    "title": "Response 200 List Branches Branches Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/{branch_id}": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Insert Transaction",
+                "operationId": "insert_transaction_transactions__branch_id__post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "branch_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Branch Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TransactionCreate"
+                            }
+                        }
+                    }
                 },
-                {
-                  "type": "null"
+                "responses": {
+                    "200": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionPublic"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
                 }
-              ],
-              "title": "Offset"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of Transactions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TransactionPublic"
-                  },
-                  "title": "Response 200 List Transactions Transactions Get"
+            },
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "List Transactions",
+                "description": "Gets the list of all Transactions",
+                "operationId": "list_transactions_transactions__branch_id__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "branch_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Branch Id"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Start Date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "End Date"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "asc",
+                                        "desc"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": "asc",
+                            "title": "Ordering"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": 20,
+                            "title": "Limit"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": 1,
+                            "title": "Page"
+                        }
+                    },
+                    {
+                        "name": "transaction_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/TransactionType"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Transaction Type"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of Transactions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse_TransactionPublic_"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
                 }
-              }
             }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "/transactions/{transaction_id}/void": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Void Transaction",
+                "operationId": "void_transaction_transactions__transaction_id__void_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "transaction_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Transaction Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionPublic"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
                 }
-              }
             }
-          }
+        },
+        "/transactions/{branch_id}/calculate": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Calculate Transaction",
+                "operationId": "calculate_transaction_transactions__branch_id__calculate_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "branch_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Branch Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TransactionCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionCalculated"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/capital/{branch_id}": {
+            "get": {
+                "tags": [
+                    "Capital"
+                ],
+                "summary": "Current Capital",
+                "description": "Gets the current capital for a branch",
+                "operationId": "current_capital_capital__branch_id__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "branch_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Branch Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current Capital - either single branch capital or all branches summary",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Capital"
+                                    },
+                                    "title": "Response Current Capital Capital  Branch Id  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/currencies": {
+            "post": {
+                "tags": [
+                    "currencies"
+                ],
+                "summary": "Insert Currency",
+                "operationId": "insert_currency_currencies_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/CurrencyCreate"
+                                },
+                                "title": "Currencies"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CurrencyPublic"
+                                    },
+                                    "title": "Response 200 Insert Currency Currencies Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "currencies"
+                ],
+                "summary": "List Currencies",
+                "description": "Gets the list of all currencies",
+                "operationId": "list_currencies_currencies_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": 20,
+                            "title": "Limit"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": 1,
+                            "title": "Page"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of currencies",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse_CurrencyPublic_"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get My User",
+                "description": "Return the currently authenticated user",
+                "operationId": "get_my_user_users_me_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserPublic"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
+        "/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List Users",
+                "description": "List users (admin only)",
+                "operationId": "list_users_users_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": 20,
+                            "title": "Limit"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": 1,
+                            "title": "Page"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "asc",
+                                        "desc"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": "asc",
+                            "title": "Ordering"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse_UserPublic_"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create User",
+                "description": "Create a user (admin only)",
+                "operationId": "create_user_users_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserPublic"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{username}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get User",
+                "description": "Get a single user (admin or the user themself)",
+                "operationId": "get_user_users__username__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Username"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserPublic"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update User",
+                "description": "Update a user (admin only)",
+                "operationId": "update_user_users__username__patch",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Username"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserPublic"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete User",
+                "description": "Soft delete a user by marking as deleted (admin only)",
+                "operationId": "delete_user_users__username__delete",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Username"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{username}/change-password": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Change Password",
+                "description": "Change user password (user themself or admin)",
+                "operationId": "change_password_users__username__change_password_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Username"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-      }
     },
-    "/transactions/calculate": {
-      "post": {
-        "tags": ["Transactions"],
-        "summary": "Calculate Transaction",
-        "operationId": "calculate_transaction_transactions_calculate_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TransactionCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransactionCalculated"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
-      }
-    },
-    "/currencies": {
-      "post": {
-        "tags": ["currencies"],
-        "summary": "Insert Currency",
-        "operationId": "insert_currency_currencies_post",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CurrencyCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrencyPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": ["currencies"],
-        "summary": "List Currencies",
-        "description": "Gets the list of all currencies",
-        "operationId": "list_currencies_currencies_get",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
+    "components": {
+        "schemas": {
+            "Body_get_token_token_post": {
+                "properties": {
+                    "grant_type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^password$"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Grant Type"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "title": "Password"
+                    },
+                    "scope": {
+                        "type": "string",
+                        "title": "Scope",
+                        "default": ""
+                    },
+                    "client_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Client Id"
+                    },
+                    "client_secret": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "format": "password",
+                        "title": "Client Secret"
+                    }
                 },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Limit"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
+                "type": "object",
+                "required": [
+                    "username",
+                    "password"
+                ],
+                "title": "Body_get_token_token_post"
+            },
+            "Branch": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "hex_color": {
+                        "type": "string",
+                        "title": "Hex Color"
+                    },
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Id"
+                    }
                 },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Offset"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of currencies",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CurrencyPublic"
-                  },
-                  "title": "Response 200 List Currencies Currencies Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Body_get_token_token_post": {
-        "properties": {
-          "grant_type": {
-            "anyOf": [
-              {
+                "type": "object",
+                "required": [
+                    "name",
+                    "hex_color"
+                ],
+                "title": "Branch"
+            },
+            "Capital": {
+                "properties": {
+                    "amount": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,16}0*$)\\d{0,11}\\.\\d{0,4}0*$)"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Amount"
+                    },
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Id"
+                    },
+                    "transaction_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Transaction Id"
+                    },
+                    "branch_id": {
+                        "type": "integer",
+                        "title": "Branch Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "branch_id"
+                ],
+                "title": "Capital"
+            },
+            "CapitalPublic": {
+                "properties": {
+                    "amount": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,16}0*$)\\d{0,11}\\.\\d{0,4}0*$)"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Amount"
+                    }
+                },
+                "type": "object",
+                "title": "CapitalPublic"
+            },
+            "CurrencyCreate": {
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "short_name": {
+                        "type": "string",
+                        "title": "Short Name"
+                    },
+                    "supplier_rate": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)"
+                            }
+                        ],
+                        "title": "Supplier Rate"
+                    },
+                    "buy_rate": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)"
+                            }
+                        ],
+                        "title": "Buy Rate"
+                    },
+                    "sell_rate": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)"
+                            }
+                        ],
+                        "title": "Sell Rate"
+                    },
+                    "buy_locked": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Buy Locked",
+                        "default": false
+                    },
+                    "sell_locked": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Sell Locked",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "short_name"
+                ],
+                "title": "CurrencyCreate"
+            },
+            "CurrencyPublic": {
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "short_name": {
+                        "type": "string",
+                        "title": "Short Name"
+                    },
+                    "supplier_rate": {
+                        "type": "string",
+                        "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)",
+                        "title": "Supplier Rate"
+                    },
+                    "buy_rate": {
+                        "type": "string",
+                        "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)",
+                        "title": "Buy Rate"
+                    },
+                    "sell_rate": {
+                        "type": "string",
+                        "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)",
+                        "title": "Sell Rate"
+                    },
+                    "buy_locked": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Buy Locked",
+                        "default": false
+                    },
+                    "sell_locked": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Sell Locked",
+                        "default": false
+                    },
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "created": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "short_name",
+                    "id",
+                    "created",
+                    "username"
+                ],
+                "title": "CurrencyPublic"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "PaginatedResponse_CurrencyPublic_": {
+                "properties": {
+                    "page": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Page",
+                        "description": "Page Number",
+                        "default": 1
+                    },
+                    "limit": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Limit",
+                        "description": "Limit items per page",
+                        "default": 20
+                    },
+                    "count": {
+                        "type": "integer",
+                        "title": "Count",
+                        "description": "Number of items returned in the response"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/CurrencyPublic"
+                        },
+                        "type": "array",
+                        "title": "Items",
+                        "description": "List of items returned in the response following given criteria"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "count",
+                    "items"
+                ],
+                "title": "PaginatedResponse[CurrencyPublic]"
+            },
+            "PaginatedResponse_TransactionPublic_": {
+                "properties": {
+                    "page": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Page",
+                        "description": "Page Number",
+                        "default": 1
+                    },
+                    "limit": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Limit",
+                        "description": "Limit items per page",
+                        "default": 20
+                    },
+                    "count": {
+                        "type": "integer",
+                        "title": "Count",
+                        "description": "Number of items returned in the response"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/TransactionPublic"
+                        },
+                        "type": "array",
+                        "title": "Items",
+                        "description": "List of items returned in the response following given criteria"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "count",
+                    "items"
+                ],
+                "title": "PaginatedResponse[TransactionPublic]"
+            },
+            "PaginatedResponse_UserPublic_": {
+                "properties": {
+                    "page": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Page",
+                        "description": "Page Number",
+                        "default": 1
+                    },
+                    "limit": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Limit",
+                        "description": "Limit items per page",
+                        "default": 20
+                    },
+                    "count": {
+                        "type": "integer",
+                        "title": "Count",
+                        "description": "Number of items returned in the response"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/UserPublic"
+                        },
+                        "type": "array",
+                        "title": "Items",
+                        "description": "List of items returned in the response following given criteria"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "count",
+                    "items"
+                ],
+                "title": "PaginatedResponse[UserPublic]"
+            },
+            "PasswordChange": {
+                "properties": {
+                    "old_password": {
+                        "type": "string",
+                        "title": "Old Password"
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "title": "New Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "old_password",
+                    "new_password"
+                ],
+                "title": "PasswordChange"
+            },
+            "Token": {
+                "properties": {
+                    "access_token": {
+                        "type": "string",
+                        "title": "Access Token"
+                    },
+                    "token_type": {
+                        "type": "string",
+                        "title": "Token Type"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/UserType"
+                    },
+                    "branch_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Branch Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "access_token",
+                    "token_type",
+                    "role"
+                ],
+                "title": "Token"
+            },
+            "TransactionCalculated": {
+                "properties": {
+                    "remarks": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Remarks"
+                    },
+                    "transaction_type": {
+                        "$ref": "#/components/schemas/TransactionType"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "id_provided": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Id Provided"
+                    },
+                    "address": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Address"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "birthdate": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Birthdate"
+                    },
+                    "contact_number": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Contact Number"
+                    },
+                    "transaction_items": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "$ref": "#/components/schemas/TransactionItemCalculated"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Transaction Items"
+                    },
+                    "total": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Total"
+                    },
+                    "branch_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Branch Id"
+                    },
+                    "capital": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CapitalPublic"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "transaction_type"
+                ],
+                "title": "TransactionCalculated"
+            },
+            "TransactionCreate": {
+                "properties": {
+                    "remarks": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Remarks"
+                    },
+                    "transaction_type": {
+                        "$ref": "#/components/schemas/TransactionType"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "id_provided": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Id Provided"
+                    },
+                    "address": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Address"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "birthdate": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Birthdate"
+                    },
+                    "contact_number": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Contact Number"
+                    },
+                    "transaction_items": {
+                        "items": {
+                            "$ref": "#/components/schemas/TransactionItemCreate"
+                        },
+                        "type": "array",
+                        "title": "Transaction Items"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "transaction_type",
+                    "transaction_items"
+                ],
+                "title": "TransactionCreate"
+            },
+            "TransactionItemCalculated": {
+                "properties": {
+                    "amount": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Amount"
+                    },
+                    "rate_override": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Rate Override"
+                    },
+                    "currency": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CurrencyPublic"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "currency_id": {
+                        "type": "integer",
+                        "title": "Currency Id"
+                    },
+                    "subtotal": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Subtotal"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "currency_id"
+                ],
+                "title": "TransactionItemCalculated"
+            },
+            "TransactionItemCreate": {
+                "properties": {
+                    "amount": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,16}0*$)\\d{0,11}\\.\\d{0,4}0*$)"
+                            }
+                        ],
+                        "title": "Amount"
+                    },
+                    "rate_override": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Rate Override"
+                    },
+                    "currency_id": {
+                        "type": "integer",
+                        "title": "Currency Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "amount",
+                    "currency_id"
+                ],
+                "title": "TransactionItemCreate"
+            },
+            "TransactionItemPublic": {
+                "properties": {
+                    "amount": {
+                        "type": "string",
+                        "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,16}0*$)\\d{0,11}\\.\\d{0,4}0*$)",
+                        "title": "Amount"
+                    },
+                    "rate_override": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Rate Override"
+                    },
+                    "currency_id": {
+                        "type": "integer",
+                        "title": "Currency Id"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "subtotal": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Subtotal"
+                    },
+                    "currency": {
+                        "$ref": "#/components/schemas/CurrencyPublic"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "amount",
+                    "currency_id",
+                    "id",
+                    "subtotal",
+                    "currency"
+                ],
+                "title": "TransactionItemPublic"
+            },
+            "TransactionPublic": {
+                "properties": {
+                    "remarks": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Remarks"
+                    },
+                    "transaction_type": {
+                        "$ref": "#/components/schemas/TransactionType"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "id_provided": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Id Provided"
+                    },
+                    "address": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Address"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "birthdate": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Birthdate"
+                    },
+                    "contact_number": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Contact Number"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "transaction_items": {
+                        "items": {
+                            "$ref": "#/components/schemas/TransactionItemPublic"
+                        },
+                        "type": "array",
+                        "title": "Transaction Items"
+                    },
+                    "created": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created"
+                    },
+                    "total": {
+                        "type": "string",
+                        "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                        "title": "Total"
+                    },
+                    "capital": {
+                        "$ref": "#/components/schemas/CapitalPublic"
+                    },
+                    "branch_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Branch Id"
+                    },
+                    "voided": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Voided",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "transaction_type",
+                    "id",
+                    "transaction_items",
+                    "created",
+                    "total",
+                    "capital"
+                ],
+                "title": "TransactionPublic"
+            },
+            "TransactionType": {
                 "type": "string",
-                "pattern": "^password$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Grant Type"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          },
-          "scope": {
-            "type": "string",
-            "title": "Scope",
-            "default": ""
-          },
-          "client_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Client Id"
-          },
-          "client_secret": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Client Secret"
-          }
-        },
-        "type": "object",
-        "required": ["username", "password"],
-        "title": "Body_get_token_token_post"
-      },
-      "CurrencyCreate": {
-        "properties": {
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "short_name": {
-            "type": "string",
-            "title": "Short Name"
-          },
-          "supplier_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Supplier Rate"
-          },
-          "buy_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Buy Rate"
-          },
-          "sell_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Sell Rate"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          }
-        },
-        "type": "object",
-        "required": ["short_name"],
-        "title": "CurrencyCreate"
-      },
-      "CurrencyPublic": {
-        "properties": {
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "short_name": {
-            "type": "string",
-            "title": "Short Name"
-          },
-          "supplier_rate": {
-            "type": "string",
-            "title": "Supplier Rate"
-          },
-          "buy_rate": {
-            "type": "string",
-            "title": "Buy Rate"
-          },
-          "sell_rate": {
-            "type": "string",
-            "title": "Sell Rate"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created"
-          }
-        },
-        "type": "object",
-        "required": ["short_name", "id", "created"],
-        "title": "CurrencyPublic"
-      },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
+                "enum": [
+                    "BUY",
+                    "SELL",
+                    "ADD_CAPITAL",
+                    "DEDUCT_CAPITAL",
+                    "VOID_BUY",
+                    "VOID_SELL"
+                ],
+                "title": "TransactionType"
             },
-            "type": "array",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
-      },
-      "Token": {
-        "properties": {
-          "access_token": {
-            "type": "string",
-            "title": "Access Token"
-          },
-          "token_type": {
-            "type": "string",
-            "title": "Token Type"
-          },
-          "role": {
-            "$ref": "#/components/schemas/UserType"
-          }
-        },
-        "type": "object",
-        "required": ["access_token", "token_type", "role"],
-        "title": "Token"
-      },
-      "TransactionCalculated": {
-        "properties": {
-          "remarks": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Remarks"
-          },
-          "transaction_type": {
-            "$ref": "#/components/schemas/TransactionType"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "transaction_items": {
-            "items": {
-              "$ref": "#/components/schemas/TransactionItemCalculated"
-            },
-            "type": "array",
-            "title": "Transaction Items"
-          }
-        },
-        "type": "object",
-        "required": ["transaction_type", "transaction_items"],
-        "title": "TransactionCalculated"
-      },
-      "TransactionCreate": {
-        "properties": {
-          "remarks": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Remarks"
-          },
-          "transaction_type": {
-            "$ref": "#/components/schemas/TransactionType"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "transaction_items": {
-            "items": {
-              "$ref": "#/components/schemas/TransactionItemCreate"
-            },
-            "type": "array",
-            "title": "Transaction Items"
-          }
-        },
-        "type": "object",
-        "required": ["transaction_type", "transaction_items"],
-        "title": "TransactionCreate"
-      },
-      "TransactionItemCalculated": {
-        "properties": {
-          "amount": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Amount"
-          },
-          "rate_override": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate Override"
-          },
-          "currency": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/CurrencyPublic"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "currency_id": {
-            "type": "integer",
-            "title": "Currency Id"
-          },
-          "subtotal": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subtotal"
-          }
-        },
-        "type": "object",
-        "required": ["currency_id"],
-        "title": "TransactionItemCalculated"
-      },
-      "TransactionItemCreate": {
-        "properties": {
-          "amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Amount"
-          },
-          "rate_override": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate Override"
-          },
-          "currency_id": {
-            "type": "integer",
-            "title": "Currency Id"
-          }
-        },
-        "type": "object",
-        "required": ["amount", "currency_id"],
-        "title": "TransactionItemCreate"
-      },
-      "TransactionItemPublic": {
-        "properties": {
-          "amount": {
-            "type": "string",
-            "title": "Amount"
-          },
-          "rate_override": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate Override"
-          },
-          "currency_id": {
-            "type": "integer",
-            "title": "Currency Id"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "subtotal": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subtotal"
-          },
-          "currency": {
-            "$ref": "#/components/schemas/CurrencyPublic"
-          }
-        },
-        "type": "object",
-        "required": ["amount", "currency_id", "id", "subtotal", "currency"],
-        "title": "TransactionItemPublic"
-      },
-      "TransactionPublic": {
-        "properties": {
-          "remarks": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Remarks"
-          },
-          "transaction_type": {
-            "$ref": "#/components/schemas/TransactionType"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "transaction_items": {
-            "items": {
-              "$ref": "#/components/schemas/TransactionItemPublic"
-            },
-            "type": "array",
-            "title": "Transaction Items"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created"
-          }
-        },
-        "type": "object",
-        "required": ["transaction_type", "id", "transaction_items", "created"],
-        "title": "TransactionPublic"
-      },
-      "TransactionType": {
-        "type": "string",
-        "enum": ["BUY", "SELL"],
-        "title": "TransactionType"
-      },
-      "UserType": {
-        "type": "string",
-        "enum": ["ADMIN", "TELLER", "ACCOUNTANT"],
-        "title": "UserType"
-      },
-      "ValidationError": {
-        "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
+            "UserCreate": {
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/UserType"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "branch_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Branch Id"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "title": "Is Active",
+                        "default": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    }
                 },
-                {
-                  "type": "integer"
-                }
-              ]
+                "type": "object",
+                "required": [
+                    "username",
+                    "role",
+                    "password"
+                ],
+                "title": "UserCreate"
             },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          }
+            "UserPublic": {
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/UserType"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "branch_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Branch Id"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "title": "Is Active",
+                        "default": true
+                    },
+                    "created_at": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "username",
+                    "role"
+                ],
+                "title": "UserPublic"
+            },
+            "UserType": {
+                "type": "string",
+                "enum": [
+                    "ADMIN",
+                    "TELLER",
+                    "ACCOUNTANT"
+                ],
+                "title": "UserType"
+            },
+            "UserUpdate": {
+                "properties": {
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "role": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/UserType"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "branch_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Branch Id"
+                    },
+                    "is_active": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Is Active"
+                    }
+                },
+                "type": "object",
+                "title": "UserUpdate"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
         },
-        "type": "object",
-        "required": ["loc", "msg", "type"],
-        "title": "ValidationError"
-      }
-    },
-    "securitySchemes": {
-      "OAuth2PasswordBearer": {
-        "type": "oauth2",
-        "flows": {
-          "password": {
-            "scopes": {},
-            "tokenUrl": "token"
-          }
+        "securitySchemes": {
+            "OAuth2PasswordBearer": {
+                "type": "oauth2",
+                "flows": {
+                    "password": {
+                        "scopes": {},
+                        "tokenUrl": "token"
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }

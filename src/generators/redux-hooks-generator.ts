@@ -18,14 +18,15 @@ export const generateReduxHooks = (outputDir: string): void => {
 
 export const generateReduxStore = (
   outputDir: string,
-  services: Record<string, any>
+  services: Record<string, any>,
+  excludeOptions: string[] = []
 ): void => {
   const reduxDir = path.resolve(outputDir, "redux");
   if (!fs.existsSync(reduxDir)) {
     fs.mkdirSync(reduxDir, { recursive: true });
   }
 
-  // Process services to get a list of all generated services and thunks
+  // Process services to get a list of all generated services
   const serviceList: { name: string; path: string }[] = [];
   const thunkList: { thunkName: string; path: string }[] = [];
 
@@ -35,10 +36,14 @@ export const generateReduxStore = (
       name: serviceName,
       path: routePath,
     });
-    thunkList.push({
-      thunkName: `${serviceName}Thunks`,
-      path: routePath,
-    });
+    
+    // Only add thunks if they're not excluded
+    if (!excludeOptions.includes("thunks")) {
+      thunkList.push({
+        thunkName: `${serviceName}Thunks`,
+        path: routePath,
+      });
+    }
   });
 
   const storeContent = Mustache.render(storeTemplate, {

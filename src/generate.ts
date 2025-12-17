@@ -20,6 +20,7 @@ interface Arguments {
   clean: boolean
   skipValidation: boolean
   prettier: boolean
+  exclude: string[]
   [x: string]: unknown
 }
 
@@ -55,12 +56,17 @@ const parseArgs = () => {
       type: "boolean",
       description: "Skip swagger schema validation",
       default: false,
-    })
-    .option("prettier", {
+    })    .option("prettier", {
       alias: "p",
       type: "boolean",
       description: "Format generated code with prettier",
       default: true,
+    })    .option("exclude", {
+      alias: "e",
+      type: "array",
+      description: "Exclude generation types: thunks, slices",
+      default: [],
+      choices: ["thunks", "slices"],
     })
     .check((argv) => {
       if (argv.clean && !argv.output) {
@@ -77,6 +83,9 @@ const parseArgs = () => {
       "Generate from local file"
     )
     .example("$0 --clean --verbose", "Clean output and show detailed logs")
+    .example("$0 --exclude thunks", "Generate without thunks")
+    .example("$0 --exclude slices", "Generate without slices")
+    .example("$0 --exclude thunks slices", "Generate without thunks and slices")
     .help()
     .alias("help", "h").argv as Arguments
 }
@@ -93,22 +102,26 @@ export const schemaDir = path.join(baseOutPath, "schema")
 export const constantsDir = path.join(baseOutPath, "constants")
 
 const main = async () => {
-  try {
-    const log = (message: string) => {
+  try {    const log = (message: string) => {
       if (argv.verbose) {
         console.log(`[swagger-gen] ${message}`)
       }
     }
-
+    
     const ensureDirectories = () => {
-      ;[
+      const dirs = [
         reduxDir,
         sliceDir,
         schemaDir,
-        thunkDir,
         path.join(reduxDir, "helper"),
         constantsDir,
-      ].forEach((dir) => {
+      ]
+        // Only create thunk directory if thunks are not excluded
+      if (!argv.exclude.includes("thunks")) {
+        dirs.push(thunkDir)
+      }
+      
+      dirs.forEach((dir) => {
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir, { recursive: true })
           log(`Created directory: ${dir}`)
@@ -123,13 +136,12 @@ const main = async () => {
           const response = await axios.get(url)
           return response.data
         }
-        return JSON.parse(fs.readFileSync(url, "utf-8"))
-      } catch (error) {
+        return JSON.parse(fs.readFileSync(url, "utf-8"))      } catch (error) {
         console.error(`Failed to fetch swagger from ${url}:`, error)
         process.exit(1)
       }
     }
-
+    
     const generateServices = (
       paths: ExtendedPathType[],
       definitions: DefinitionType,
@@ -178,24 +190,25 @@ const main = async () => {
         }
       }
         // Routes are now properly grouped by main endpoint and HTTP method
-      
-      // Generate service and thunk files
+        // Generate service and thunk files
       for (const [route, methods] of Object.entries(mainRoutes)) {
         const servicesDir = path.join(outputDir, "services", route)
-        const thunksDir = path.join(thunkDir, route)
-
+        
         fs.mkdirSync(servicesDir, { recursive: true })
-        fs.mkdirSync(thunksDir, { recursive: true })
-
-        const service = apiServiceGenerator(route, methods)
-        const thunk = thunkGenerator(route, methods)
-
+          const service = apiServiceGenerator(route, methods)
         const fileName = route.replace(/\W/g, "_") // Simplified filename formatting
         fs.writeFileSync(path.join(servicesDir, `${fileName}.ts`), service)
-        fs.writeFileSync(path.join(thunksDir, `${fileName}.thunk.ts`), thunk)
-
         subFolders.add(servicesDir)
-        subFolders.add(thunksDir)
+        
+        // Only generate thunks if not excluded
+        if (!argv.exclude.includes("thunks")) {
+          const thunksDir = path.join(thunkDir, route)
+          fs.mkdirSync(thunksDir, { recursive: true })
+          
+          const thunk = thunkGenerator(route, methods)
+          fs.writeFileSync(path.join(thunksDir, `${fileName}.thunk.ts`), thunk)
+          subFolders.add(thunksDir)
+        }
       }
 
       // Generate index.ts files if required
@@ -215,11 +228,25 @@ const main = async () => {
       //     );
       //   });
       // }
-      
-      return mainRoutes;
+        return mainRoutes;
     }
 
+    const cleanOutputDirectory = () => {
+      if (argv.clean && fs.existsSync(outputDir)) {
+        log(`Cleaning output directory: ${outputDir}`)
+        try {
+          // Remove the entire output directory and recreate it
+          fs.rmSync(outputDir, { recursive: true, force: true })
+          log(`Successfully cleaned output directory`)
+        } catch (error) {
+          console.error(`Failed to clean output directory: ${error}`)
+          process.exit(1)
+        }
+      }
+    }
+    
     log("Starting API generation...")
+    cleanOutputDirectory()
     ensureDirectories()
 
     const swagger = await fetchSwagger(swaggerPath)
@@ -240,11 +267,13 @@ const main = async () => {
     paramsGenerator.generate()
 
     log("Generating Redux slices...")
-    await generateReduxSlices(definitions, outputDir)
-
-    log("Generating Redux hooks and store...")
+    if (!argv.exclude.includes("slices")) {
+      await generateReduxSlices(definitions, outputDir)
+    } else {
+      log("Skipping Redux slices generation (excluded)")
+    }    log("Generating Redux hooks and store...")
     generateReduxHooks(outputDir)
-    generateReduxStore(outputDir, mainRoutes)
+    generateReduxStore(outputDir, mainRoutes, argv.exclude)
 
     log("Copying dependency files...")
     const reduxGlobalFiles = ["redux.d.ts", "index.d.ts"]
@@ -268,6 +297,30 @@ const main = async () => {
         path.join(reduxDir, file)
       )
     })
+
+    // Copy config directory
+    const configDir = path.join(reduxDir, "config")
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true })
+    }
+    fs.copyFileSync(
+      path.resolve(__dirname, "../src/redux/config/api.ts"),
+      path.join(configDir, "api.ts")
+    )
+
+    // Copy slices directory
+    const slicesDir = path.join(sliceDir, "slices")
+    if (!fs.existsSync(slicesDir)) {
+      fs.mkdirSync(slicesDir, { recursive: true })
+    }
+    fs.copyFileSync(
+      path.resolve(__dirname, "../src/redux/slices/authSlice.ts"),
+      path.join(slicesDir, "authSlice.ts")
+    )
+    fs.copyFileSync(
+      path.resolve(__dirname, "../src/redux/slices/branchStateSlice.ts"),
+      path.join(slicesDir, "branchStateSlice.ts")
+    )
 
     fs.copyFileSync(
       path.resolve(__dirname, "../src/schema/api.ts"),
