@@ -3,14 +3,9 @@ import * as path from "path"
 import Mustache from "mustache"
 
 import { loadTemplate } from "../utils/template-loader"
+import { toPascalCase } from "../utils/formater"
 
 const sliceTemplate = loadTemplate("sliceTemplate.mustache")
-
-const toPascalCase = (str: string): string => {
-  return str.replace(/(^\w|_\w|-\w)/g, (g) =>
-    g.replace(/[_-]/, "").toUpperCase()
-  )
-}
 
 const toKebabCase = (str: string): string => {
   return str.replace(/[_\s]+/g, '-').replace(/([A-Z])/g, (g) => '-' + g.toLowerCase()).replace(/^-/, '')
@@ -116,15 +111,53 @@ export const generateReduxSlices = async (
   let sliceNames = []
   for (const [name, schema] of Object.entries(definitions)) {
     const sliceName = name.replace(/Upsert$/, "").replace(/GetToAlter$/, "")
-    const uniqueImports = [{ interface: `I${name}Serializer`, modelName: name }]
-    const interfaceName = `I${name}Serializer`
+    const modelName = toPascalCase(name)
+    const sliceFileName = toPascalCase(sliceName)
+    const uniqueImports = [{ interface: `I${modelName}Serializer`, modelName: modelName }]
+    const interfaceName = `I${modelName}Serializer`
     const sliceContent = generateSliceFileContent(
       sliceName,
       name,
       uniqueImports,
       interfaceName
     )
-    fs.writeFileSync(path.join(slicesDir, `${sliceName}Slice.ts`), sliceContent)
+    
+    // Determine subdirectory based on slice type to match thunks structure
+    let subDir = ''
+    if (sliceName.match(/^(Client)/i)) {
+      subDir = 'clients'
+    } else if (sliceName.match(/^(Partner)/i)) {
+      subDir = 'partners'
+    } else if (sliceName.match(/^(Consultant)/i)) {
+      subDir = 'consultants'
+    } else if (sliceName.match(/^(Professional)/i)) {
+      subDir = 'professionals'
+    } else if (sliceName.match(/^(Subcontractor)/i)) {
+      subDir = 'subcontractors'
+    } else if (sliceName.match(/^(ManpowerEmployee)/i)) {
+      subDir = 'manpower'
+    } else if (sliceName.match(/^(SkilledWorker)/i)) {
+      subDir = 'skilled-workers'
+    } else if (sliceName.match(/^(Project)/i)) {
+      subDir = 'projects'
+    } else if (sliceName.match(/^(Portfolio)/i)) {
+      subDir = 'portfolio'
+    } else if (sliceName.match(/^(Service)/i)) {
+      subDir = 'services'
+    } else if (sliceName.match(/^(Document|Body.*Document)/i)) {
+      subDir = 'documents'
+    } else if (sliceName.match(/^(Login|Token|RefreshToken|User)/i)) {
+      subDir = 'auth'
+    } else {
+      subDir = 'common'
+    }
+    
+    const targetDir = path.join(slicesDir, subDir)
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true })
+    }
+    
+    fs.writeFileSync(path.join(targetDir, `${sliceFileName}Slice.ts`), sliceContent)
     sliceNames.push(sliceName)
   }
   sliceNames = Array.from(new Set(sliceNames))
