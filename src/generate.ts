@@ -164,7 +164,13 @@ const main = async () => {
 
       // Group routes by main endpoint
       for (const [route, methods] of Object.entries(paths)) {
-        const subDir = route.split("/")[1]
+        // Calculate which path segment contains the resource name
+        // based on apiBasePath depth (number of slashes + 1)
+        const apiBaseDepth = apiBasePath ? (apiBasePath.match(/\//g) || []).length + 1 : 0;
+        const pathParts = route.split("/");
+        // Skip empty string from leading slash + apiBasePath segments
+        const resourceIndex = 1 + apiBaseDepth;
+        const subDir = pathParts[resourceIndex] || "api";
         
         // Process all available HTTP methods for this route
         const availableMethods = (["get", "post", "put", "patch", "delete"] as MethodType[]).filter(
@@ -261,19 +267,20 @@ const main = async () => {
     const swagger = await fetchSwagger(swaggerPath)
     const { definitions, paths } = parseSwagger(swagger)
 
+    const apiBasePath = argv.apiBasePath ? argv.apiBasePath.replace(/\/$/, '') : ''
+
     log("Generating models...")
     await generateModels(definitions, outputDir)
 
     log("Generating tags...")
-    const tagsContent = generateTags(paths)
+    const tagsContent = generateTags(paths, apiBasePath)
     fs.writeFileSync(path.join(constantsDir, "tags.ts"), tagsContent)
 
     log("Generating services and thunks...")
-    const apiBasePath = argv.apiBasePath ? argv.apiBasePath.replace(/\/$/, '') : ''
     const mainRoutes = generateServices(paths, definitions, true, apiBasePath)
 
     log("Generating parameters...")
-    const paramsGenerator = new ParamsGenerator(paths, outputDir)
+    const paramsGenerator = new ParamsGenerator(paths, outputDir, apiBasePath)
     paramsGenerator.generate()
 
     log("Generating Redux slices...")

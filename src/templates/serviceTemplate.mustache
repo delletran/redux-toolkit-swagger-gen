@@ -22,7 +22,7 @@ import { {{interface}} } from '../../params/{{modelName}}';
 export const {{sliceName}} = createApi({
   reducerPath: {{{slicePath}}},
   baseQuery: fetchBaseQuery({
-    baseUrl: `${API_CONFIG.BASE_URL}{{#apiBasePath}}/{{{apiBasePath}}}{{/apiBasePath}}`,
+    baseUrl: API_CONFIG.BASE_URL,
     prepareHeaders: (headers, { getState }) => {
       const access_token = (getState() as RootState).auth?.access_token;
       if (access_token) {
@@ -57,8 +57,20 @@ export const {{sliceName}} = createApi({
     }),
     {{/isListEndpoint}}
     {{^isListEndpoint}}
-      query: ({{#hasPathParams}}{ {{pathParamsList}} }{{/hasPathParams}}{{^hasPathParams}}{{#params}}{{params}}{{/params}}{{^params}}_{{/params}}{{/hasPathParams}}) => {
-        return `{{{path}}}`;
+      query: ({{#hasPathParams}}{ {{pathParamsList}}{{#params}}, ...params{{/params}} }{{/hasPathParams}}{{^hasPathParams}}{{#params}}{{params}}{{/params}}{{^params}}_{{/params}}{{/hasPathParams}}) => {
+        let url = `{{{path}}}`;
+        {{#params}}
+        {{#hasPathParams}}
+        const qs = toQueryString(params as Record<string, any>)
+        {{/hasPathParams}}
+        {{^hasPathParams}}
+        const qs = toQueryString({{params}} as Record<string, any>)
+        {{/hasPathParams}}
+        return `${url}?${qs}`;
+        {{/params}}
+        {{^params}}
+        return url;
+        {{/params}}
       },
       transformErrorResponse: transformErrorResponse,
       providesTags: [TAGS.{{tag}}],

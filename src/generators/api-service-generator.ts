@@ -9,6 +9,13 @@ const serviceTemplate = loadTemplate('serviceTemplate.mustache');
 export const apiServiceGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>, apiBasePath?: string): string => {
   const rawEndpoints = EndpointFactory.getEndpoints('service', path, methods);
   
+  // Helper to strip apiBasePath from route for name generation
+  const stripApiBasePath = (route: string): string => {
+    if (!apiBasePath) return route;
+    const basePathPrefix = `/${apiBasePath}/`;
+    return route.startsWith(basePathPrefix) ? route.substring(basePathPrefix.length - 1) : route;
+  };
+  
   // Collect all interfaces that need to be imported
   const importMap = new Map();
   rawEndpoints.forEach(ep => {
@@ -60,7 +67,8 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     // Generate clean endpoint name
     // Extract meaningful operation names from path segments
     let cleanName = '';
-    const pathSegments = ep.path.split('/').filter((p: string) => p && !p.includes('{') && !p.startsWith('$'));
+    const pathForNaming = stripApiBasePath(ep.path);
+    const pathSegments = pathForNaming.split('/').filter((p: string) => p && !p.includes('{') && !p.startsWith('$'));
     
     // Check for path params more reliably
     const pathPattern = /[\$]?\{([^}]+)\}/g;
@@ -131,7 +139,7 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     } else {
       // Regular endpoint: use path segments without params
       // For GET requests without path params (like /users/me), use descriptive name
-      const pathWithoutParams = ep.path
+      const pathWithoutParams = stripApiBasePath(ep.path)
         .replace(/\$\{[^}]+\}/g, '') // Remove ${param}
         .replace(/\/+/g, '/') // Remove double slashes
         .replace(/^\//, '') // Remove leading slash
@@ -176,7 +184,7 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     if (pathParamsFromUrl.length > 0 || hasQueryParams || (ep.isListEndpoint && ep.params)) {
       // Include path param names in interface name
       const pathSegments: string[] = [];
-      ep.path.split('/').forEach((segment: string) => {
+      stripApiBasePath(ep.path).split('/').forEach((segment: string) => {
         if (segment && !segment.startsWith('$')) {
           pathSegments.push(segment);
         } else if (segment.startsWith('${')) {

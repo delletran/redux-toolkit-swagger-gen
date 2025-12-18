@@ -1,8 +1,13 @@
-export const generateTags = (paths: any): string => {
+export const generateTags = (paths: any, apiBasePath?: string): string => {
   const tags: Set<string> = new Set()
 
+  // Calculate resource name position based on apiBasePath depth
+  const apiBaseDepth = apiBasePath ? (apiBasePath.match(/\//g) || []).length + 1 : 0;
+
   for (const route of Object.keys(paths)) {
-    const tag = route.split("/")[1]
+    const pathParts = route.split("/");
+    const resourceIndex = 1 + apiBaseDepth;
+    const tag = pathParts[resourceIndex] || "api";
     if (tag) {
       tags.add(tag.toUpperCase().replace(/-/g, "_") + "_LIST")
     }

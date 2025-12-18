@@ -22,10 +22,12 @@ const paramsTemplate = loadTemplate("paramsTemplate.mustache")
 export class ParamsGenerator {
   private readonly outputDir: string
   private readonly paths: IPaths
+  private readonly apiBasePath?: string
 
-  constructor(paths: IPaths, outputDir: string) {
+  constructor(paths: IPaths, outputDir: string, apiBasePath?: string) {
     this.paths = paths
     this.outputDir = outputDir
+    this.apiBasePath = apiBasePath
   }
 
   public generate(): void {
@@ -36,8 +38,13 @@ export class ParamsGenerator {
   private groupParamsByMainRoute(): GroupedParams {
     const grouped: GroupedParams = {}
 
+    // Calculate resource name position based on apiBasePath depth
+    const apiBaseDepth = this.apiBasePath ? (this.apiBasePath.match(/\//g) || []).length + 1 : 0;
+
     for (const [route, methods] of Object.entries(this.paths)) {
-      const mainRoute = route.split("/")[1]
+      const pathParts = route.split("/");
+      const resourceIndex = 1 + apiBaseDepth;
+      const mainRoute = pathParts[resourceIndex] || "api";
       if (!grouped[mainRoute]) {
         grouped[mainRoute] = {}
       }
@@ -104,7 +111,15 @@ export class ParamsGenerator {
     if (!details.parameters && !details.requestBody)
       return { interfaceData: null, requiredImports: new Set() }
 
-    const routeIdentifier = route
+    // Strip apiBasePath from route for interface naming
+    const stripApiBasePath = (routePath: string): string => {
+      if (!this.apiBasePath) return routePath;
+      const basePathPrefix = `/${this.apiBasePath}/`;
+      return routePath.startsWith(basePathPrefix) ? routePath.substring(basePathPrefix.length - 1) : routePath;
+    };
+
+    const routeForNaming = stripApiBasePath(route);
+    const routeIdentifier = routeForNaming
       .split("/")
       .slice(1)
       .map((part) => part.replace(/{|}/g, ""))

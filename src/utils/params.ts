@@ -3,7 +3,9 @@ export const getQueryParams = (
   parameters: (IBodyParameter | IQueryParameter)[] | undefined
 ): string[] => {
   if (!parameters || !Array.isArray(parameters)) return [];
-  const params = parameters.filter((param) => param.in === 'query').map((param) => param.name);
+  const params = parameters
+    .filter((param) => param.in === 'query' && param.name)
+    .map((param) => param.name);
   return params
 };
 // #endregion
@@ -13,7 +15,9 @@ export const getBodyParams = (
   parameters: (IBodyParameter | IQueryParameter)[] | undefined
 ): string[] => {
   if (!parameters || !Array.isArray(parameters)) return [];
-  const params = parameters.filter((param) => param.in === 'body').map((param) => param.name);
+  const params = parameters
+    .filter((param) => param.in === 'body' && param.name)
+    .map((param) => param.name);
   return params
 };
 // #endregion
@@ -24,7 +28,7 @@ export const getPathParams = (
 ): string[] => {
   if (!parameters || !Array.isArray(parameters)) return [];
   const params = parameters
-    .filter((param) => param.in === 'path')
+    .filter((param) => param.in === 'path' && param.name)
     .map((param) => param.name);
   return params
 };
@@ -37,7 +41,7 @@ export const getPathParamsTyped = (
 ): string[] => {
   if (!parameters || !Array.isArray(parameters)) return [];
   const params = parameters
-    .filter((param) => param.in === 'path')
+    .filter((param) => param.in === 'path' && param.name)
     .map((param) => {
       const paramType = _parsePathParamType(param);
       return `${param.name}${param.required ? '' : '?'}: ${paramType}`;
