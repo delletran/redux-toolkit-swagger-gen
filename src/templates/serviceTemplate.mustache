@@ -22,7 +22,7 @@ import { {{interface}} } from '../../params/{{modelName}}';
 export const {{sliceName}} = createApi({
   reducerPath: {{{slicePath}}},
   baseQuery: fetchBaseQuery({
-    baseUrl: getApiUrl(''),
+    baseUrl: `${API_CONFIG.BASE_URL}{{#apiBasePath}}/{{{apiBasePath}}}{{/apiBasePath}}`,
     prepareHeaders: (headers, { getState }) => {
       const access_token = (getState() as RootState).auth?.access_token;
       if (access_token) {
@@ -71,7 +71,8 @@ export const {{sliceName}} = createApi({
           method: '{{httpMethod}}',{{#useBodyDestructuring}}{{#requestBodyType}}{{#bodyParam}}
           body: { {{bodyParam}} },{{/bodyParam}}{{^bodyParam}}
           body,{{/bodyParam}}{{/requestBodyType}}{{/useBodyDestructuring}}{{^useBodyDestructuring}}{{#bodyParam}}
-          body: {{bodyParam}},{{/bodyParam}}{{/useBodyDestructuring}}
+          body: {{bodyParam}},{{/bodyParam}}{{^bodyParam}}
+          body,{{/bodyParam}}{{/useBodyDestructuring}}
           headers: {
             'Content-Type': '{{{contentType}}}',
           },

@@ -6,7 +6,7 @@ import { loadTemplate } from '../utils/template-loader';
 
 const serviceTemplate = loadTemplate('serviceTemplate.mustache');
 
-export const apiServiceGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>): string => {
+export const apiServiceGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>, apiBasePath?: string): string => {
   const rawEndpoints = EndpointFactory.getEndpoints('service', path, methods);
   
   // Collect all interfaces that need to be imported
@@ -270,6 +270,7 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     uniqueImports: Array.from(allImports.values()),
     uniqueParamImports: Array.from(paramImports.values()),
     endpoints,
+    apiBasePath,
   };
 
   return Mustache.render(serviceTemplate, modelData);

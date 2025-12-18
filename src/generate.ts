@@ -22,7 +22,7 @@ interface Arguments {
   skipValidation: boolean
   prettier: boolean
   exclude: string[]
-  apiBaseUrl?: string
+  apiBasePath?: string
   [x: string]: unknown
 }
 
@@ -70,7 +70,7 @@ const parseArgs = () => {
       default: [],
       choices: ["thunks", "slices"],
     })
-    .option("apiBaseUrl", {
+    .option("apiBasePath", {
       alias: "b",
       type: "string",
       description: "API base URL path (e.g., api/v1/)",
@@ -153,7 +153,8 @@ const main = async () => {
     const generateServices = (
       paths: ExtendedPathType[],
       definitions: DefinitionType,
-      generateIndex = false
+      generateIndex = false,
+      apiBasePath?: string
     ) => {
       const subFolders = new Set<string>()
       const mainRoutes: Record<
@@ -203,7 +204,7 @@ const main = async () => {
         const servicesDir = path.join(outputDir, "services", route)
         
         fs.mkdirSync(servicesDir, { recursive: true })
-          const service = apiServiceGenerator(route, methods)
+          const service = apiServiceGenerator(route, methods, apiBasePath)
         const fileName = route.replace(/\W/g, "_") // Simplified filename formatting
         fs.writeFileSync(path.join(servicesDir, `${fileName}.ts`), service)
         subFolders.add(servicesDir)
@@ -268,7 +269,8 @@ const main = async () => {
     fs.writeFileSync(path.join(constantsDir, "tags.ts"), tagsContent)
 
     log("Generating services and thunks...")
-    const mainRoutes = generateServices(paths, definitions, true)
+    const apiBasePath = argv.apiBasePath ? argv.apiBasePath.replace(/\/$/, '') : ''
+    const mainRoutes = generateServices(paths, definitions, true, apiBasePath)
 
     log("Generating parameters...")
     const paramsGenerator = new ParamsGenerator(paths, outputDir)
@@ -281,7 +283,7 @@ const main = async () => {
       log("Skipping Redux slices generation (excluded)")
     }    log("Generating Redux hooks and store...")
     generateReduxHooks(outputDir)
-    generateReduxStore(outputDir, mainRoutes, argv.exclude, argv.apiBaseUrl)
+    generateReduxStore(outputDir, mainRoutes, argv.exclude, argv.apiBasePath)
 
     log("Copying dependency files...")
     const reduxGlobalFiles = ["redux.d.ts", "index.d.ts"]
@@ -315,7 +317,7 @@ const main = async () => {
       path.resolve(__dirname, "../src/redux/config/api.ts"),
       "utf-8"
     )
-    const apiBasePath = argv.apiBaseUrl ? argv.apiBaseUrl.replace(/\/$/, '') : '' // Remove trailing slash
+    // Reuse apiBasePath from above
     const apiConfigContent = Mustache.render(apiConfigTemplate, {
       apiBasePath: apiBasePath
     })
