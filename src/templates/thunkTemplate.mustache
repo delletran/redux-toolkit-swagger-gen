@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 // import type { PayloadAction } from '@reduxjs/toolkit';
 // import { IFilters } from '../../redux/types';
 import { toQueryString } from '../../redux/query';
+import { getApiUrl } from '../../redux/config/api';
 
 {{#uniqueImports}}
 {{#modelName}}
@@ -29,11 +30,12 @@ export const {{operationId}} = createAsyncThunk(
   '{{slicePath}}/{{operationId}}',
   async ({{#paramInterface}}{{#hasSingleParam}}{{params}}{{/hasSingleParam}}{{#hasMultipleParams}}{{params}}{{/hasMultipleParams}}: {{paramInterface}}{{/paramInterface}}{{^paramInterface}}{{#hasSingleParam}}{{types}}{{/hasSingleParam}}{{#hasMultipleParams}}{{params}}: {{types}}{{/hasMultipleParams}}{{^params}}_{{/params}}{{/paramInterface}}, { rejectWithValue }) => {
     try {
-      let url = `{{{url}}}`;
+      let endpoint = `{{{url}}}`;
       {{#queryParams}}
       const qs = toQueryString({{queryParams}});
-      if (qs) url += `?${qs}`;
+      if (qs) endpoint += `?${qs}`;
       {{/queryParams}}
+      const url = getApiUrl(endpoint);
       
       const response = await fetch(url, {
         method: '{{method}}',

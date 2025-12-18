@@ -19,7 +19,8 @@ export const generateReduxHooks = (outputDir: string): void => {
 export const generateReduxStore = (
   outputDir: string,
   services: Record<string, any>,
-  excludeOptions: string[] = []
+  excludeOptions: string[] = [],
+  apiBaseUrl?: string
 ): void => {
   const reduxDir = path.resolve(outputDir, "redux");
   if (!fs.existsSync(reduxDir)) {
@@ -50,6 +51,7 @@ export const generateReduxStore = (
   const storeContent = Mustache.render(storeTemplate, {
     services: serviceList,
     thunks: thunkList,
+    apiBaseUrl: apiBaseUrl || '',
   });
 
   fs.writeFileSync(path.join(reduxDir, "store.ts"), storeContent);

@@ -4,7 +4,7 @@ import { transformErrorResponse} from '../../redux/response';
 import { toQueryString } from '../../redux/query';
 import { TAGS } from '../../constants/tags';
 import { RootState } from '../../redux/store';
-import { API_CONFIG } from '../../redux/config/api';
+import { API_CONFIG, getApiUrl } from '../../redux/config/api';
 // import { IFilters } from '../../redux/types';
 
 {{#uniqueImports}}
@@ -22,7 +22,7 @@ import { {{interface}} } from '../../params/{{modelName}}';
 export const {{sliceName}} = createApi({
   reducerPath: {{{slicePath}}},
   baseQuery: fetchBaseQuery({
-    baseUrl: API_CONFIG.BASE_URL,
+    baseUrl: getApiUrl(''),
     prepareHeaders: (headers, { getState }) => {
       const access_token = (getState() as RootState).auth?.access_token;
       if (access_token) {

@@ -4,6 +4,7 @@ import * as path from "path"
 import axios from "axios"
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
+import * as Mustache from "mustache"
 import { parseSwagger } from "./utils/swagger-parser"
 import { generateModels } from "./generators/model-generator"
 import { apiServiceGenerator } from "./generators/api-service-generator"
@@ -21,6 +22,7 @@ interface Arguments {
   skipValidation: boolean
   prettier: boolean
   exclude: string[]
+  apiBaseUrl?: string
   [x: string]: unknown
 }
 
@@ -67,6 +69,12 @@ const parseArgs = () => {
       description: "Exclude generation types: thunks, slices",
       default: [],
       choices: ["thunks", "slices"],
+    })
+    .option("apiBaseUrl", {
+      alias: "b",
+      type: "string",
+      description: "API base URL path (e.g., api/v1/)",
+      default: "api",
     })
     .check((argv) => {
       if (argv.clean && !argv.output) {
@@ -273,7 +281,7 @@ const main = async () => {
       log("Skipping Redux slices generation (excluded)")
     }    log("Generating Redux hooks and store...")
     generateReduxHooks(outputDir)
-    generateReduxStore(outputDir, mainRoutes, argv.exclude)
+    generateReduxStore(outputDir, mainRoutes, argv.exclude, argv.apiBaseUrl)
 
     log("Copying dependency files...")
     const reduxGlobalFiles = ["redux.d.ts", "index.d.ts"]
@@ -298,14 +306,22 @@ const main = async () => {
       )
     })
 
-    // Copy config directory
+    // Copy config directory with template rendering
     const configDir = path.join(reduxDir, "config")
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true })
     }
-    fs.copyFileSync(
+    const apiConfigTemplate = fs.readFileSync(
       path.resolve(__dirname, "../src/redux/config/api.ts"),
-      path.join(configDir, "api.ts")
+      "utf-8"
+    )
+    const apiBasePath = argv.apiBaseUrl ? argv.apiBaseUrl.replace(/\/$/, '') : '' // Remove trailing slash
+    const apiConfigContent = Mustache.render(apiConfigTemplate, {
+      apiBasePath: apiBasePath
+    })
+    fs.writeFileSync(
+      path.join(configDir, "api.ts"),
+      apiConfigContent
     )
 
     // Copy slices directory
