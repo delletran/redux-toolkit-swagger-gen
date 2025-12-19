@@ -7,7 +7,7 @@ import { loadTemplate } from '../utils/template-loader';
 const serviceTemplate = loadTemplate('serviceTemplate.mustache');
 
 export const apiServiceGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>, apiBasePath?: string): string => {
-  const rawEndpoints = EndpointFactory.getEndpoints('service', path, methods);
+  const rawEndpoints = EndpointFactory.getEndpoints('service', path, methods, undefined, apiBasePath);
   
   // Helper to strip apiBasePath from route for name generation
   const stripApiBasePath = (route: string): string => {
@@ -206,7 +206,26 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       // Add param interface fields
       enhanced.paramInterfaceName = interfaceName;
       enhanced.hasPathParams = pathParamsFromUrl.length > 0;
+      enhanced.hasQueryParams = hasQueryParams;
       enhanced.pathParamsList = pathParamsFromUrl.join(', ');
+      
+      // For mutations: build list of all non-body param names for destructuring
+      if (enhanced.isMutation && enhanced.paramInterfaceName) {
+        const allParamNames = [...pathParamsFromUrl];
+        
+        // Extract query param names from the queryParams string
+        if (ep.queryParams) {
+          const queryParamStr = ep.queryParams.toString().trim();
+          // Remove curly braces and split by comma
+          const cleanedStr = queryParamStr.replace(/[{}]/g, '').trim();
+          if (cleanedStr) {
+            const queryParamNames = cleanedStr.split(',').map((p: string) => p.trim()).filter(Boolean);
+            allParamNames.push(...queryParamNames);
+          }
+        }
+        
+        enhanced.allNonBodyParams = allParamNames.length > 0 ? allParamNames.join(', ') : null;
+      }
     } else {
       // No parameters - don't set paramInterfaceName so template uses void
       enhanced.paramInterfaceName = null;
@@ -247,16 +266,13 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       enhanced.contentType = enhanced.contentType.replace(/&/g, '&amp;').replace(/\//g, '/');
       
       // Set correct request body type
-      // For mutations with path params, use param interface instead of body type
-      if (pathParamsFromUrl.length > 0 && interfaceName) {
-        enhanced.requestBodyType = interfaceName;
-        enhanced.useBodyDestructuring = true;
-        // If no request body, only path params go in body object
-        enhanced.bodyParam = !hasRequestBody ? pathParamsFromUrl.join(', ') : null;
-      } else if (ep.requestBodyModelName) {
-        enhanced.requestBodyType = `I${ep.requestBodyModelName}Serializer`;
-      } else if (ep.modelName) {
-        enhanced.requestBodyType = `I${ep.modelName}Serializer`;
+      // Only set requestBodyType if there's actually a request body
+      if (hasRequestBody) {
+        if (ep.requestBodyModelName) {
+          enhanced.requestBodyType = `I${ep.requestBodyModelName}Serializer`;
+        } else if (ep.modelName) {
+          enhanced.requestBodyType = `I${ep.modelName}Serializer`;
+        }
       }
       
       // For mutations with path params, set body destructuring flag

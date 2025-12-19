@@ -3,6 +3,7 @@ import * as path from "path"
 import Mustache from "mustache"
 import { loadTemplate } from "../utils/template-loader"
 import { toPascalCase } from "../utils/formater"
+import { stripApiBasePath } from "../utils/name-cleaner"
 
 const modelTemplate = loadTemplate("modelTemplate.mustache")
 const enumTemplate = loadTemplate("enumTemplate.mustache")
@@ -230,7 +231,8 @@ const generateModelFileContent = (modelName: string, schema: any): string => {
 
 export const generateModels = async (
   definitions: any,
-  outputDir: string
+  outputDir: string,
+  apiBasePath?: string
 ): Promise<void> => {
   if (!definitions || typeof definitions !== "object") {
     console.warn("Warning: No definitions found in swagger file")
@@ -257,7 +259,8 @@ export const generateModels = async (
       console.warn(`Warning: Empty schema for ${name}`)
       continue
     }
-    const cleanName = toPascalCase(name)
+    const cleanedName = stripApiBasePath(name, apiBasePath);
+    const cleanName = toPascalCase(cleanedName)
     const modelContent = generateModelFileContent(cleanName, schema)
     
     // Check if this is an enum and save to constants dir

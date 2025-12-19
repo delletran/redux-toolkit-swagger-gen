@@ -8,6 +8,7 @@ import {
   getParamsTyped,
 } from "./params"
 import { getNames } from "./interface"
+import { stripApiBasePath } from "./name-cleaner"
 
 type EndpointType = "service" | "slice" | "thunk"
 
@@ -16,7 +17,8 @@ export class EndpointFactory {
     endpointType: EndpointType,
     path: string,
     methods: Record<string, ReduxApiEndpointType>,
-    definitions?: any
+    definitions?: any,
+    apiBasePath?: string
   ): any[] {
     const pathParams = methods?.parameters || []
 
@@ -26,11 +28,11 @@ export class EndpointFactory {
         const endpointDetails = { ...details, pathParams }
         switch (endpointType) {
           case "service":
-            return getServiceEndpoint(path, details.method, endpointDetails)
+            return getServiceEndpoint(path, details.method, endpointDetails, apiBasePath)
           case "slice":
-            return getSliceEndpoint(path, details.method, endpointDetails)
+            return getSliceEndpoint(path, details.method, endpointDetails, apiBasePath)
           case "thunk":
-            return getThunkEndpoint(path, details.method, endpointDetails)
+            return getThunkEndpoint(path, details.method, endpointDetails, apiBasePath)
           default:
             throw new Error(`Unknown endpoint type: ${endpointType}`)
         }
@@ -41,15 +43,17 @@ export class EndpointFactory {
 const getServiceEndpoint = (
   path: string,
   httpMethod: MethodType,
-  details: ReduxApiEndpointType
+  details: ReduxApiEndpointType,
+  apiBasePath?: string
 ): any => {
-  const endpoint = new Endpoint("service", path, httpMethod, details)
+  const endpoint = new Endpoint("service", path, httpMethod, details, apiBasePath)
   return {
     name: endpoint.name,
     method: endpoint.method,
     path: endpoint.path,
     httpMethod: endpoint.httpMethod,
     params: endpoint.params,
+    queryParams: endpoint.queryParams,
     bodyParam: endpoint.body,
     tag: endpoint.tag,
     isMutation: endpoint.isMutation,
@@ -70,9 +74,10 @@ const getServiceEndpoint = (
 const getSliceEndpoint = (
   path: string,
   httpMethod: MethodType,
-  details: any
+  details: any,
+  apiBasePath?: string
 ): any => {
-  const endpoint = new Endpoint("slice", path, httpMethod, details)
+  const endpoint = new Endpoint("slice", path, httpMethod, details, apiBasePath)
   return {
     name: endpoint.name,
     method: endpoint.method,
@@ -96,21 +101,39 @@ const getSliceEndpoint = (
 const getThunkEndpoint = (
   path: string,
   httpMethod: MethodType,
-  details: any
+  details: any,
+  apiBasePath?: string
 ): any => {
-  const endpoint = new Endpoint("thunk", path, httpMethod, details)
+  const endpoint = new Endpoint("thunk", path, httpMethod, details, apiBasePath)
   const hasMultipleParams = endpoint.joinedParamsLength > 1
   
   // Generate param interface name if there are parameters
-  // Use same logic as params-generator.ts
+  // Must match the logic in params-generator.ts to ensure consistency
   let paramInterface = null;
+  let hasRequestBody = false;
   if (endpoint.params && endpoint.joinedParamsLength > 0) {
-    const routeIdentifier = details.url
+    // Strip apiBasePath from route for interface naming
+    const stripApiBasePathFromRoute = (routePath: string): string => {
+      if (!apiBasePath) return routePath;
+      const basePathPrefix = `/${apiBasePath}/`;
+      return routePath.startsWith(basePathPrefix) ? routePath.substring(basePathPrefix.length - 1) : routePath;
+    };
+    
+    const routeForNaming = stripApiBasePathFromRoute(details.url);
+    const routeIdentifier = routeForNaming
       .split("/")
       .slice(1)
       .map((part: string) => part.replace(/{|}/g, ""))
       .join("_");
-    paramInterface = `I${toPascalCase(routeIdentifier)}Params`;
+    
+    // Add HTTP method suffix to match params generator naming
+    const methodSuffix = httpMethod.charAt(0).toUpperCase() + httpMethod.slice(1).toLowerCase();
+    paramInterface = `I${toPascalCase(routeIdentifier)}${methodSuffix}Params`;
+    
+    // Check if there's a request body for POST/PUT/PATCH
+    if (['post', 'put', 'patch'].includes(httpMethod.toLowerCase())) {
+      hasRequestBody = !!(details.methodObj?.requestBody || endpoint.requestBodyModelName);
+    }
   }
   
   return {
@@ -125,6 +148,7 @@ const getThunkEndpoint = (
     modelName: endpoint.modelName,
     queryParams: endpoint.queryParams,
     bodyParam: endpoint.body,
+    hasRequestBody: hasRequestBody,
     pathParamsTyped: endpoint.pathParamsTyped,
     paramsTyped: endpoint.paramsTyped,
     params: endpoint.params,
@@ -165,13 +189,16 @@ class Endpoint {
     endpointType: EndpointType,
     path: string,
     httpMethod: MethodType,
-    details: ReduxApiEndpointType
+    details: ReduxApiEndpointType,
+    apiBasePath?: string
   ) {
     this._endpointType = endpointType
     this._path = path
     this._httpMethod = httpMethod
     this._details = details
-    this._name = toCamelCase(details.id)
+    // Clean the operation ID to remove API base path patterns
+    const cleanedId = stripApiBasePath(details.id, apiBasePath)
+    this._name = toCamelCase(cleanedId)
     this._exportName = toPascalCase(this._name)
     this._isListEndpoint =
       details.url.toLowerCase().includes("/list") ||
@@ -187,7 +214,7 @@ class Endpoint {
       requestBodyInterfaceName,
       isRequestBodyArray,
       isResponseArray,
-    } = getNames(details)
+    } = getNames(details, apiBasePath)
     this._modelName = paramModelName
     this._interfaceName = paramInterfaceName
     this._INameParam = iNameParam

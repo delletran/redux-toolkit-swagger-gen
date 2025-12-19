@@ -4,6 +4,7 @@ import Mustache from "mustache"
 import { toPascalCase } from "../utils/formater"
 import { _parsePathParamType, _parseQueryParamType } from "../utils/params"
 import { loadTemplate } from "../utils/template-loader"
+import { stripApiBasePath } from "../utils/name-cleaner"
 
 interface IPaths {
   [key: string]: {
@@ -137,13 +138,13 @@ export class ParamsGenerator {
       return { interfaceData: null, requiredImports: new Set() }
 
     // Strip apiBasePath from route for interface naming
-    const stripApiBasePath = (routePath: string): string => {
+    const stripApiBasePathFromRoute = (routePath: string): string => {
       if (!this.apiBasePath) return routePath;
       const basePathPrefix = `/${this.apiBasePath}/`;
       return routePath.startsWith(basePathPrefix) ? routePath.substring(basePathPrefix.length - 1) : routePath;
     };
 
-    const routeForNaming = stripApiBasePath(route);
+    const routeForNaming = stripApiBasePathFromRoute(route);
     const routeIdentifier = routeForNaming
       .split("/")
       .slice(1)
@@ -214,10 +215,11 @@ export class ParamsGenerator {
         } else if (param.in === "body" && param.schema) {
           if (param.schema.$ref) {
             const refType = param.schema.$ref.split("/").pop() || ""
-            const serializerName = `I${toPascalCase(refType)}Serializer`
+            const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
+            const serializerName = `I${toPascalCase(cleanedRefType)}Serializer`
             requiredImports.add({
               name: serializerName,
-              fileName: toPascalCase(refType),
+              fileName: toPascalCase(cleanedRefType),
             })
             paramType = serializerName
           } else {
@@ -243,10 +245,11 @@ export class ParamsGenerator {
 
       if (schema?.$ref) {
         const refType = schema.$ref.split("/").pop() || ""
-        const serializerName = `I${toPascalCase(refType)}Serializer`
+        const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
+        const serializerName = `I${toPascalCase(cleanedRefType)}Serializer`
         requiredImports.add({
           name: serializerName,
-          fileName: toPascalCase(refType),
+          fileName: toPascalCase(cleanedRefType),
         })
 
         // Add the request body as a parameter

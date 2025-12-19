@@ -28,11 +28,14 @@ const initialState: {{sliceName}}State = {
 {{#endpoints}}
 export const {{operationId}} = createAsyncThunk(
   '{{slicePath}}/{{operationId}}',
-  async ({{#paramInterface}}{{#hasSingleParam}}{{params}}{{/hasSingleParam}}{{#hasMultipleParams}}{{params}}{{/hasMultipleParams}}: {{paramInterface}}{{/paramInterface}}{{^paramInterface}}{{#hasSingleParam}}{{types}}{{/hasSingleParam}}{{#hasMultipleParams}}{{params}}: {{types}}{{/hasMultipleParams}}{{^params}}_{{/params}}{{/paramInterface}}, { rejectWithValue }) => {
+  async ({{#paramInterface}}params: {{paramInterface}}{{/paramInterface}}{{^paramInterface}}{{^params}}_{{/params}}{{#params}}{{params}}: {{types}}{{/params}}{{/paramInterface}}, { rejectWithValue }) => {
     try {
+      {{#paramInterface}}
+      const { {{params}}{{#hasRequestBody}}, body{{/hasRequestBody}} } = params;
+      {{/paramInterface}}
       let endpoint = `{{{url}}}`;
       {{#queryParams}}
-      const qs = toQueryString({{queryParams}});
+      const qs = toQueryString({ {{queryParams}} });
       if (qs) endpoint += `?${qs}`;
       {{/queryParams}}
       const url = getApiUrl(endpoint);
@@ -41,8 +44,8 @@ export const {{operationId}} = createAsyncThunk(
         method: '{{method}}',
         headers: {
           'Content-Type': 'application/json',
-        },{{#bodyParam}}
-        body: JSON.stringify({{bodyParam}}),{{/bodyParam}}
+        },{{#hasRequestBody}}
+        body: JSON.stringify(body),{{/hasRequestBody}}
       });
 
       if (!response.ok) {

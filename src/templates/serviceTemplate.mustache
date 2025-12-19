@@ -76,15 +76,12 @@ export const {{sliceName}} = createApi({
       providesTags: [TAGS.{{tag}}],
     }),
     {{/isListEndpoint}}{{/isMutation}}{{#isMutation}}
-      query: ({{#useBodyDestructuring}}{{#hasPathParams}}{ {{pathParamsList}}{{#bodyParam}}{{/bodyParam}}{{^bodyParam}}, ...body{{/bodyParam}} }{{/hasPathParams}}{{^hasPathParams}}body{{/hasPathParams}}{{/useBodyDestructuring}}{{^useBodyDestructuring}}{{#params}}{{params}}{{/params}}{{^params}}body{{/params}}{{/useBodyDestructuring}}) => {
+      query: ({{#paramInterfaceName}}{{#requestBodyType}}{ {{#allNonBodyParams}}{{allNonBodyParams}}, {{/allNonBodyParams}}body }{{/requestBodyType}}{{^requestBodyType}}{{#hasPathParams}}{ {{pathParamsList}} }{{/hasPathParams}}{{^hasPathParams}}params{{/hasPathParams}}{{/requestBodyType}}{{/paramInterfaceName}}{{^paramInterfaceName}}body{{/paramInterfaceName}}) => {
         let url = `{{{path}}}`;
         return {
           url,
-          method: '{{httpMethod}}',{{#useBodyDestructuring}}{{#requestBodyType}}{{#bodyParam}}
-          body: { {{bodyParam}} },{{/bodyParam}}{{^bodyParam}}
-          body,{{/bodyParam}}{{/requestBodyType}}{{/useBodyDestructuring}}{{^useBodyDestructuring}}{{#bodyParam}}
-          body: {{bodyParam}},{{/bodyParam}}{{^bodyParam}}
-          body,{{/bodyParam}}{{/useBodyDestructuring}}
+          method: '{{httpMethod}}',{{#requestBodyType}}
+          body,{{/requestBodyType}}
           headers: {
             'Content-Type': '{{{contentType}}}',
           },

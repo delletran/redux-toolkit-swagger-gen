@@ -4,6 +4,7 @@ import Mustache from "mustache"
 
 import { loadTemplate } from "../utils/template-loader"
 import { toPascalCase } from "../utils/formater"
+import { stripApiBasePath } from "../utils/name-cleaner"
 
 const sliceTemplate = loadTemplate("sliceTemplate.mustache")
 
@@ -77,7 +78,8 @@ const updateConstantsFile = (
 
 export const generateReduxSlices = async (
   definitions: any,
-  outputDir: string
+  outputDir: string,
+  apiBasePath?: string
 ): Promise<void> => {
   const slicesDir = path.resolve(outputDir, "slices")
   if (!fs.existsSync(slicesDir)) {
@@ -110,14 +112,15 @@ export const generateReduxSlices = async (
   // Continue with slice generation
   let sliceNames = []
   for (const [name, schema] of Object.entries(definitions)) {
-    const sliceName = name.replace(/Upsert$/, "").replace(/GetToAlter$/, "")
-    const modelName = toPascalCase(name)
+    const cleanedName = stripApiBasePath(name, apiBasePath);
+    const sliceName = cleanedName.replace(/Upsert$/, "").replace(/GetToAlter$/, "")
+    const modelName = toPascalCase(cleanedName)
     const sliceFileName = toPascalCase(sliceName)
     const uniqueImports = [{ interface: `I${modelName}Serializer`, modelName: modelName }]
     const interfaceName = `I${modelName}Serializer`
     const sliceContent = generateSliceFileContent(
       sliceName,
-      name,
+      cleanedName,
       uniqueImports,
       interfaceName
     )
