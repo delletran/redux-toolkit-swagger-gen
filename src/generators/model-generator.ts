@@ -5,6 +5,7 @@ import { loadTemplate } from "../utils/template-loader"
 import { toPascalCase } from "../utils/formater"
 
 const modelTemplate = loadTemplate("modelTemplate.mustache")
+const enumTemplate = loadTemplate("enumTemplate.mustache")
 
 // Common regex patterns mapped to constant names
 const REGEX_PATTERN_MAP: Record<string, string> = {
@@ -12,6 +13,10 @@ const REGEX_PATTERN_MAP: Record<string, string> = {
   '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,16}0*$)\\d{0,11}\\.\\d{0,4}0*$)': 'REGEX_DECIMAL_11_4',
   '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,11}0*$)\\d{0,6}\\.\\d{0,4}0*$)': 'REGEX_DECIMAL_6_4',
   '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$': 'REGEX_DECIMAL_FLEXIBLE'
+}
+
+const isEnumSchema = (schema: any): boolean => {
+  return schema && schema.type === 'string' && Array.isArray(schema.enum) && schema.enum.length > 0
 }
 
 const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<string>): string => {
@@ -122,6 +127,19 @@ const generateProperties = (
   }))
 }
 
+const generateEnumFileContent = (enumName: string, schema: any): string => {
+  if (!schema || !Array.isArray(schema.enum)) {
+    console.warn(`Warning: Invalid enum schema for ${enumName}`)
+    return ''
+  }
+
+  return Mustache.render(enumTemplate, {
+    enumName,
+    values: schema.enum,
+    description: schema.title || schema.description,
+  })
+}
+
 const generateModelFileContent = (modelName: string, schema: any): string => {
   if (!schema) {
     console.warn(`Warning: Empty schema for model ${modelName}`)
@@ -131,6 +149,11 @@ const generateModelFileContent = (modelName: string, schema: any): string => {
       nestedModels: [],
       hasRegexImport: false,
     })
+  }
+
+  // Check if this is an enum schema
+  if (isEnumSchema(schema)) {
+    return generateEnumFileContent(modelName, schema)
   }
 
   const nestedModels = new Set<string>()
@@ -160,14 +183,20 @@ export const generateModels = async (
   }
 
   const modelsDir = path.resolve(outputDir, "models")
+  const constantsDir = path.resolve(outputDir, "constants")
+  
   if (!fs.existsSync(modelsDir)) {
     fs.mkdirSync(modelsDir, { recursive: true })
+  }
+  if (!fs.existsSync(constantsDir)) {
+    fs.mkdirSync(constantsDir, { recursive: true })
   }
 
   // Track all used patterns across all models with their actual regex patterns
   const allUsedPatterns = new Map<string, string>()
+  const enumDefinitions: Array<{ name: string; content: string }> = []
 
-  // Generate models
+  // Generate models and collect enums
   for (const [name, schema] of Object.entries(definitions)) {
     if (!schema) {
       console.warn(`Warning: Empty schema for ${name}`)
@@ -175,7 +204,14 @@ export const generateModels = async (
     }
     const cleanName = toPascalCase(name)
     const modelContent = generateModelFileContent(cleanName, schema)
-    fs.writeFileSync(path.join(modelsDir, `${cleanName}.ts`), modelContent)
+    
+    // Check if this is an enum and save to constants dir
+    if (isEnumSchema(schema)) {
+      enumDefinitions.push({ name: cleanName, content: modelContent })
+    } else {
+      // Regular models go to models dir
+      fs.writeFileSync(path.join(modelsDir, `${cleanName}.ts`), modelContent)
+    }
     
     // Extract patterns used in this model and find their regex
     const matches = modelContent.matchAll(/REGEX_[A-Z_0-9]+/g)
@@ -188,13 +224,13 @@ export const generateModels = async (
     }
   }
 
+  // Write all enums to constants directory
+  for (const enumDef of enumDefinitions) {
+    fs.writeFileSync(path.join(constantsDir, `${enumDef.name}.ts`), enumDef.content)
+  }
+
   // Generate regex constants file if any patterns were used
   if (allUsedPatterns.size > 0) {
-    const constantsDir = path.resolve(outputDir, "constants")
-    if (!fs.existsSync(constantsDir)) {
-      fs.mkdirSync(constantsDir, { recursive: true })
-    }
-    
     const regexConstantsContent = `// Auto-generated regex constants
 ${Array.from(allUsedPatterns.entries()).map(([constName, pattern]) => {
   return `export const ${constName} = /${pattern}/;`

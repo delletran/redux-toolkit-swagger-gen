@@ -93,9 +93,10 @@ export const _parsePathParamType = (param: IEndpointParameter): string => {
 };
 
 export const _parseQueryParamType = (param: IQueryParameter): string => {
-  // For enum/complex types (schema refs), use string since they'll be serialized anyway
+  // For enum/complex types (schema refs), return the ref name
   if (param.schema?.$ref) {
-    return 'any';  // Changed from complex type lookup to 'any' for simplicity
+    const refName = param.schema.$ref.split('/').pop();
+    return refName || 'any';
   }
   
   // OpenAPI 3.x: type is in schema.type
@@ -108,7 +109,8 @@ export const _parseQueryParamType = (param: IQueryParameter): string => {
     // First check for $ref (schema references)
     const refType = schema.anyOf.find((t: any) => t.$ref);
     if (refType) {
-      return 'any';  // Changed from complex type lookup to 'any'
+      const refName = refType.$ref.split('/').pop();
+      return refName || 'any';
     }
     
     // Then find the first non-null type

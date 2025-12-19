@@ -1,0 +1,12 @@
+{{#description}}
+/**
+ * {{description}}
+ */
+{{/description}}
+export enum {{enumName}} {
+{{#values}}
+  {{.}} = '{{.}}',
+{{/values}}
+}
+
+export type I{{enumName}}Serializer = {{enumName}};

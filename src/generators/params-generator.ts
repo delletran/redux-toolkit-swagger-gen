@@ -19,6 +19,20 @@ interface GroupedParams {
 
 const paramsTemplate = loadTemplate("paramsTemplate.mustache")
 
+// List of known enum types - these will be imported from constants
+const KNOWN_ENUM_TYPES = [
+  'EmploymentType',
+  'PayrollMethod',
+  'PersonStatus',
+  'ProjectStatus',
+  'ProjectType',
+  'RateType',
+  'ServiceCategory',
+  'SkillCategory',
+  'TESDALevel',
+  'UserRole',
+]
+
 export class ParamsGenerator {
   private readonly outputDir: string
   private readonly paths: IPaths
@@ -28,6 +42,10 @@ export class ParamsGenerator {
     this.paths = paths
     this.outputDir = outputDir
     this.apiBasePath = apiBasePath
+  }
+
+  private isEnumType(typeName: string): boolean {
+    return KNOWN_ENUM_TYPES.includes(typeName)
   }
 
   public generate(): void {
@@ -67,7 +85,7 @@ export class ParamsGenerator {
       }
 
       const allInterfaces = []
-      const imports = new Set<{ name: string; fileName: string }>()
+      const imports = new Set<{ name: string; fileName: string; isEnum?: boolean }>()
 
       for (const [route, details] of Object.entries(routes)) {
         if (details.parameters) {
@@ -125,7 +143,7 @@ export class ParamsGenerator {
       .map((part) => part.replace(/{|}/g, ""))
       .join("_")
     const interfaceName = `I${toPascalCase(routeIdentifier)}Params`
-    const requiredImports = new Set<{ name: string; fileName: string }>()
+    const requiredImports = new Set<{ name: string; fileName: string; isEnum?: boolean }>()
     const properties = []
 
     // Handle OpenAPI 2.0 parameters
@@ -135,12 +153,39 @@ export class ParamsGenerator {
         let paramType: string
         if (param.in === "query") {
           paramType = _parseQueryParamType(param as IQueryParameter)
-          // Check if this is a Serializer type that needs an import
-          if (paramType.endsWith('Serializer')) {
+          
+          // Check if this is a schema reference (enum or model)
+          const schema = (param as IQueryParameter).schema as any;
+          let refName: string | undefined;
+          
+          // Direct $ref
+          if (schema?.$ref) {
+            refName = schema.$ref.split('/').pop();
+          }
+          // anyOf with $ref (common for nullable enums)
+          else if (schema?.anyOf && Array.isArray(schema.anyOf)) {
+            const refType = schema.anyOf.find((t: any) => t.$ref);
+            if (refType) {
+              refName = refType.$ref.split('/').pop();
+            }
+          }
+          
+          if (refName) {
+            // For enums, import from constants, for models use models with Serializer
+            const isEnumType = this.isEnumType(refName);
+            requiredImports.add({
+              name: refName,
+              fileName: refName,
+              isEnum: isEnumType,
+            });
+            paramType = refName;
+          } else if (paramType.endsWith('Serializer')) {
+            // For serializer types
             const modelName = paramType.replace(/^I/, '').replace(/Serializer$/, '')
             requiredImports.add({
               name: paramType,
               fileName: modelName,
+              isEnum: false,
             })
           }
         } else if (param.in === "path") {

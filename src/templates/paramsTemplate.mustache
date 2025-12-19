@@ -1,5 +1,10 @@
 {{#imports}}
+{{#isEnum}}
+import { {{name}} } from '../constants/{{fileName}}';
+{{/isEnum}}
+{{^isEnum}}
 import { {{name}} } from '../models/{{fileName}}';
+{{/isEnum}}
 {{/imports}}
 
 {{#interfaces}}
