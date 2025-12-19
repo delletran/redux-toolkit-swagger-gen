@@ -31,13 +31,13 @@ export const {{operationId}} = createAsyncThunk(
   async ({{#paramInterface}}params: {{paramInterface}}{{/paramInterface}}{{^paramInterface}}{{^params}}_{{/params}}{{#params}}{{params}}: {{types}}{{/params}}{{/paramInterface}}, { rejectWithValue }) => {
     try {
       {{#paramInterface}}
-      const { {{params}}{{#hasRequestBody}}, body{{/hasRequestBody}} } = params;
+      const { {{paramsForDestructuring}}{{#hasRequestBody}}, body{{/hasRequestBody}} } = params;
       {{/paramInterface}}
       let endpoint = `{{{url}}}`;
-      {{#queryParams}}
-      const qs = toQueryString({ {{queryParams}} });
+      {{#queryParamsForObject}}
+      const qs = toQueryString({{queryParamsForObject}});
       if (qs) endpoint += `?${qs}`;
-      {{/queryParams}}
+      {{/queryParamsForObject}}
       const url = getApiUrl(endpoint);
       
       const response = await fetch(url, {

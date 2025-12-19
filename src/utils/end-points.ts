@@ -147,11 +147,13 @@ const getThunkEndpoint = (
     interface: endpoint.interface,
     modelName: endpoint.modelName,
     queryParams: endpoint.queryParams,
+    queryParamsForObject: endpoint.queryParamsArray.length > 0 ? `{ ${endpoint.queryParamsArray.join(', ')} }` : null,
     bodyParam: endpoint.body,
     hasRequestBody: hasRequestBody,
     pathParamsTyped: endpoint.pathParamsTyped,
     paramsTyped: endpoint.paramsTyped,
     params: endpoint.params,
+    paramsForDestructuring: endpoint.joinedParams.join(', '), // For destructuring in thunks
     types: endpoint.types,
     paramInterface: paramInterface,
     // Add flags for template conditional logic
@@ -331,12 +333,20 @@ class Endpoint {
     return param
   }
 
+  get joinedParams(): string[] {
+    return this._joinedParams
+  }
+
   get queryParams(): string | null {
     return this._queryParams.length > 1
       ? `{ ${this._queryParams.join(", ")} }`
       : this._queryParams.length == 1
       ? `${this._queryParams.join(", ")}`
       : null
+  }
+
+  get queryParamsArray(): string[] {
+    return this._queryParams
   }
 
   get body(): string | null {
