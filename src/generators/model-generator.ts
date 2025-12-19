@@ -15,6 +15,20 @@ const REGEX_PATTERN_MAP: Record<string, string> = {
   '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$': 'REGEX_DECIMAL_FLEXIBLE'
 }
 
+// List of known enum types
+const KNOWN_ENUM_TYPES = [
+  'EmploymentType',
+  'PayrollMethod',
+  'PersonStatus',
+  'ProjectStatus',
+  'ProjectType',
+  'RateType',
+  'ServiceCategory',
+  'SkillCategory',
+  'TESDALevel',
+  'UserRole',
+]
+
 const isEnumSchema = (schema: any): boolean => {
   return schema && schema.type === 'string' && Array.isArray(schema.enum) && schema.enum.length > 0
 }
@@ -26,15 +40,45 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
   if (property.$ref) {
     const refName = property.$ref.split("/").pop()
     nestedModels.add(refName)
+    // Wrap enums with z.enum() using Object.values
+    if (KNOWN_ENUM_TYPES.includes(refName)) {
+      return `z.enum(Object.values(${refName}) as [string, ...string[]])`
+    }
     return refName
   }
 
   // Handle OpenAPI 3.x anyOf and oneOf
   if (property.anyOf || property.oneOf) {
-    const unionTypes = (property.anyOf || property.oneOf).map((subSchema: any) => 
+    const schemas = property.anyOf || property.oneOf;
+    
+    // Check if this is a nullable pattern (ref/type + null)
+    const refSchema = schemas.find((s: any) => s.$ref);
+    const typeSchema = schemas.find((s: any) => s.type && s.type !== 'null');
+    const hasNull = schemas.some((s: any) => s.type === 'null');
+    
+    // Handle nullable reference (ref + null)
+    if (refSchema && hasNull && schemas.length === 2) {
+      const refName = refSchema.$ref.split("/").pop();
+      nestedModels.add(refName);
+      
+      if (KNOWN_ENUM_TYPES.includes(refName)) {
+        return `z.enum(Object.values(${refName}) as [string, ...string[]]).nullable()`;
+      }
+      return `${refName}.nullable()`;
+    }
+    
+    // Handle nullable type with format (e.g., datetime + null, uuid + null)
+    if (typeSchema && hasNull && schemas.length === 2) {
+      // Recursively get the zod type for the non-null schema
+      const baseZodType = getZodType(typeSchema, nestedModels, usedPatterns);
+      return `${baseZodType}.nullable()`;
+    }
+    
+    // Otherwise, handle as a union
+    const unionTypes = schemas.map((subSchema: any) => 
       getZodType(subSchema, nestedModels, usedPatterns)
     );
-    return `z.union([${unionTypes.join(', ')}])`
+    return `z.union([${unionTypes.join(', ')}])`;
   }
 
   const baseType = property.type
@@ -42,8 +86,15 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
 
   switch (baseType) {
     case "string":
-      zodType = "z.string()"
-      if (property.format === "date") {
+      // Handle special formats that have their own z.* methods
+      if (property.format === "date-time") {
+        zodType = "z.iso.datetime()"
+      } else if (property.format === "email") {
+        zodType = "z.email()"
+      } else if (property.format === "uri") {
+        zodType = "z.string().url()"
+      } else if (property.format === "date") {
+        zodType = "z.string()"
         const constName = REGEX_PATTERN_MAP['^\\d{4}-\\d{2}-\\d{2}$']
         if (constName) {
           usedPatterns.add(constName)
@@ -51,24 +102,22 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
         } else {
           zodType += ".regex(/^\\d{4}-\\d{2}-\\d{2}$/)"
         }
-      }
-      if (property.format === "date-time") 
-        zodType += ".datetime()"
-      if (property.format === "uri") zodType += ".url()"
-      if (property.format === "email") zodType += ".email()"
-      if (property.enum)
+      } else if (property.enum) {
         zodType = `z.enum([${property.enum
           .map((e: string) => `'${e}'`)
           .join(", ")}])`
-      if (property.maxLength) zodType += `.max(${property.maxLength})`
-      if (property.minLength) zodType += `.min(${property.minLength})`
-      if (property.pattern) {
-        const constName = REGEX_PATTERN_MAP[property.pattern]
-        if (constName) {
-          usedPatterns.add(constName)
-          zodType += `.regex(${constName})`
-        } else {
-          zodType += `.regex(/${property.pattern}/)`
+      } else {
+        zodType = "z.string()"
+        if (property.maxLength) zodType += `.max(${property.maxLength})`
+        if (property.minLength) zodType += `.min(${property.minLength})`
+        if (property.pattern) {
+          const constName = REGEX_PATTERN_MAP[property.pattern]
+          if (constName) {
+            usedPatterns.add(constName)
+            zodType += `.regex(${constName})`
+          } else {
+            zodType += `.regex(/${property.pattern}/)`
+          }
         }
       }
       break
@@ -165,10 +214,16 @@ const generateModelFileContent = (modelName: string, schema: any): string => {
     usedPatterns
   )
 
+  // Separate enum imports from model imports
+  const allNestedModels = Array.from(nestedModels)
+  const enumImports = allNestedModels.filter(name => KNOWN_ENUM_TYPES.includes(name))
+  const modelImports = allNestedModels.filter(name => !KNOWN_ENUM_TYPES.includes(name))
+
   return Mustache.render(modelTemplate, {
     modelName,
     properties,
-    nestedModels: Array.from(nestedModels),
+    nestedModels: modelImports,
+    enumImports: enumImports,
     hasRegexImport: usedPatterns.size > 0,
   })
 }
