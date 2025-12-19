@@ -9,7 +9,6 @@ import {{thunkName}} from '../thunks/{{path}}/{{sanitizedPath}}.thunk'
 {{/thunks}}
 import authReducer from '../../../src/lib/redux/authSlice'
 
-
 // Create a no-op storage for server-side rendering
 const createNoopStorage = () => {
   return {
@@ -25,10 +24,33 @@ const createNoopStorage = () => {
   }
 }
 
-// Use session storage on client, noop storage on server
+// Cookie storage implementation for redux-persist
+const createCookieStorage = () => {
+  return {
+    getItem: (key: string): Promise<string | null> => {
+      if (typeof document === 'undefined') return Promise.resolve(null)
+      const matches = document.cookie.match(new RegExp(
+        '(?:^|; )' + key.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)'
+      ))
+      return Promise.resolve(matches ? decodeURIComponent(matches[1]) : null)
+    },
+    setItem: (key: string, value: string): Promise<void> => {
+      if (typeof document === 'undefined') return Promise.resolve()
+      document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=2592000; SameSite=Lax`
+      return Promise.resolve()
+    },
+    removeItem: (key: string): Promise<void> => {
+      if (typeof document === 'undefined') return Promise.resolve()
+      document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      return Promise.resolve()
+    },
+  }
+}
+
+// Use cookie storage on client, noop storage on server
 const storage =
   typeof window !== 'undefined'
-    ? require('redux-persist/lib/storage/session').default
+    ? createCookieStorage()
     : createNoopStorage()
 
 const persistConfig = {
