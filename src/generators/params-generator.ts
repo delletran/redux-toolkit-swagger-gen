@@ -68,8 +68,10 @@ export class ParamsGenerator {
       }
 
       for (const [httpMethod, details] of Object.entries(methods)) {
-        if (this.isValidHttpMethod(httpMethod) && details.parameters) {
-          grouped[mainRoute][route] = details
+        if (this.isValidHttpMethod(httpMethod) && (details.parameters || details.requestBody)) {
+          // Create a unique key per route+method to distinguish between GET and PATCH operations
+          const routeKey = `${route}::${httpMethod}`;
+          grouped[mainRoute][routeKey] = details
         }
       }
     }
@@ -87,11 +89,15 @@ export class ParamsGenerator {
       const allInterfaces = []
       const imports = new Set<{ name: string; fileName: string; isEnum?: boolean }>()
 
-      for (const [route, details] of Object.entries(routes)) {
-        if (details.parameters) {
+      for (const [routeKey, details] of Object.entries(routes)) {
+        // Extract route and method from the combined key
+        const [route, httpMethod] = routeKey.split('::');
+        
+        if (details.parameters || details.requestBody) {
           const { interfaceData, requiredImports } = this.generateParamsContent(
             route,
-            details
+            details,
+            httpMethod
           )
           if (interfaceData && interfaceData.properties.length > 0) {
             allInterfaces.push(interfaceData)
@@ -124,7 +130,8 @@ export class ParamsGenerator {
   }
   private generateParamsContent(
     route: string,
-    details: MethodObjectType
+    details: MethodObjectType,
+    httpMethod?: string
   ): { interfaceData: any; requiredImports: Set<any> } {
     if (!details.parameters && !details.requestBody)
       return { interfaceData: null, requiredImports: new Set() }
@@ -142,7 +149,11 @@ export class ParamsGenerator {
       .slice(1)
       .map((part) => part.replace(/{|}/g, ""))
       .join("_")
-    const interfaceName = `I${toPascalCase(routeIdentifier)}Params`
+    
+    // Add HTTP method suffix to distinguish between GET and PATCH/POST/PUT operations
+    const methodSuffix = httpMethod ? toPascalCase(httpMethod) : '';
+    const interfaceName = `I${toPascalCase(routeIdentifier)}${methodSuffix}Params`
+    
     const requiredImports = new Set<{ name: string; fileName: string; isEnum?: boolean }>()
     const properties = []
 

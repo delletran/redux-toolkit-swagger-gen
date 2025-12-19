@@ -170,9 +170,9 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     const routeParts = ep.path.split('/').filter((p: string) => p && !p.startsWith('$'));
     const pathParamsFromUrl = (ep.path.match(/\$\{([^}]+)\}/g) || []).map((p: string) => p.replace(/\$\{|\}/g, ''));
     
-    // Build interface name including path param names
-    // e.g., /transactions/{branch_id} -> ITransactionsBranchIdParams
-    // e.g., /transactions/{transaction_id}/void -> ITransactionsTransactionIdVoidParams
+    // Build interface name including path param names and HTTP method
+    // e.g., GET /transactions/{branch_id} -> ITransactionsBranchIdGetParams
+    // e.g., PATCH /transactions/{transaction_id}/void -> ITransactionsTransactionIdVoidPatchParams
     let interfaceName = '';
     // Check both queryParams and params fields as they might be used differently for list vs non-list endpoints
     const hasQueryParams = (ep.queryParams != null && ep.queryParams !== '') || 
@@ -193,7 +193,10 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
           pathSegments.push(paramName);
         }
       });
-      interfaceName = `I${toPascalCase(pathSegments.join('_'))}Params`;
+      
+      // Add HTTP method suffix to distinguish between GET and PATCH/POST/PUT operations
+      const httpMethodSuffix = ep.httpMethod.charAt(0).toUpperCase() + ep.httpMethod.slice(1).toLowerCase();
+      interfaceName = `I${toPascalCase(pathSegments.join('_'))}${httpMethodSuffix}Params`;
       
       paramImports.set(interfaceName, {
         interface: interfaceName,
