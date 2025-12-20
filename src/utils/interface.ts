@@ -83,8 +83,8 @@ export const getNames = (details: ReduxApiEndpointType, apiBasePath?: string): {
   // If no response ref but have request body ref, use that instead
   const modelName = paramModelName || requestBodyModelName || '';
   
-  const interfaceName = ref ? `I${paramModelName}Serializer` : (requestBodyModelName ? `I${requestBodyModelName}Serializer` : 'unknown');
-  const requestBodyInterfaceName = requestBodyModelName ? `I${requestBodyModelName}Serializer` : interfaceName;  const paramName = ref ? `I${paramModelName}Param` : 'unknown';
+  const interfaceName = ref ? `I${paramModelName}Schema` : (requestBodyModelName ? `I${requestBodyModelName}Schema` : 'unknown');
+  const requestBodyInterfaceName = requestBodyModelName ? `I${requestBodyModelName}Schema` : interfaceName;  const paramName = ref ? `I${paramModelName}Param` : 'unknown';
 
   return { interfaceName, modelName, paramName, requestBodyModelName, requestBodyInterfaceName, isRequestBodyArray, isResponseArray };
 };

@@ -116,8 +116,8 @@ export const generateReduxSlices = async (
     const sliceName = cleanedName.replace(/Upsert$/, "").replace(/GetToAlter$/, "")
     const modelName = toPascalCase(cleanedName)
     const sliceFileName = toPascalCase(sliceName)
-    const uniqueImports = [{ interface: `I${modelName}Serializer`, modelName: modelName }]
-    const interfaceName = `I${modelName}Serializer`
+    const uniqueImports = [{ interface: `I${modelName}Schema`, modelName: modelName }]
+    const interfaceName = `I${modelName}Schema`
     const sliceContent = generateSliceFileContent(
       sliceName,
       cleanedName,

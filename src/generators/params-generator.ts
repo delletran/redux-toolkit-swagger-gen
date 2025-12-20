@@ -183,7 +183,7 @@ export class ParamsGenerator {
           }
           
           if (refName) {
-            // For enums, import from constants, for models use models with Serializer
+            // For enums, import from constants, for models use models with Schema
             const isEnumType = this.isEnumType(refName);
             requiredImports.add({
               name: refName,
@@ -191,9 +191,9 @@ export class ParamsGenerator {
               isEnum: isEnumType,
             });
             paramType = refName;
-          } else if (paramType.endsWith('Serializer')) {
-            // For serializer types
-            const modelName = paramType.replace(/^I/, '').replace(/Serializer$/, '')
+          } else if (paramType.endsWith('Schema')) {
+            // For schema types
+            const modelName = paramType.replace(/^I/, '').replace(/Schema$/, '')
             requiredImports.add({
               name: paramType,
               fileName: modelName,
@@ -216,12 +216,12 @@ export class ParamsGenerator {
           if (param.schema.$ref) {
             const refType = param.schema.$ref.split("/").pop() || ""
             const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
-            const serializerName = `I${toPascalCase(cleanedRefType)}Serializer`
+            const schemaName = `I${toPascalCase(cleanedRefType)}Schema`
             requiredImports.add({
-              name: serializerName,
+              name: schemaName,
               fileName: toPascalCase(cleanedRefType),
             })
-            paramType = serializerName
+            paramType = schemaName
           } else {
             paramType = "any"
           }
@@ -246,16 +246,16 @@ export class ParamsGenerator {
       if (schema?.$ref) {
         const refType = schema.$ref.split("/").pop() || ""
         const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
-        const serializerName = `I${toPascalCase(cleanedRefType)}Serializer`
+        const schemaName = `I${toPascalCase(cleanedRefType)}Schema`
         requiredImports.add({
-          name: serializerName,
+          name: schemaName,
           fileName: toPascalCase(cleanedRefType),
         })
 
         // Add the request body as a parameter
         properties.push({
           name: "body",
-          type: serializerName,
+          type: schemaName,
           optional: !details.requestBody.required,
         })
       }

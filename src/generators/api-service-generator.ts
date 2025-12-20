@@ -25,7 +25,7 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     }
     // Add request body interface if different from response
     if (ep.requestBodyModelName && ep.requestBodyModelName !== ep.modelName) {
-      const requestInterface = `I${ep.requestBodyModelName}Serializer`;
+      const requestInterface = `I${ep.requestBodyModelName}Schema`;
       importMap.set(`${requestInterface}|${ep.requestBodyModelName}`, { 
         interface: requestInterface, 
         modelName: ep.requestBodyModelName 
@@ -269,9 +269,9 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       // Only set requestBodyType if there's actually a request body
       if (hasRequestBody) {
         if (ep.requestBodyModelName) {
-          enhanced.requestBodyType = `I${ep.requestBodyModelName}Serializer`;
+          enhanced.requestBodyType = `I${ep.requestBodyModelName}Schema`;
         } else if (ep.modelName) {
-          enhanced.requestBodyType = `I${ep.modelName}Serializer`;
+          enhanced.requestBodyType = `I${ep.modelName}Schema`;
         }
       }
       
