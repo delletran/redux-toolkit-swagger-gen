@@ -37,10 +37,6 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
   // Generate param interface imports and enhanced endpoint data
   const paramImports = new Map();
   const endpoints = rawEndpoints.map((ep: any) => {
-    if (ep.path.includes('/users') && ep.httpMethod === 'get') {
-      console.log(`USER PATH: ${ep.path}, httpMethod=${ep.httpMethod}, queryParams=${ep.queryParams}, params=${ep.params}`);
-    }
-    
     // Create a new object with all original properties plus our additions
     const enhanced: any = {
       method: ep.method,
@@ -68,12 +64,26 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     // Extract meaningful operation names from path segments
     let cleanName = '';
     const pathForNaming = stripApiBasePath(ep.path);
-    const pathSegments = pathForNaming.split('/').filter((p: string) => p && !p.includes('{') && !p.startsWith('$'));
     
-    // Check for path params more reliably
+    // Split path and categorize segments
+    const allSegments = pathForNaming.split('/').filter((p: string) => p);
     const pathPattern = /[\$]?\{([^}]+)\}/g;
-    const paramMatches = ep.path.match(pathPattern);
-    const hasPathParams = paramMatches && paramMatches.length > 0;
+    
+    // Separate path segments into non-param and param segments, preserving order
+    const segmentInfo = allSegments.map((segment: string) => {
+      const isParam = segment.includes('{') || segment.startsWith('$');
+      const paramMatch = segment.match(/[\$]?\{([^}]+)\}/);
+      return {
+        original: segment,
+        isParam,
+        paramName: paramMatch ? paramMatch[1] : null,
+        value: isParam ? null : segment
+      };
+    });
+    
+    const nonParamSegments = segmentInfo.filter(s => !s.isParam).map(s => s.value!);
+    const paramNames = segmentInfo.filter(s => s.isParam).map(s => s.paramName!);
+    const hasPathParams = paramNames.length > 0;
     
     // Check if it's truly a list endpoint (returns paginated results or has isListEndpoint flag)
     // List endpoints have query params for pagination (limit, page)
@@ -82,81 +92,109 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     
     if (ep.isListEndpoint || (ep.isQuery && hasListQueryParams)) {
       // List endpoint: listTransactions, listUsers, etc.
-      // Check pagination first because it's more specific - even if it has path params
-      const mainResource = pathSegments[0];
-      cleanName = 'list' + toCamelCase(mainResource).charAt(0).toUpperCase() + toCamelCase(mainResource).slice(1);
+      // Use ALL non-param segments to create unique names
+      // e.g., /goals/units/ -> listGoalsUnits, /goals/templates/ -> listGoalsTemplates
+      const nameParts = nonParamSegments.map(seg => toPascalCase(seg));
+      cleanName = 'list' + nameParts.join('');
     } else if (ep.isQuery && hasPathParams) {
       // GET with path params (no pagination) - these are single resource retrieval
-      // e.g., GET /users/{username} -> getUserUsername
-      const mainResource = pathSegments[0];
-      const paramNames: string[] = [];
-      let match;
-      pathPattern.lastIndex = 0; // Reset regex
-      while ((match = pathPattern.exec(ep.path)) !== null) {
-        paramNames.push(match[1]);
-      }
-      const paramPart = paramNames.map((p: string) => toPascalCase(p).charAt(0).toUpperCase() + toPascalCase(p).slice(1)).join('');
-      const resourcePart = toPascalCase(mainResource).charAt(0).toUpperCase() + toPascalCase(mainResource).slice(1);
-      cleanName = 'get' + resourcePart + paramPart;
-    } else if (ep.isMutation) {
-      // For mutations, look for action verbs in the path
-      const lastSegment = pathSegments[pathSegments.length - 1];
-      const firstSegment = pathSegments[0];
+      // Build name from ALL segments, both before and after params
+      // e.g., GET /analytics/member/{member_id}/ltv -> getAnalyticsMemberMemberIdLtv
+      // e.g., GET /users/{username} -> getUsersUsername
+      const nameParts: string[] = [];
       
-      // Check if last segment is an action (like 'void', 'calculate', 'change-password')
-      if (pathSegments.length > 1 && lastSegment && !lastSegment.match(/^\d/)) {
-        // Pattern: /resource/{id}/action -> actionParamNameAction
-        // e.g., /transactions/{transaction_id}/void -> voidTransactionIdVoid
-        // /transactions/{branch_id}/calculate -> calculateBranchIdCalculate
-        // /users/{username}/change-password -> changePasswordUsernameChangePassword
-        const action = toCamelCase(lastSegment);
-        
-        // Extract just the path param names (not the segments)
-        const pathPattern = /\{([^}]+)\}/g;
-        const paramNames: string[] = [];
-        let match;
-        while ((match = pathPattern.exec(ep.path)) !== null) {
-          paramNames.push(match[1]);
+      segmentInfo.forEach((seg) => {
+        if (seg.isParam) {
+          // Add param name in PascalCase
+          nameParts.push(toPascalCase(seg.paramName!));
+        } else {
+          // Add segment value in PascalCase
+          nameParts.push(toPascalCase(seg.value!));
         }
-        
-        // Format: action + PathParamName + Action
-        // e.g., void + TransactionId + Void
-        const paramPart = paramNames.map(p => toPascalCase(p)).join('');
-        cleanName = action + paramPart + action.charAt(0).toUpperCase() + action.slice(1);
-      } else if (ep.httpMethod.toLowerCase() === 'post' && pathSegments.length === 1) {
-        // POST to /resource -> insertResource
-        cleanName = 'insert' + toCamelCase(firstSegment).charAt(0).toUpperCase() + toCamelCase(firstSegment).slice(1);
+      });
+      
+      cleanName = 'get' + nameParts.join('');
+    } else if (ep.isMutation) {
+      // For mutations, build name from all segments (both before and after params)
+      // e.g., POST /check-in -> checkInCheckIn
+      // e.g., POST /check-out/{member_id} -> checkOutMemberIdCheckOut
+      // e.g., PATCH /users/{username}/change-password -> changePasswordUsernameChangePassword
+      const lastNonParamSegment = nonParamSegments[nonParamSegments.length - 1];
+      const firstNonParamSegment = nonParamSegments[0];
+      
+      // Determine mutation type based on HTTP method and path structure
+      if (ep.httpMethod.toLowerCase() === 'post' && nonParamSegments.length === 1 && !hasPathParams) {
+        // Simple POST to /resource -> insertResource
+        cleanName = 'insert' + toCamelCase(firstNonParamSegment).charAt(0).toUpperCase() + toCamelCase(firstNonParamSegment).slice(1);
+      } else if (ep.httpMethod.toLowerCase() === 'put' && hasPathParams) {
+        // PUT with path params -> typically an update
+        // Build from first segment + params + last segment
+        const nameParts: string[] = [toPascalCase(firstNonParamSegment)];
+        paramNames.forEach(p => nameParts.push(toPascalCase(p)));
+        if (nonParamSegments.length > 1) {
+          nameParts.push(toPascalCase(lastNonParamSegment));
+        }
+        cleanName = toCamelCase(nameParts.join(''));
       } else if (ep.httpMethod.toLowerCase() === 'patch') {
-        // PATCH -> updateResource
-        cleanName = 'update' + toCamelCase(firstSegment).charAt(0).toUpperCase() + toCamelCase(firstSegment).slice(1);
+        // PATCH -> build full name from all segments
+        const nameParts: string[] = [];
+        segmentInfo.forEach((seg) => {
+          if (seg.isParam) {
+            nameParts.push(toPascalCase(seg.paramName!));
+          } else {
+            nameParts.push(toPascalCase(seg.value!));
+          }
+        });
+        cleanName = toCamelCase(nameParts.join(''));
       } else if (ep.httpMethod.toLowerCase() === 'delete') {
-        // DELETE -> deleteResource
-        cleanName = 'delete' + toCamelCase(firstSegment).charAt(0).toUpperCase() + toCamelCase(firstSegment).slice(1);
+        // DELETE -> deleteResource or more specific name
+        const nameParts: string[] = [];
+        segmentInfo.forEach((seg) => {
+          if (seg.isParam) {
+            nameParts.push(toPascalCase(seg.paramName!));
+          } else {
+            nameParts.push(toPascalCase(seg.value!));
+          }
+        });
+        cleanName = 'delete' + nameParts.join('');
       } else {
-        // Fallback: use all path segments
-        cleanName = toCamelCase(pathSegments.join('_'));
+        // Default: build name from all segments
+        // This handles cases like POST /check-in, POST /quick-check-in, POST /check-out/{member_id}
+        const nameParts: string[] = [];
+        segmentInfo.forEach((seg) => {
+          if (seg.isParam) {
+            nameParts.push(toPascalCase(seg.paramName!));
+          } else {
+            nameParts.push(toPascalCase(seg.value!));
+          }
+        });
+        cleanName = toCamelCase(nameParts.join(''));
       }
     } else {
-      // Regular endpoint: use path segments without params
+      // Regular endpoint: use all path segments including those after params
       // For GET requests without path params (like /users/me), use descriptive name
-      const pathWithoutParams = stripApiBasePath(ep.path)
-        .replace(/\$\{[^}]+\}/g, '') // Remove ${param}
-        .replace(/\/+/g, '/') // Remove double slashes
-        .replace(/^\//, '') // Remove leading slash
-        .replace(/\/$/, ''); // Remove trailing slash
+      const nameParts: string[] = [];
+      
+      segmentInfo.forEach((seg) => {
+        if (seg.isParam) {
+          nameParts.push(toPascalCase(seg.paramName!));
+        } else {
+          nameParts.push(toPascalCase(seg.value!));
+        }
+      });
       
       // For GET queries, prefix with 'get' or 'list'
       if (ep.isQuery && !ep.isListEndpoint) {
-        const segments = pathWithoutParams.split('/').filter((s: string) => s);
-        if (segments.length > 1) {
+        if (nameParts.length > 1 || hasPathParams) {
           // e.g., /users/me -> getUsersMe
-          cleanName = 'get' + segments.map((s: string) => toCamelCase(s).charAt(0).toUpperCase() + toCamelCase(s).slice(1)).join('');
+          // e.g., /analytics/retention -> getAnalyticsRetention
+          cleanName = 'get' + nameParts.join('');
         } else {
           // Single segment without list - treat as list
-          cleanName = 'list' + toCamelCase(segments[0]).charAt(0).toUpperCase() + toCamelCase(segments[0]).slice(1);
+          cleanName = 'list' + nameParts.join('');
         }
       } else {
-        cleanName = toCamelCase(pathWithoutParams.replace(/\//g, '_'));
+        cleanName = toCamelCase(nameParts.join(''));
       }
     }
     
@@ -210,19 +248,12 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       enhanced.pathParamsList = pathParamsFromUrl.join(', ');
       
       // For mutations: build list of all non-body param names for destructuring
+      // Only include PATH parameters here - query params go in query string
       if (enhanced.isMutation && enhanced.paramInterfaceName) {
         const allParamNames = [...pathParamsFromUrl];
         
-        // Extract query param names from the queryParams string
-        if (ep.queryParams) {
-          const queryParamStr = ep.queryParams.toString().trim();
-          // Remove curly braces and split by comma
-          const cleanedStr = queryParamStr.replace(/[{}]/g, '').trim();
-          if (cleanedStr) {
-            const queryParamNames = cleanedStr.split(',').map((p: string) => p.trim()).filter(Boolean);
-            allParamNames.push(...queryParamNames);
-          }
-        }
+        // Do NOT include query params in destructuring - they should be in URL query string
+        // Query params are handled separately in the template via toQueryString()
         
         enhanced.allNonBodyParams = allParamNames.length > 0 ? allParamNames.join(', ') : null;
       }
@@ -239,11 +270,39 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     
     // Patch endpoint for mutations
     if (enhanced.isMutation) {
-      const methodKey = Object.keys(methods).find(k => k.includes(ep.path));
-      const methodObj = methodKey ? methods[methodKey]?.methodObj : null;
+      // Access the method object using the path+method key
+      // Convert path params back from ${param} to {param} format to match methods keys
+      const normalizedPath = ep.path.replace(/\$\{([^}]+)\}/g, '{$1}');
+      const methodKey = `${normalizedPath}_${ep.httpMethod.toLowerCase()}`;
+      const methodObj = methods[methodKey]?.methodObj;
       
-      // Check if mutation has a request body (based on whether requestBodyModelName exists)
-      const hasRequestBody = !!ep.requestBodyModelName || !!ep.modelName;
+      // Check if mutation has a request body with actual schema $ref
+      // This matches the logic in params-generator which only adds body property when there's a $ref
+      let hasRequestBody = false;
+      let requestBodyRef: string | undefined;
+      
+      if (methodObj?.requestBody?.content) {
+        const firstContentType = Object.keys(methodObj.requestBody.content)[0];
+        const schema = methodObj.requestBody.content[firstContentType]?.schema;
+        
+        // Check for direct $ref, anyOf with $ref, or oneOf with $ref
+        if (schema?.$ref) {
+          hasRequestBody = true;
+          requestBodyRef = schema.$ref;
+        } else if (schema?.anyOf && Array.isArray(schema.anyOf)) {
+          const refItem = schema.anyOf.find((item: any) => item.$ref);
+          if (refItem) {
+            hasRequestBody = true;
+            requestBodyRef = refItem.$ref;
+          }
+        } else if (schema?.oneOf && Array.isArray(schema.oneOf)) {
+          const refItem = schema.oneOf.find((item: any) => item.$ref);
+          if (refItem) {
+            hasRequestBody = true;
+            requestBodyRef = refItem.$ref;
+          }
+        }
+      }
       
       // Determine content type from OpenAPI spec
       if (methodObj?.requestBody?.content) {
@@ -266,13 +325,17 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       enhanced.contentType = enhanced.contentType.replace(/&/g, '&amp;').replace(/\//g, '/');
       
       // Set correct request body type
-      // Only set requestBodyType if there's actually a request body
-      if (hasRequestBody) {
-        if (ep.requestBodyModelName) {
-          enhanced.requestBodyType = `I${ep.requestBodyModelName}Schema`;
-        } else if (ep.modelName) {
-          enhanced.requestBodyType = `I${ep.modelName}Schema`;
-        }
+      // Only set requestBodyType if there's actually a request body with $ref
+      if (hasRequestBody && requestBodyRef) {
+        // Extract model name from $ref (e.g., "#/components/schemas/ModuleUpdate" => "ModuleUpdate")
+        const modelName = requestBodyRef.split('/').pop() || '';
+        enhanced.requestBodyType = `I${toPascalCase(modelName)}Schema`;
+      } else if (hasRequestBody && ep.requestBodyModelName) {
+        // Fallback to existing logic if we have requestBodyModelName but no ref
+        enhanced.requestBodyType = `I${ep.requestBodyModelName}Schema`;
+      } else if (hasRequestBody && ep.modelName) {
+        // Final fallback
+        enhanced.requestBodyType = `I${ep.modelName}Schema`;
       }
       
       // For mutations with path params, set body destructuring flag

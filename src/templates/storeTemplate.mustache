@@ -7,7 +7,7 @@ import { {{name}} } from '../services/{{path}}/{{name}}'
 {{#thunks}}
 import {{thunkName}} from '../thunks/{{path}}/{{sanitizedPath}}.thunk'
 {{/thunks}}
-import authReducer from '../../../src/lib/redux/authSlice'
+import authReducer from '../../../src/store/redux/authSlice'
 
 // Create a no-op storage for server-side rendering
 const createNoopStorage = () => {

@@ -242,9 +242,29 @@ export class ParamsGenerator {
       const contentTypes = Object.keys(details.requestBody.content)
       const firstContentType = contentTypes[0]
       const schema = details.requestBody.content[firstContentType]?.schema
+      let refString: string | undefined
 
+      // Direct $ref
       if (schema?.$ref) {
-        const refType = schema.$ref.split("/").pop() || ""
+        refString = schema.$ref
+      }
+      // Handle Optional types (anyOf with $ref and null)
+      else if (schema?.anyOf && Array.isArray(schema.anyOf)) {
+        const refItem = schema.anyOf.find((item: any) => item.$ref)
+        if (refItem) {
+          refString = refItem.$ref
+        }
+      }
+      // Handle oneOf patterns
+      else if (schema?.oneOf && Array.isArray(schema.oneOf)) {
+        const refItem = schema.oneOf.find((item: any) => item.$ref)
+        if (refItem) {
+          refString = refItem.$ref
+        }
+      }
+
+      if (refString) {
+        const refType = refString.split("/").pop() || ""
         const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
         const schemaName = `I${toPascalCase(cleanedRefType)}Schema`
         requiredImports.add({

@@ -100,6 +100,8 @@ interface RequestBodyType {
         type?: string;
         properties?: any;
         items?: any;
+        anyOf?: any[];
+        oneOf?: any[];
       }
     }
   }
