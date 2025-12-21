@@ -5,7 +5,7 @@ import { loadTemplate } from '../utils/template-loader';
 
 const thunkTemplate = loadTemplate('thunkTemplate.mustache');
 
-export const thunkGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>, apiBasePath?: string): string => {
+export const thunkGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>, apiBasePath?: string, useAtAlias?: boolean): string => {
   const endpoints = EndpointFactory.getEndpoints('thunk', path, methods, undefined, apiBasePath);
 
   // Extract unique imports for interfaces
@@ -33,6 +33,7 @@ export const thunkGenerator = (path: string, methods: Record<string, ReduxApiEnd
     uniqueImports,
     uniqueParamImports,
     endpoints,
+    useAtAlias,
   };
 
   return Mustache.render(thunkTemplate, modelData);

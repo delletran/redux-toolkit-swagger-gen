@@ -1,7 +1,23 @@
 import { createSlice } from '@reduxjs/toolkit'
 {{#uniqueImports}}
-import { {{interface}} } from '../../models/{{modelName}}'
+{{#useAtAlias}}
+import { {{interface}} } from '@/api/models/{{{modelName}}}'
+{{/useAtAlias}}
+{{^useAtAlias}}
+import { {{interface}} } from '../../models/{{{modelName}}}'
+{{/useAtAlias}}
 {{/uniqueImports}}
+{{#useAtAlias}}
+import { REDUX } from '@/api/redux/constants'
+import {
+  clearFormErrorAction,
+  editFormErrorAction,
+  processFormAction,
+  setFormAction,
+  setFormErrorAction
+} from '@/api/redux/actions'
+{{/useAtAlias}}
+{{^useAtAlias}}
 import { REDUX } from '../../redux/constants'
 import {
   clearFormErrorAction,
@@ -10,6 +26,7 @@ import {
   setFormAction,
   setFormErrorAction
 } from '../../redux/actions'
+{{/useAtAlias}}
 
 export type I{{sliceNamePascalCase}}SliceState = IReduxFormState<{{interfaceName}}>
 

@@ -8,6 +8,34 @@ import { stripApiBasePath } from "../utils/name-cleaner"
 
 const sliceTemplate = loadTemplate("sliceTemplate.mustache")
 
+const getModelDomain = (modelName: string): string => {
+  const name = modelName.toLowerCase();
+  
+  if (/^(user|login|token|refresh|account|password)/.test(name)) return 'auth';
+  if (/^(member|membership)/.test(name)) return 'members';
+  if (/^(attendance|checkin|checkout)/.test(name)) return 'attendance';
+  if (/^(transaction|payment)/.test(name)) return 'transactions';
+  if (/^branch/.test(name)) return 'branches';
+  if (/^lead/.test(name)) return 'leads';
+  if (/^(goal|unit)/.test(name)) return 'goals';
+  if (/^(discount|referral)/.test(name)) return 'discounts';
+  if (/^expense/.test(name)) return 'expenses';
+  if (/^(product|inventory|stock|sale)/.test(name)) return 'products';
+  if (/^(role|permission|module|submodule|department)/.test(name)) return 'permissions';
+  if (/^notification/.test(name)) return 'notifications';
+  if (/^(report|profit|revenue|export)/.test(name)) return 'reports';
+  if (/^(analytics|churn|retention|cohort|segment|ltv|engagement|atrisk|renewal|prediction)/.test(name)) return 'analytics';
+  if (/^(setting|systemconfiguration|category)/.test(name)) return 'settings';
+  if (/^(file|upload)/.test(name)) return 'files';
+  if (/^(billing|schedule|upcoming)/.test(name)) return 'billing';
+  if (/^(paymentintent|paymentstatus|cardtokenize|refund)/.test(name)) return 'payment-gateway';
+  if (/^training/.test(name)) return 'training';
+  if (/^dashboard/.test(name)) return 'dashboard';
+  if (/^(validation|http|body_|app_schemas_|app__)/.test(name)) return 'common';
+  
+  return 'common';
+}
+
 const toKebabCase = (str: string): string => {
   return str.replace(/[_\s]+/g, '-').replace(/([A-Z])/g, (g) => '-' + g.toLowerCase()).replace(/^-/, '')
 }
@@ -16,7 +44,9 @@ const generateSliceFileContent = (
   sliceName: string,
   schemaName: string,
   uniqueImports: any[],
-  interfaceName: string
+  interfaceName: string,
+  useAtAlias?: boolean,
+  modelDomain?: string
 ): string => {
   return Mustache.render(sliceTemplate, {
     sliceName,
@@ -27,6 +57,8 @@ const generateSliceFileContent = (
     sliceNamePascalCase: toPascalCase(sliceName),
     sliceNameKebabCase: toKebabCase(sliceName),
     uniqueImports,
+    useAtAlias,
+    modelDomain,
   })
 }
 
@@ -79,7 +111,8 @@ const updateConstantsFile = (
 export const generateReduxSlices = async (
   definitions: any,
   outputDir: string,
-  apiBasePath?: string
+  apiBasePath?: string,
+  useAtAlias?: boolean
 ): Promise<void> => {
   const slicesDir = path.resolve(outputDir, "slices")
   if (!fs.existsSync(slicesDir)) {
@@ -116,44 +149,25 @@ export const generateReduxSlices = async (
     const sliceName = cleanedName.replace(/Upsert$/, "").replace(/GetToAlter$/, "")
     const modelName = toPascalCase(cleanedName)
     const sliceFileName = toPascalCase(sliceName)
-    const uniqueImports = [{ interface: `I${modelName}Schema`, modelName: modelName }]
+    
+    // Get domain for the model to construct correct import path
+    const modelDomain = getModelDomain(cleanedName)
+    const modelPath = `${modelDomain}/${modelName}`
+    
+    const uniqueImports = [{ interface: `I${modelName}Schema`, modelName: modelPath }]
     const interfaceName = `I${modelName}Schema`
+    
+    // Use domain-based classification for slice directory
+    const subDir = modelDomain
+    
     const sliceContent = generateSliceFileContent(
       sliceName,
       cleanedName,
       uniqueImports,
-      interfaceName
+      interfaceName,
+      useAtAlias,
+      subDir
     )
-    
-    // Determine subdirectory based on slice type to match thunks structure
-    let subDir = ''
-    if (sliceName.match(/^(Client)/i)) {
-      subDir = 'clients'
-    } else if (sliceName.match(/^(Partner)/i)) {
-      subDir = 'partners'
-    } else if (sliceName.match(/^(Consultant)/i)) {
-      subDir = 'consultants'
-    } else if (sliceName.match(/^(Professional)/i)) {
-      subDir = 'professionals'
-    } else if (sliceName.match(/^(Subcontractor)/i)) {
-      subDir = 'subcontractors'
-    } else if (sliceName.match(/^(ManpowerEmployee)/i)) {
-      subDir = 'manpower'
-    } else if (sliceName.match(/^(SkilledWorker)/i)) {
-      subDir = 'skilled-workers'
-    } else if (sliceName.match(/^(Project)/i)) {
-      subDir = 'projects'
-    } else if (sliceName.match(/^(Portfolio)/i)) {
-      subDir = 'portfolio'
-    } else if (sliceName.match(/^(Service)/i)) {
-      subDir = 'services'
-    } else if (sliceName.match(/^(Document|Body.*Document)/i)) {
-      subDir = 'documents'
-    } else if (sliceName.match(/^(Login|Token|RefreshToken|User)/i)) {
-      subDir = 'auth'
-    } else {
-      subDir = 'common'
-    }
     
     const targetDir = path.join(slicesDir, subDir)
     if (!fs.existsSync(targetDir)) {

@@ -232,7 +232,7 @@ const main = async () => {
           const thunksDir = path.join(thunkDir, route)
           fs.mkdirSync(thunksDir, { recursive: true })
           
-          const thunk = thunkGenerator(route, methods, apiBasePath)
+          const thunk = thunkGenerator(route, methods, apiBasePath, argv["use@"])
           fs.writeFileSync(path.join(thunksDir, `${fileName}.thunk.ts`), thunk)
           subFolders.add(thunksDir)
         }
@@ -297,7 +297,7 @@ const main = async () => {
 
     log("Generating Redux slices...")
     if (!argv.exclude.includes("slices")) {
-      await generateReduxSlices(definitions, outputDir, apiBasePath)
+      await generateReduxSlices(definitions, outputDir, apiBasePath, argv["use@"])
     } else {
       log("Skipping Redux slices generation (excluded)")
     }    log("Generating Redux hooks and store...")

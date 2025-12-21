@@ -1,16 +1,32 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 // import type { PayloadAction } from '@reduxjs/toolkit';
 // import { IFilters } from '../../redux/types';
+{{#useAtAlias}}
+import { toQueryString } from '@/api/redux/query';
+import { getApiUrl } from '@/api/redux/config/api';
+{{/useAtAlias}}
+{{^useAtAlias}}
 import { toQueryString } from '../../redux/query';
 import { getApiUrl } from '../../redux/config/api';
+{{/useAtAlias}}
 
 {{#uniqueImports}}
 {{#modelName}}
+{{#useAtAlias}}
+import { {{interface}} } from '@/api/models/{{modelName}}';
+{{/useAtAlias}}
+{{^useAtAlias}}
 import { {{interface}} } from '../../models/{{modelName}}';
+{{/useAtAlias}}
 {{/modelName}}
 {{/uniqueImports}}
 {{#uniqueParamImports}}
+{{#useAtAlias}}
+import { {{paramInterface}} } from '@/api/params/{{paramPath}}.params';
+{{/useAtAlias}}
+{{^useAtAlias}}
 import { {{paramInterface}} } from '../../params/{{paramPath}}.params';
+{{/useAtAlias}}
 {{/uniqueParamImports}}
 
 interface {{sliceName}}State {
