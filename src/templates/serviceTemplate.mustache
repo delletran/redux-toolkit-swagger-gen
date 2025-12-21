@@ -8,9 +8,14 @@ import { API_CONFIG, getApiUrl } from '../../redux/config/api';
 // import { IFilters } from '../../redux/types';
 
 {{#uniqueImports}}
+{{#importPath}}
+import { {{interface}} } from '../../models/{{{importPath}}}';
+{{/importPath}}
+{{^importPath}}
 {{#modelName}}
 import { {{interface}} } from '../../models/{{modelName}}';
 {{/modelName}}
+{{/importPath}}
 {{/uniqueImports}}
 {{#uniqueParamImports}}
 {{#modelName}}

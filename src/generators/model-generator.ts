@@ -5,6 +5,77 @@ import { loadTemplate } from "../utils/template-loader"
 import { toPascalCase } from "../utils/formater"
 import { stripApiBasePath } from "../utils/name-cleaner"
 
+// Model domain mapping based on naming patterns
+const getModelDomain = (modelName: string): string => {
+  const name = modelName.toLowerCase();
+  
+  // Authentication & Users
+  if (/^(user|login|token|refresh|account|password)/.test(name)) return 'auth';
+  
+  // Members
+  if (/^(member|membership)/.test(name)) return 'members';
+  
+  // Attendance
+  if (/^(attendance|checkin|checkout)/.test(name)) return 'attendance';
+  
+  // Transactions & Payments
+  if (/^(transaction|payment)/.test(name)) return 'transactions';
+  
+  // Branches
+  if (/^branch/.test(name)) return 'branches';
+  
+  // Leads
+  if (/^lead/.test(name)) return 'leads';
+  
+  // Goals
+  if (/^(goal|unit)/.test(name)) return 'goals';
+  
+  // Discounts & Referrals
+  if (/^(discount|referral)/.test(name)) return 'discounts';
+  
+  // Expenses
+  if (/^expense/.test(name)) return 'expenses';
+  
+  // Products & Inventory
+  if (/^(product|inventory|stock|sale)/.test(name)) return 'products';
+  
+  // Roles & Permissions
+  if (/^(role|permission|module|submodule|department)/.test(name)) return 'permissions';
+  
+  // Notifications
+  if (/^notification/.test(name)) return 'notifications';
+  
+  // Reports
+  if (/^(report|profit|revenue|export)/.test(name)) return 'reports';
+  
+  // Analytics
+  if (/^(analytics|churn|retention|cohort|segment|ltv|engagement|atrisk|renewal|prediction)/.test(name)) return 'analytics';
+  
+  // Settings
+  if (/^(setting|systemconfiguration|category)/.test(name)) return 'settings';
+  
+  // Files
+  if (/^(file|upload)/.test(name)) return 'files';
+  
+  // Billing & Automation
+  if (/^(billing|schedule|upcoming)/.test(name)) return 'billing';
+  
+  // Payment Gateway
+  if (/^(paymentintent|paymentstatus|cardtokenize|refund)/.test(name)) return 'payment-gateway';
+  
+  // Training
+  if (/^training/.test(name)) return 'training';
+  
+  // Common/Shared (validation errors, body schemas, etc.)
+  if (/^(validation|http|body_|app_schemas_|app__)/.test(name)) return 'common';
+  
+  // Dashboard
+  if (/^dashboard/.test(name)) return 'dashboard';
+  
+  // Default to common for everything else
+  return 'common';
+}
+
 const modelTemplate = loadTemplate("modelTemplate.mustache")
 const enumTemplate = loadTemplate("enumTemplate.mustache")
 
@@ -190,7 +261,7 @@ const generateEnumFileContent = (enumName: string, schema: any): string => {
   })
 }
 
-const generateModelFileContent = (modelName: string, schema: any): string => {
+const generateModelFileContent = (modelName: string, schema: any, currentDomain: string, knownEnumTypes: string[]): string => {
   if (!schema) {
     console.warn(`Warning: Empty schema for model ${modelName}`)
     return Mustache.render(modelTemplate, {
@@ -217,13 +288,32 @@ const generateModelFileContent = (modelName: string, schema: any): string => {
 
   // Separate enum imports from model imports
   const allNestedModels = Array.from(nestedModels)
-  const enumImports = allNestedModels.filter(name => KNOWN_ENUM_TYPES.includes(name))
-  const modelImports = allNestedModels.filter(name => !KNOWN_ENUM_TYPES.includes(name))
+  const enumImports = allNestedModels.filter(name => knownEnumTypes.includes(name))
+  const modelImports = allNestedModels.filter(name => !knownEnumTypes.includes(name))
+  
+  // Generate import paths for nested models based on their domain
+  const nestedModelImports = modelImports.map(nestedModelName => {
+    const targetDomain = getModelDomain(nestedModelName)
+    let importPath: string
+    
+    if (targetDomain === currentDomain) {
+      // Same domain - use relative import in same directory
+      importPath = `./${nestedModelName}`
+    } else {
+      // Different domain - navigate up and into target domain
+      importPath = `../${targetDomain}/${nestedModelName}`
+    }
+    
+    return {
+      name: nestedModelName,
+      importPath: importPath
+    }
+  })
 
   return Mustache.render(modelTemplate, {
     modelName,
     properties,
-    nestedModels: modelImports,
+    nestedModels: nestedModelImports,
     enumImports: enumImports,
     hasRegexImport: usedPatterns.size > 0,
   })
@@ -252,6 +342,22 @@ export const generateModels = async (
   // Track all used patterns across all models with their actual regex patterns
   const allUsedPatterns = new Map<string, string>()
   const enumDefinitions: Array<{ name: string; content: string }> = []
+  // Track domain directories created
+  const createdDomains = new Set<string>()
+  
+  // First pass: Identify all enums
+  const enumNames = new Set<string>()
+  for (const [name, schema] of Object.entries(definitions)) {
+    if (!schema) continue
+    const cleanedName = stripApiBasePath(name, apiBasePath);
+    const cleanName = toPascalCase(cleanedName)
+    if (isEnumSchema(schema)) {
+      enumNames.add(cleanName)
+    }
+  }
+  
+  // Update KNOWN_ENUM_TYPES to include all detected enums
+  const KNOWN_ENUM_TYPES_RUNTIME = Array.from(enumNames)
 
   // Generate models and collect enums
   for (const [name, schema] of Object.entries(definitions)) {
@@ -261,14 +367,27 @@ export const generateModels = async (
     }
     const cleanedName = stripApiBasePath(name, apiBasePath);
     const cleanName = toPascalCase(cleanedName)
-    const modelContent = generateModelFileContent(cleanName, schema)
+    
+    // Determine domain for this model first (needed for generateModelFileContent)
+    const domain = getModelDomain(cleanName)
+    const modelContent = generateModelFileContent(cleanName, schema, domain, KNOWN_ENUM_TYPES_RUNTIME)
     
     // Check if this is an enum and save to constants dir
     if (isEnumSchema(schema)) {
       enumDefinitions.push({ name: cleanName, content: modelContent })
     } else {
-      // Regular models go to models dir
-      fs.writeFileSync(path.join(modelsDir, `${cleanName}.ts`), modelContent)
+      const domainDir = path.join(modelsDir, domain)
+      
+      // Create domain directory if it doesn't exist
+      if (!createdDomains.has(domain)) {
+        if (!fs.existsSync(domainDir)) {
+          fs.mkdirSync(domainDir, { recursive: true })
+        }
+        createdDomains.add(domain)
+      }
+      
+      // Write model to domain subdirectory
+      fs.writeFileSync(path.join(domainDir, `${cleanName}.ts`), modelContent)
     }
     
     // Extract patterns used in this model and find their regex
