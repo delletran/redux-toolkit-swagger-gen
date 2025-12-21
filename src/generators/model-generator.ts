@@ -35,16 +35,16 @@ const isEnumSchema = (schema: any): boolean => {
   return schema && schema.type === 'string' && Array.isArray(schema.enum) && schema.enum.length > 0
 }
 
-const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<string>): string => {
+const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<string>, knownEnumTypes: string[]): string => {
   if (!property) return "z.any()"
 
   // Handle $ref references
   if (property.$ref) {
     const refName = property.$ref.split("/").pop()
     nestedModels.add(refName)
-    // Wrap enums with z.enum() using Object.values
-    if (KNOWN_ENUM_TYPES.includes(refName)) {
-      return `z.enum(Object.values(${refName}) as [string, ...string[]])`
+    // Wrap enums with z.enum() for TypeScript enums
+    if (knownEnumTypes.includes(refName)) {
+      return `z.enum(${refName})`
     }
     return refName
   }
@@ -63,8 +63,8 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
       const refName = refSchema.$ref.split("/").pop();
       nestedModels.add(refName);
       
-      if (KNOWN_ENUM_TYPES.includes(refName)) {
-        return `z.enum(Object.values(${refName}) as [string, ...string[]]).nullable()`;
+      if (knownEnumTypes.includes(refName)) {
+        return `z.enum(${refName}).nullable()`;
       }
       return `${refName}.nullable()`;
     }
@@ -72,13 +72,13 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
     // Handle nullable type with format (e.g., datetime + null, uuid + null)
     if (typeSchema && hasNull && schemas.length === 2) {
       // Recursively get the zod type for the non-null schema
-      const baseZodType = getZodType(typeSchema, nestedModels, usedPatterns);
+      const baseZodType = getZodType(typeSchema, nestedModels, usedPatterns, knownEnumTypes);
       return `${baseZodType}.nullable()`;
     }
     
     // Otherwise, handle as a union
     const unionTypes = schemas.map((subSchema: any) => 
-      getZodType(subSchema, nestedModels, usedPatterns)
+      getZodType(subSchema, nestedModels, usedPatterns, knownEnumTypes)
     );
     return `z.union([${unionTypes.join(', ')}])`;
   }
@@ -133,7 +133,7 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
       zodType = "z.boolean()"
       break
     case "array":
-      const itemType = getZodType(property.items, nestedModels, usedPatterns)
+      const itemType = getZodType(property.items, nestedModels, usedPatterns, knownEnumTypes)
       zodType = `z.array(${itemType})`
       break
     case "object":
@@ -141,7 +141,7 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
         // Handle nested objects
         const nestedProps = Object.entries(property.properties).map(
           ([propName, propSchema]: [string, any]) => {
-            const propType = getZodType(propSchema, nestedModels, usedPatterns);
+            const propType = getZodType(propSchema, nestedModels, usedPatterns, knownEnumTypes);
             const isRequired = Array.isArray(property.required) && property.required.includes(propName);
             return `${propName}: ${propType}${isRequired ? '' : '.optional()'}`;
           }
@@ -164,18 +164,23 @@ const generateProperties = (
   properties: any = {},
   required: string[] = [],
   nestedModels: Set<string>,
-  usedPatterns: Set<string>
+  usedPatterns: Set<string>,
+  knownEnumTypes: string[]
 ): any[] => {
   if (!properties) return []
 
-  return Object.entries(properties).map(([name, prop]: [string, any]) => ({
-    name,
-    zodType: getZodType(prop, nestedModels, usedPatterns),
-    isRef: prop && prop.$ref ? true : false,
-    isOptional:
-      !prop || prop["x-nullable"] === true || !required.includes(name),
-    refName: prop && prop.$ref ? prop.$ref.split("/").pop() : null,
-  }))
+  return Object.entries(properties).map(([name, prop]: [string, any]) => {
+    const refName = prop && prop.$ref ? prop.$ref.split("/").pop() : null;
+    const isEnum = refName && knownEnumTypes.includes(refName);
+    return {
+      name,
+      zodType: getZodType(prop, nestedModels, usedPatterns, knownEnumTypes),
+      isRef: prop && prop.$ref && !isEnum ? true : false,
+      isOptional:
+        !prop || prop["x-nullable"] === true || !required.includes(name),
+      refName: refName,
+    };
+  })
 }
 
 const generateEnumFileContent = (enumName: string, schema: any): string => {
@@ -191,7 +196,7 @@ const generateEnumFileContent = (enumName: string, schema: any): string => {
   })
 }
 
-const generateModelFileContent = (modelName: string, schema: any, currentDomain: string, knownEnumTypes: string[]): string => {
+const generateModelFileContent = (modelName: string, schema: any, currentDomain: string, knownEnumTypes: string[], useAtAlias?: boolean): string => {
   if (!schema) {
     console.warn(`Warning: Empty schema for model ${modelName}`)
     return Mustache.render(modelTemplate, {
@@ -213,7 +218,8 @@ const generateModelFileContent = (modelName: string, schema: any, currentDomain:
     schema.properties,
     Array.isArray(schema.required) ? schema.required : [],
     nestedModels,
-    usedPatterns
+    usedPatterns,
+    knownEnumTypes
   )
 
   // Separate enum imports from model imports
@@ -226,7 +232,10 @@ const generateModelFileContent = (modelName: string, schema: any, currentDomain:
     const targetDomain = getModelDomain(nestedModelName)
     let importPath: string
     
-    if (targetDomain === currentDomain) {
+    if (useAtAlias) {
+      // Use @ alias import
+      importPath = `@/api/models/${targetDomain}/${nestedModelName}`
+    } else if (targetDomain === currentDomain) {
       // Same domain - use relative import in same directory
       importPath = `./${nestedModelName}`
     } else {
@@ -240,12 +249,15 @@ const generateModelFileContent = (modelName: string, schema: any, currentDomain:
     }
   })
 
+  const constantsImportPrefix = useAtAlias ? '@/api/constants' : '../../constants';
+
   return Mustache.render(modelTemplate, {
     modelName,
     properties,
     nestedModels: nestedModelImports,
     enumImports: enumImports,
     hasRegexImport: usedPatterns.size > 0,
+    constantsImportPrefix: constantsImportPrefix,
   })
 }
 
@@ -253,7 +265,8 @@ export const generateModels = async (
   definitions: any,
   outputDir: string,
   apiBasePath?: string,
-  openApiSpec?: any
+  openApiSpec?: any,
+  useAtAlias?: boolean
 ): Promise<void> => {
   if (!definitions || typeof definitions !== "object") {
     console.warn("Warning: No definitions found in swagger file")
@@ -303,7 +316,7 @@ export const generateModels = async (
     
     // Determine domain using ORIGINAL schema name from OpenAPI spec
     const domain = getModelDomain(name)
-    const modelContent = generateModelFileContent(cleanName, schema, domain, KNOWN_ENUM_TYPES_RUNTIME)
+    const modelContent = generateModelFileContent(cleanName, schema, domain, KNOWN_ENUM_TYPES_RUNTIME, useAtAlias)
     
     // Check if this is an enum and save to constants dir
     if (isEnumSchema(schema)) {

@@ -5,6 +5,7 @@ import { toPascalCase } from "../utils/formater"
 import { _parsePathParamType, _parseQueryParamType } from "../utils/params"
 import { loadTemplate } from "../utils/template-loader"
 import { stripApiBasePath } from "../utils/name-cleaner"
+import { getModelDomain } from "../utils/domain-classifier"
 
 interface IPaths {
   [key: string]: {
@@ -38,11 +39,13 @@ export class ParamsGenerator {
   private readonly outputDir: string
   private readonly paths: IPaths
   private readonly apiBasePath?: string
+  private readonly useAtAlias?: boolean
 
-  constructor(paths: IPaths, outputDir: string, apiBasePath?: string) {
+  constructor(paths: IPaths, outputDir: string, apiBasePath?: string, useAtAlias?: boolean) {
     this.paths = paths
     this.outputDir = outputDir
     this.apiBasePath = apiBasePath
+    this.useAtAlias = useAtAlias
   }
 
   private isEnumType(typeName: string): boolean {
@@ -116,9 +119,14 @@ export class ParamsGenerator {
       }
 
       if (allInterfaces.length > 0) {
+        const constantsImportPrefix = this.useAtAlias ? '@/api/constants' : '../constants';
+        const modelsImportPrefix = this.useAtAlias ? '@/api/models' : '../models';
+        
         const content = Mustache.render(paramsTemplate, {
           imports: Array.from(imports),
           interfaces: allInterfaces,
+          constantsImportPrefix: constantsImportPrefix,
+          modelsImportPrefix: modelsImportPrefix,
         })
         const fileName = `${group}.params.ts`
         fs.writeFileSync(path.join(paramsDir, fileName), content)
@@ -185,18 +193,20 @@ export class ParamsGenerator {
           if (refName) {
             // For enums, import from constants, for models use models with Schema
             const isEnumType = this.isEnumType(refName);
+            const fileName = isEnumType ? refName : (this.useAtAlias ? `${getModelDomain(refName)}/${refName}` : refName);
             requiredImports.add({
               name: refName,
-              fileName: refName,
+              fileName: fileName,
               isEnum: isEnumType,
             });
             paramType = refName;
           } else if (paramType.endsWith('Schema')) {
             // For schema types
             const modelName = paramType.replace(/^I/, '').replace(/Schema$/, '')
+            const fileName = this.useAtAlias ? `${getModelDomain(modelName)}/${modelName}` : modelName;
             requiredImports.add({
               name: paramType,
-              fileName: modelName,
+              fileName: fileName,
               isEnum: false,
             })
           }
@@ -216,10 +226,12 @@ export class ParamsGenerator {
           if (param.schema.$ref) {
             const refType = param.schema.$ref.split("/").pop() || ""
             const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
-            const schemaName = `I${toPascalCase(cleanedRefType)}Schema`
+            const modelName = toPascalCase(cleanedRefType);
+            const schemaName = `I${modelName}Schema`
+            const fileName = this.useAtAlias ? `${getModelDomain(refType)}/${modelName}` : modelName;
             requiredImports.add({
               name: schemaName,
-              fileName: toPascalCase(cleanedRefType),
+              fileName: fileName,
             })
             paramType = schemaName
           } else {
@@ -266,10 +278,12 @@ export class ParamsGenerator {
       if (refString) {
         const refType = refString.split("/").pop() || ""
         const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
-        const schemaName = `I${toPascalCase(cleanedRefType)}Schema`
+        const modelName = toPascalCase(cleanedRefType);
+        const schemaName = `I${modelName}Schema`
+        const fileName = this.useAtAlias ? `${getModelDomain(refType)}/${modelName}` : modelName;
         requiredImports.add({
           name: schemaName,
-          fileName: toPascalCase(cleanedRefType),
+          fileName: fileName,
         })
 
         // Add the request body as a parameter

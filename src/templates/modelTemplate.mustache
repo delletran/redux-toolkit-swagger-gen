@@ -1,9 +1,9 @@
 import { z } from 'zod';
 {{#hasRegexImport}}
-import { REGEX_DATE, REGEX_TIME, REGEX_TIME_24, REGEX_DATETIME_ISO, REGEX_DECIMAL, REGEX_DECIMAL_RESTRICTED, REGEX_DECIMAL_11_4, REGEX_DECIMAL_6_4, REGEX_DECIMAL_FLEXIBLE } from '../../constants/regex-constants';
+import { REGEX_DATE, REGEX_TIME, REGEX_TIME_24, REGEX_DATETIME_ISO, REGEX_DECIMAL, REGEX_DECIMAL_RESTRICTED, REGEX_DECIMAL_11_4, REGEX_DECIMAL_6_4, REGEX_DECIMAL_FLEXIBLE } from '{{{constantsImportPrefix}}}/regex-constants';
 {{/hasRegexImport}}
 {{#enumImports}}
-import { {{.}} } from '../../constants/{{.}}';
+import { {{.}} } from '{{{constantsImportPrefix}}}/{{.}}';
 {{/enumImports}}
 {{#nestedModels}}
 import { {{name}} } from '{{{importPath}}}';

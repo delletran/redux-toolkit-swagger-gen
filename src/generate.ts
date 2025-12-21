@@ -285,7 +285,7 @@ const main = async () => {
     buildDomainMappings(swagger, apiBasePath)
 
     log("Generating models...")
-    await generateModels(definitions, outputDir, apiBasePath, swagger)
+    await generateModels(definitions, outputDir, apiBasePath, swagger, argv["use@"])
 
     log("Generating tags...")
     const tagsContent = generateTags(paths, apiBasePath)
@@ -295,7 +295,7 @@ const main = async () => {
     const mainRoutes = generateServices(paths, definitions, true, apiBasePath)
 
     log("Generating parameters...")
-    const paramsGenerator = new ParamsGenerator(paths, outputDir, apiBasePath)
+    const paramsGenerator = new ParamsGenerator(paths, outputDir, apiBasePath, argv["use@"])
     paramsGenerator.generate()
 
     log("Generating Redux slices...")

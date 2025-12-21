@@ -1,9 +1,9 @@
 {{#imports}}
 {{#isEnum}}
-import { {{name}} } from '../constants/{{fileName}}';
+import { {{name}} } from '{{{constantsImportPrefix}}}/{{{fileName}}}';
 {{/isEnum}}
 {{^isEnum}}
-import { {{name}} } from '../models/{{fileName}}';
+import { {{name}} } from '{{{modelsImportPrefix}}}/{{{fileName}}}';
 {{/isEnum}}
 {{/imports}}
 
