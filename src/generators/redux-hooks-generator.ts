@@ -22,7 +22,8 @@ export const generateReduxStore = (
   excludeOptions: string[] = [],
   apiBaseUrl?: string,
   reduxPath?: string,
-  apiRelativePath?: string
+  apiRelativePath?: string,
+  useAtAlias?: boolean
 ): void => {
   // If apiRelativePath is provided, we're generating to a custom redux location
   // so don't append 'redux' subdirectory
@@ -53,16 +54,26 @@ export const generateReduxStore = (
   });
 
   // Determine import prefix based on whether this is for the redux directory or API directory
-  const importPrefix = apiRelativePath ? `${apiRelativePath}/` : '../';
-  const authSliceImport = apiRelativePath ? './authSlice' : `../../../${reduxPath}/authSlice`;
+  let importPrefix: string;
+  let authSliceImport: string;
+  
+  if (useAtAlias) {
+    // Use @ alias imports
+    importPrefix = '@/api/';
+    authSliceImport = apiRelativePath ? './authSlice' : `@/${reduxPath}/authSlice`;
+  } else {
+    // Use relative imports
+    importPrefix = apiRelativePath ? `${apiRelativePath}/` : '../';
+    authSliceImport = apiRelativePath ? './authSlice' : `../../../${reduxPath}/authSlice`;
+  }
 
   const storeContent = Mustache.render(storeTemplate, {
     services: serviceList,
     thunks: thunkList,
     apiBaseUrl: apiBaseUrl || '',
     reduxPath: reduxPath || 'src/store/redux',
-    importPrefix: importPrefix || '../',
-    authSliceImport: authSliceImport || `../../../${reduxPath || 'src/store/redux'}/authSlice`,
+    importPrefix: importPrefix,
+    authSliceImport: authSliceImport,
   });
 
   fs.writeFileSync(path.join(reduxDir, "store.ts"), storeContent);

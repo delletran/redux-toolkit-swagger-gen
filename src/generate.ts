@@ -305,7 +305,7 @@ const main = async () => {
       log("Skipping Redux slices generation (excluded)")
     }    log("Generating Redux hooks and store...")
     generateReduxHooks(outputDir)
-    generateReduxStore(outputDir, mainRoutes, argv.exclude, argv.apiBasePath, argv.reduxPath)
+    generateReduxStore(outputDir, mainRoutes, argv.exclude, argv.apiBasePath, argv.reduxPath, undefined, argv["use@"])
 
     log("Copying dependency files...")
     const reduxGlobalFiles = ["redux.d.ts", "index.d.ts"]
@@ -369,7 +369,7 @@ const main = async () => {
       const apiRelativePath = path.relative(targetReduxPath, path.resolve(outputDir))
         .replace(/\\/g, '/') // Normalize to forward slashes
       
-      generateReduxStore(targetReduxPath, mainRoutes, argv.exclude, argv.apiBasePath, argv.reduxPath, apiRelativePath)
+      generateReduxStore(targetReduxPath, mainRoutes, argv.exclude, argv.apiBasePath, argv.reduxPath, apiRelativePath, argv["use@"])
     }
 
     // Also copy slices to API directory for backward compatibility
