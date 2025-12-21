@@ -1,1 +1,5 @@
-src/generators/api-service-generator.ts(385,26): error TS2304: Cannot find name 'serviceTemplate'.
+
+> redux-toolkit-swagger-gen@0.1.13 build
+> tsc && node scripts/copy-templates.js
+
+src/generators/api-service-generator.ts(87,32): error TS2339: Property 'summary' does not exist on type 'MethodObjectType'.

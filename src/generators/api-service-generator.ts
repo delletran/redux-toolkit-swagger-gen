@@ -77,141 +77,157 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       isResponseArray: ep.isResponseArray,
     };
     
-    // Generate clean endpoint name
-    // Extract meaningful operation names from path segments
+    // Generate endpoint name from summary if available
     let cleanName = '';
-    const pathForNaming = stripApiBasePath(ep.path);
     
-    // Split path and categorize segments
-    const allSegments = pathForNaming.split('/').filter((p: string) => p);
-    const pathPattern = /[\$]?\{([^}]+)\}/g;
+    // Try to get summary from methodObj
+    const normalizedPath = ep.path.replace(/\$\{([^}]+)\}/g, '{$1}');
+    const methodKey = `${normalizedPath}_${ep.httpMethod.toLowerCase()}`;
+    const methodObj = methods[methodKey]?.methodObj;
+    const summary = methodObj?.summary;
     
-    // Separate path segments into non-param and param segments, preserving order
-    const segmentInfo = allSegments.map((segment: string) => {
-      const isParam = segment.includes('{') || segment.startsWith('$');
-      const paramMatch = segment.match(/[\$]?\{([^}]+)\}/);
-      return {
-        original: segment,
-        isParam,
-        paramName: paramMatch ? paramMatch[1] : null,
-        value: isParam ? null : segment
-      };
-    });
-    
-    const nonParamSegments = segmentInfo.filter(s => !s.isParam).map(s => s.value!);
-    const paramNames = segmentInfo.filter(s => s.isParam).map(s => s.paramName!);
-    const hasPathParams = paramNames.length > 0;
-    
-    // Check if it's truly a list endpoint (returns paginated results or has isListEndpoint flag)
-    // List endpoints have query params for pagination (limit, page)
-    const queryParamsArray = Array.isArray(ep.queryParams) ? ep.queryParams : [];
-    const hasListQueryParams = queryParamsArray.some((p: string) => p === 'limit' || p === 'page');
-    
-    if (ep.isListEndpoint || (ep.isQuery && hasListQueryParams)) {
-      // List endpoint: listTransactions, listUsers, etc.
-      // Use ALL non-param segments to create unique names
-      // e.g., /goals/units/ -> listGoalsUnits, /goals/templates/ -> listGoalsTemplates
-      const nameParts = nonParamSegments.map(seg => toPascalCase(seg));
-      cleanName = 'list' + nameParts.join('');
-    } else if (ep.isQuery && hasPathParams) {
-      // GET with path params (no pagination) - these are single resource retrieval
-      // Build name from ALL segments, both before and after params
-      // e.g., GET /analytics/member/{member_id}/ltv -> getAnalyticsMemberMemberIdLtv
-      // e.g., GET /users/{username} -> getUsersUsername
-      const nameParts: string[] = [];
-      
-      segmentInfo.forEach((seg) => {
-        if (seg.isParam) {
-          // Add param name in PascalCase
-          nameParts.push(toPascalCase(seg.paramName!));
-        } else {
-          // Add segment value in PascalCase
-          nameParts.push(toPascalCase(seg.value!));
-        }
-      });
-      
-      cleanName = 'get' + nameParts.join('');
-    } else if (ep.isMutation) {
-      // For mutations, build name from all segments (both before and after params)
-      // e.g., POST /check-in -> checkInCheckIn
-      // e.g., POST /check-out/{member_id} -> checkOutMemberIdCheckOut
-      // e.g., PATCH /users/{username}/change-password -> changePasswordUsernameChangePassword
-      const lastNonParamSegment = nonParamSegments[nonParamSegments.length - 1];
-      const firstNonParamSegment = nonParamSegments[0];
-      
-      // Determine mutation type based on HTTP method and path structure
-      if (ep.httpMethod.toLowerCase() === 'post' && nonParamSegments.length === 1 && !hasPathParams) {
-        // Simple POST to /resource -> insertResource
-        cleanName = 'insert' + toCamelCase(firstNonParamSegment).charAt(0).toUpperCase() + toCamelCase(firstNonParamSegment).slice(1);
-      } else if (ep.httpMethod.toLowerCase() === 'put' && hasPathParams) {
-        // PUT with path params -> typically an update
-        // Build from first segment + params + last segment
-        const nameParts: string[] = [toPascalCase(firstNonParamSegment)];
-        paramNames.forEach(p => nameParts.push(toPascalCase(p)));
-        if (nonParamSegments.length > 1) {
-          nameParts.push(toPascalCase(lastNonParamSegment));
-        }
-        cleanName = toCamelCase(nameParts.join(''));
-      } else if (ep.httpMethod.toLowerCase() === 'patch') {
-        // PATCH -> build full name from all segments
-        const nameParts: string[] = [];
-        segmentInfo.forEach((seg) => {
-          if (seg.isParam) {
-            nameParts.push(toPascalCase(seg.paramName!));
-          } else {
-            nameParts.push(toPascalCase(seg.value!));
-          }
-        });
-        cleanName = toCamelCase(nameParts.join(''));
-      } else if (ep.httpMethod.toLowerCase() === 'delete') {
-        // DELETE -> deleteResource or more specific name
-        const nameParts: string[] = [];
-        segmentInfo.forEach((seg) => {
-          if (seg.isParam) {
-            nameParts.push(toPascalCase(seg.paramName!));
-          } else {
-            nameParts.push(toPascalCase(seg.value!));
-          }
-        });
-        cleanName = 'delete' + nameParts.join('');
-      } else {
-        // Default: build name from all segments
-        // This handles cases like POST /check-in, POST /quick-check-in, POST /check-out/{member_id}
-        const nameParts: string[] = [];
-        segmentInfo.forEach((seg) => {
-          if (seg.isParam) {
-            nameParts.push(toPascalCase(seg.paramName!));
-          } else {
-            nameParts.push(toPascalCase(seg.value!));
-          }
-        });
-        cleanName = toCamelCase(nameParts.join(''));
-      }
+    if (summary) {
+      // Convert summary to camelCase endpoint name
+      // "Get Upcoming Charges" -> "getUpcomingCharges"
+      // "Process Billing" -> "processBilling"
+      // "Login" -> "login"
+      cleanName = toCamelCase(summary.replace(/[^\w\s]/g, ''));
     } else {
-      // Regular endpoint: use all path segments including those after params
-      // For GET requests without path params (like /users/me), use descriptive name
-      const nameParts: string[] = [];
+      // Fallback to path-based naming
+      // Extract meaningful operation names from path segments
+      const pathForNaming = stripApiBasePath(ep.path);
       
-      segmentInfo.forEach((seg) => {
-        if (seg.isParam) {
-          nameParts.push(toPascalCase(seg.paramName!));
-        } else {
-          nameParts.push(toPascalCase(seg.value!));
-        }
+      // Split path and categorize segments
+      const allSegments = pathForNaming.split('/').filter((p: string) => p);
+      const pathPattern = /[\$]?\{([^}]+)\}/g;
+      
+      // Separate path segments into non-param and param segments, preserving order
+      const segmentInfo = allSegments.map((segment: string) => {
+        const isParam = segment.includes('{') || segment.startsWith('$');
+        const paramMatch = segment.match(/[\$]?\{([^}]+)\}/);
+        return {
+          original: segment,
+          isParam,
+          paramName: paramMatch ? paramMatch[1] : null,
+          value: isParam ? null : segment
+        };
       });
       
-      // For GET queries, prefix with 'get' or 'list'
-      if (ep.isQuery && !ep.isListEndpoint) {
-        if (nameParts.length > 1 || hasPathParams) {
-          // e.g., /users/me -> getUsersMe
-          // e.g., /analytics/retention -> getAnalyticsRetention
-          cleanName = 'get' + nameParts.join('');
+      const nonParamSegments = segmentInfo.filter(s => !s.isParam).map(s => s.value!);
+      const paramNames = segmentInfo.filter(s => s.isParam).map(s => s.paramName!);
+      const hasPathParams = paramNames.length > 0;
+      
+      // Check if it's truly a list endpoint (returns paginated results or has isListEndpoint flag)
+      // List endpoints have query params for pagination (limit, page)
+      const queryParamsArray = Array.isArray(ep.queryParams) ? ep.queryParams : [];
+      const hasListQueryParams = queryParamsArray.some((p: string) => p === 'limit' || p === 'page');
+      
+        if (ep.isListEndpoint || (ep.isQuery && hasListQueryParams)) {
+        // List endpoint: listTransactions, listUsers, etc.
+        // Use ALL non-param segments to create unique names
+        // e.g., /goals/units/ -> listGoalsUnits, /goals/templates/ -> listGoalsTemplates
+        const nameParts = nonParamSegments.map(seg => toPascalCase(seg));
+        cleanName = 'list' + nameParts.join('');
+      } else if (ep.isQuery && hasPathParams) {
+        // GET with path params (no pagination) - these are single resource retrieval
+        // Build name from ALL segments, both before and after params
+        // e.g., GET /analytics/member/{member_id}/ltv -> getAnalyticsMemberMemberIdLtv
+        // e.g., GET /users/{username} -> getUsersUsername
+        const nameParts: string[] = [];
+        
+        segmentInfo.forEach((seg) => {
+          if (seg.isParam) {
+            // Add param name in PascalCase
+            nameParts.push(toPascalCase(seg.paramName!));
+          } else {
+            // Add segment value in PascalCase
+            nameParts.push(toPascalCase(seg.value!));
+          }
+        });
+        
+        cleanName = 'get' + nameParts.join('');
+        } else if (ep.isMutation) {
+        // For mutations, build name from all segments (both before and after params)
+        // e.g., POST /check-in -> checkInCheckIn
+        // e.g., POST /check-out/{member_id} -> checkOutMemberIdCheckOut
+        // e.g., PATCH /users/{username}/change-password -> changePasswordUsernameChangePassword
+        const lastNonParamSegment = nonParamSegments[nonParamSegments.length - 1];
+        const firstNonParamSegment = nonParamSegments[0];
+        
+        // Determine mutation type based on HTTP method and path structure
+        if (ep.httpMethod.toLowerCase() === 'post' && nonParamSegments.length === 1 && !hasPathParams) {
+          // Simple POST to /resource -> insertResource
+          cleanName = 'insert' + toCamelCase(firstNonParamSegment).charAt(0).toUpperCase() + toCamelCase(firstNonParamSegment).slice(1);
+        } else if (ep.httpMethod.toLowerCase() === 'put' && hasPathParams) {
+          // PUT with path params -> typically an update
+          // Build from first segment + params + last segment
+          const nameParts: string[] = [toPascalCase(firstNonParamSegment)];
+          paramNames.forEach(p => nameParts.push(toPascalCase(p)));
+          if (nonParamSegments.length > 1) {
+            nameParts.push(toPascalCase(lastNonParamSegment));
+          }
+          cleanName = toCamelCase(nameParts.join(''));
+        } else if (ep.httpMethod.toLowerCase() === 'patch') {
+          // PATCH -> build full name from all segments
+          const nameParts: string[] = [];
+          segmentInfo.forEach((seg) => {
+            if (seg.isParam) {
+              nameParts.push(toPascalCase(seg.paramName!));
+            } else {
+              nameParts.push(toPascalCase(seg.value!));
+            }
+          });
+          cleanName = toCamelCase(nameParts.join(''));
+        } else if (ep.httpMethod.toLowerCase() === 'delete') {
+          // DELETE -> deleteResource or more specific name
+          const nameParts: string[] = [];
+          segmentInfo.forEach((seg) => {
+            if (seg.isParam) {
+              nameParts.push(toPascalCase(seg.paramName!));
+            } else {
+              nameParts.push(toPascalCase(seg.value!));
+            }
+          });
+          cleanName = 'delete' + nameParts.join('');
         } else {
-          // Single segment without list - treat as list
-          cleanName = 'list' + nameParts.join('');
+          // Default: build name from all segments
+          // This handles cases like POST /check-in, POST /quick-check-in, POST /check-out/{member_id}
+          const nameParts: string[] = [];
+          segmentInfo.forEach((seg) => {
+            if (seg.isParam) {
+              nameParts.push(toPascalCase(seg.paramName!));
+            } else {
+              nameParts.push(toPascalCase(seg.value!));
+            }
+          });
+          cleanName = toCamelCase(nameParts.join(''));
         }
-      } else {
-        cleanName = toCamelCase(nameParts.join(''));
+        } else {
+        // Regular endpoint: use all path segments including those after params
+        // For GET requests without path params (like /users/me), use descriptive name
+        const nameParts: string[] = [];
+        
+        segmentInfo.forEach((seg) => {
+          if (seg.isParam) {
+            nameParts.push(toPascalCase(seg.paramName!));
+          } else {
+            nameParts.push(toPascalCase(seg.value!));
+          }
+        });
+        
+        // For GET queries, prefix with 'get' or 'list'
+        if (ep.isQuery && !ep.isListEndpoint) {
+          if (nameParts.length > 1 || hasPathParams) {
+            // e.g., /users/me -> getUsersMe
+            // e.g., /analytics/retention -> getAnalyticsRetention
+            cleanName = 'get' + nameParts.join('');
+          } else {
+            // Single segment without list - treat as list
+            cleanName = 'list' + nameParts.join('');
+          }
+        } else {
+          cleanName = toCamelCase(nameParts.join(''));
+        }
       }
     }
     

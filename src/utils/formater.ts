@@ -1,6 +1,10 @@
 export const toCamelCase = (str: string): string => {
   if (!str) return '';
-  return str.replace(/_([a-z])/g, (g) => g[1].toUpperCase()).replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+  // Handle spaces, underscores, and hyphens
+  return str
+    .replace(/[_\s-]([a-z])/gi, (g) => g[1].toUpperCase())
+    .replace(/^[A-Z]/, (g) => g.toLowerCase())
+    .replace(/[_\s-]/g, ''); // Remove any remaining separators
 };
 
 export const toPascalCase = (str: string): string => {

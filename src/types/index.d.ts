@@ -111,6 +111,7 @@ interface RequestBodyType {
 // #region MethodObjectType
 type MethodObjectType = {
   operationId: string;
+  summary?: string;
   description?: string;
   parameters?: (IBodyParameter | IQueryParameter)[];
   responses: IResponse;

@@ -96,6 +96,28 @@ function isSchemaUsedInOperation(operation: any, schemaName: string): boolean {
       if (schema?.items?.$ref === schemaRef || schema?.items?.$ref === definitionRef) {
         return true;
       }
+      // Check for anyOf/oneOf/allOf
+      if (schema?.anyOf) {
+        for (const option of schema.anyOf) {
+          if (option?.$ref === schemaRef || option?.$ref === definitionRef) {
+            return true;
+          }
+        }
+      }
+      if (schema?.oneOf) {
+        for (const option of schema.oneOf) {
+          if (option?.$ref === schemaRef || option?.$ref === definitionRef) {
+            return true;
+          }
+        }
+      }
+      if (schema?.allOf) {
+        for (const option of schema.allOf) {
+          if (option?.$ref === schemaRef || option?.$ref === definitionRef) {
+            return true;
+          }
+        }
+      }
     }
   }
   
@@ -112,6 +134,28 @@ function isSchemaUsedInOperation(operation: any, schemaName: string): boolean {
           // Check for arrays
           if (schema?.items?.$ref === schemaRef || schema?.items?.$ref === definitionRef) {
             return true;
+          }
+          // Check for anyOf/oneOf/allOf
+          if (schema?.anyOf) {
+            for (const option of schema.anyOf) {
+              if (option?.$ref === schemaRef || option?.$ref === definitionRef) {
+                return true;
+              }
+            }
+          }
+          if (schema?.oneOf) {
+            for (const option of schema.oneOf) {
+              if (option?.$ref === schemaRef || option?.$ref === definitionRef) {
+                return true;
+              }
+            }
+          }
+          if (schema?.allOf) {
+            for (const option of schema.allOf) {
+              if (option?.$ref === schemaRef || option?.$ref === definitionRef) {
+                return true;
+              }
+            }
           }
         }
       }
@@ -179,9 +223,8 @@ export function buildDomainMappings(openApiSpec: any, apiBasePath?: string): voi
       }
     }
     
-    // If still no domain found, log warning and use 'uncategorized'
+    // If still no domain found, use 'uncategorized' (will be resolved in third pass if possible)
     if (!foundDomain) {
-      console.warn(`⚠️  Schema "${schemaName}" has no domain - not used in any tagged operation`);
       foundDomain = 'uncategorized';
     }
     
@@ -201,55 +244,56 @@ export function buildDomainMappings(openApiSpec: any, apiBasePath?: string): voi
   for (const { name: schemaName, wrappedTypeRef } of wrapperSchemas) {
     let foundDomain: string | null = null;
     
-    // Extract the wrapped type name from the $ref
-    const wrappedTypeName = wrappedTypeRef.split('/').pop() || '';
-    
-    if (wrappedTypeName) {
-      // Look for the wrapped type's domain in the cache (from first pass)
-      foundDomain = modelDomainCache.get(wrappedTypeName) as string | null;
-      
-      if (foundDomain) {
-        console.log(`✓ Wrapper "${schemaName}" inheriting domain "${foundDomain}" from wrapped type "${wrappedTypeName}"`);
-      }
-      
-      // If exact match not found, try partial match
-      if (!foundDomain) {
-        for (const [otherSchemaName, domain] of modelDomainCache.entries()) {
-          if (otherSchemaName.endsWith(wrappedTypeName)) {
-            foundDomain = domain as string;
-            console.log(`✓ Wrapper "${schemaName}" inheriting domain "${foundDomain}" from "${otherSchemaName}" (partial match)`);
+    // FIRST: Check if wrapper itself is used in operations
+    for (const [pathUrl, pathItem] of Object.entries(paths)) {
+      for (const [method, operation] of Object.entries(pathItem as any)) {
+        if (typeof operation !== 'object' || !operation) continue;
+        
+        if (isSchemaUsedInOperation(operation, schemaName)) {
+          const tags = (operation as any).tags || [];
+          if (tags.length > 0) {
+            foundDomain = normalizeTag(tags[0]);
+            console.log(`✓ Wrapper "${schemaName}" found in tagged operation "${tags[0]}"`);
             break;
           }
         }
       }
       
-      if (!foundDomain) {
-        console.log(`⚠️  Wrapper "${schemaName}" could not find wrapped type "${wrappedTypeName}" in cache`);
-      }
+      if (foundDomain) break;
     }
     
-    // If still not found, check operations (wrapper might be directly used)
+    // SECOND: If not found in operations, try to inherit from wrapped type
     if (!foundDomain) {
-      for (const [pathUrl, pathItem] of Object.entries(paths)) {
-        for (const [method, operation] of Object.entries(pathItem as any)) {
-          if (typeof operation !== 'object' || !operation) continue;
-          
-          if (isSchemaUsedInOperation(operation, schemaName)) {
-            const tags = (operation as any).tags || [];
-            if (tags.length > 0) {
-              foundDomain = normalizeTag(tags[0]);
+      // Extract the wrapped type name from the $ref
+      const wrappedTypeName = wrappedTypeRef.split('/').pop() || '';
+      
+      if (wrappedTypeName) {
+        // Look for the wrapped type's domain in the cache (from first pass)
+        foundDomain = modelDomainCache.get(wrappedTypeName) as string | null;
+        
+        if (foundDomain && foundDomain !== 'uncategorized') {
+          console.log(`✓ Wrapper "${schemaName}" inheriting domain "${foundDomain}" from wrapped type "${wrappedTypeName}"`);
+        }
+        
+        // If exact match not found, try partial match
+        if (!foundDomain || foundDomain === 'uncategorized') {
+          for (const [otherSchemaName, domain] of modelDomainCache.entries()) {
+            if (domain !== 'uncategorized' && otherSchemaName.endsWith(wrappedTypeName)) {
+              foundDomain = domain as string;
+              console.log(`✓ Wrapper "${schemaName}" inheriting domain "${foundDomain}" from "${otherSchemaName}" (partial match)`);
               break;
             }
           }
         }
         
-        if (foundDomain) break;
+        if (!foundDomain || foundDomain === 'uncategorized') {
+          console.log(`⚠️  Wrapper "${schemaName}" wraps uncategorized type "${wrappedTypeName}"`);
+        }
       }
     }
     
     // Final fallback
     if (!foundDomain) {
-      console.warn(`⚠️  Schema "${schemaName}" has no domain - not used in any tagged operation`);
       foundDomain = 'uncategorized';
     }
     
@@ -263,6 +307,72 @@ export function buildDomainMappings(openApiSpec: any, apiBasePath?: string): voi
     if (cleanName !== schemaName) {
       modelDomainCache.set(cleanName, foundDomain);
     }
+  }
+  
+  // THIRD PASS: Resolve uncategorized schemas by analyzing references (iterative)
+  // Keep iterating until no more schemas can be categorized
+  let previousUncategorizedCount = -1;
+  let iteration = 0;
+  const maxIterations = 5; // Prevent infinite loops
+  
+  while (iteration < maxIterations) {
+    const uncategorized = Array.from(modelDomainCache.entries())
+      .filter(([name, domain]) => domain === 'uncategorized')
+      .map(([name]) => name);
+    
+    // Stop if no more uncategorized schemas or no progress made
+    if (uncategorized.length === 0 || uncategorized.length === previousUncategorizedCount) {
+      break;
+    }
+    
+    previousUncategorizedCount = uncategorized.length;
+    iteration++;
+    
+    for (const uncategorizedSchema of uncategorized) {
+      let foundDomain: string | null = null;
+      
+      // Check all categorized schemas to see if any reference this uncategorized schema
+      for (const [schemaName, schemaObj] of Object.entries(schemas)) {
+        const schemaDomain = modelDomainCache.get(schemaName);
+        
+        // Skip if this schema is also uncategorized or doesn't have a domain
+        if (!schemaDomain || schemaDomain === 'uncategorized') continue;
+        
+        // Check if this schema references the uncategorized schema
+        const schemaStr = JSON.stringify(schemaObj);
+        if (schemaStr.includes(`"$ref":"#/components/schemas/${uncategorizedSchema}"`) ||
+            schemaStr.includes(`"$ref": "#/components/schemas/${uncategorizedSchema}"`)) {
+          foundDomain = schemaDomain;
+          console.log(`✓ Schema "${uncategorizedSchema}" inheriting domain "${foundDomain}" from referencing schema "${schemaName}"`);
+          break;
+        }
+      }
+      
+      // Update the cache if we found a domain
+      if (foundDomain) {
+        modelDomainCache.set(uncategorizedSchema, foundDomain);
+        
+        // Also update cleaned name version
+        const stripped = stripApiBasePath(uncategorizedSchema, apiBasePath);
+        const cleaned = cleanSchemaName(stripped);
+        const cleanName = toPascalCase(cleaned);
+        if (cleanName !== uncategorizedSchema) {
+          modelDomainCache.set(cleanName, foundDomain);
+        }
+      }
+    }
+  }
+  
+  // Warn about schemas that are still uncategorized after all passes
+  const stillUncategorized = Array.from(modelDomainCache.entries())
+    .filter(([name, domain]) => domain === 'uncategorized' && !name.includes('PascalCase'))
+    .map(([name]) => name);
+  
+  if (stillUncategorized.length > 0) {
+    console.log(`\n⚠️  ${stillUncategorized.length} schemas remain uncategorized:`);
+    stillUncategorized.forEach(name => {
+      console.warn(`⚠️  Schema "${name}" has no domain - not used in any tagged operation`);
+    });
   }
   
   // Log domain distribution
