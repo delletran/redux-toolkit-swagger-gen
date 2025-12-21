@@ -62,7 +62,7 @@ export const generateReduxStore = (
     importPrefix = '@/api/';
     // Remove 'src/' prefix from reduxPath if present since @ alias already points to src/
     const normalizedReduxPath = reduxPath?.replace(/^src\//, '') || 'store/redux';
-    authSliceImport = apiRelativePath ? './authSlice' : `@/${normalizedReduxPath}/authSlice`;
+    authSliceImport = `@/${normalizedReduxPath}/authSlice`;
   } else {
     // Use relative imports
     importPrefix = apiRelativePath ? `${apiRelativePath}/` : '../';
