@@ -2,12 +2,12 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query/react'
 import { persistReducer, persistStore } from 'redux-persist'
 {{#services}}
-import { {{name}} } from '../services/{{path}}/{{name}}'
+import { {{name}} } from '{{{importPrefix}}}services/{{path}}/{{name}}'
 {{/services}}
 {{#thunks}}
-import {{thunkName}} from '../thunks/{{path}}/{{sanitizedPath}}.thunk'
+import {{thunkName}} from '{{{importPrefix}}}thunks/{{path}}/{{sanitizedPath}}.thunk'
 {{/thunks}}
-import authReducer from '../../../src/store/redux/authSlice'
+import authReducer from '{{{authSliceImport}}}'
 
 // Create a no-op storage for server-side rendering
 const createNoopStorage = () => {

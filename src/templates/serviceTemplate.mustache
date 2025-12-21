@@ -1,25 +1,32 @@
 /* eslint-disable */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+{{#useAtAlias}}
+import { transformErrorResponse} from '@/api/redux/response';
+import { toQueryString } from '@/api/redux/query';
+import { TAGS } from '@/api/constants/tags';
+import { RootState } from '@/api/redux/store';
+import { API_CONFIG, getApiUrl } from '@/api/redux/config/api';
+{{/useAtAlias}}
+{{^useAtAlias}}
 import { transformErrorResponse} from '../../redux/response';
 import { toQueryString } from '../../redux/query';
 import { TAGS } from '../../constants/tags';
 import { RootState } from '../../redux/store';
 import { API_CONFIG, getApiUrl } from '../../redux/config/api';
+{{/useAtAlias}}
 // import { IFilters } from '../../redux/types';
 
 {{#uniqueImports}}
-{{#importPath}}
-import { {{interface}} } from '../../models/{{{importPath}}}';
-{{/importPath}}
-{{^importPath}}
-{{#modelName}}
-import { {{interface}} } from '../../models/{{modelName}}';
-{{/modelName}}
-{{/importPath}}
+import { {{interface}} } from '{{{importPath}}}';
 {{/uniqueImports}}
 {{#uniqueParamImports}}
 {{#modelName}}
+{{#useAtAlias}}
+import { {{interface}} } from '@/api/params/{{modelName}}';
+{{/useAtAlias}}
+{{^useAtAlias}}
 import { {{interface}} } from '../../params/{{modelName}}';
+{{/useAtAlias}}
 {{/modelName}}
 {{/uniqueParamImports}}
 

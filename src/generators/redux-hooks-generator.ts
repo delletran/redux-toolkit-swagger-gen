@@ -20,9 +20,13 @@ export const generateReduxStore = (
   outputDir: string,
   services: Record<string, any>,
   excludeOptions: string[] = [],
-  apiBaseUrl?: string
+  apiBaseUrl?: string,
+  reduxPath?: string,
+  apiRelativePath?: string
 ): void => {
-  const reduxDir = path.resolve(outputDir, "redux");
+  // If apiRelativePath is provided, we're generating to a custom redux location
+  // so don't append 'redux' subdirectory
+  const reduxDir = apiRelativePath ? outputDir : path.resolve(outputDir, "redux");
   if (!fs.existsSync(reduxDir)) {
     fs.mkdirSync(reduxDir, { recursive: true });
   }
@@ -48,10 +52,17 @@ export const generateReduxStore = (
     }
   });
 
+  // Determine import prefix based on whether this is for the redux directory or API directory
+  const importPrefix = apiRelativePath ? `${apiRelativePath}/` : '../';
+  const authSliceImport = apiRelativePath ? './authSlice' : `../../../${reduxPath}/authSlice`;
+
   const storeContent = Mustache.render(storeTemplate, {
     services: serviceList,
     thunks: thunkList,
     apiBaseUrl: apiBaseUrl || '',
+    reduxPath: reduxPath || 'src/store/redux',
+    importPrefix: importPrefix || '../',
+    authSliceImport: authSliceImport || `../../../${reduxPath || 'src/store/redux'}/authSlice`,
   });
 
   fs.writeFileSync(path.join(reduxDir, "store.ts"), storeContent);

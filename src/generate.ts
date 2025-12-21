@@ -23,6 +23,8 @@ interface Arguments {
   prettier: boolean
   exclude: string[]
   apiBasePath?: string
+  "use@"?: boolean
+  reduxPath?: string
   [x: string]: unknown
 }
 
@@ -75,6 +77,16 @@ const parseArgs = () => {
       type: "string",
       description: "API base URL path (e.g., api/v1/)",
       default: "api",
+    })
+    .option("use@", {
+      type: "boolean",
+      description: "Use @ alias for imports (e.g., @/api/models/...)",
+      default: false,
+    })
+    .option("reduxPath", {
+      type: "string",
+      description: "Path to redux directory for authSlice and store imports (e.g., src/store/redux)",
+      default: "src/store/redux",
     })
     .check((argv) => {
       if (argv.clean && !argv.output) {
@@ -210,7 +222,7 @@ const main = async () => {
         const servicesDir = path.join(outputDir, "services", route)
         
         fs.mkdirSync(servicesDir, { recursive: true })
-          const service = apiServiceGenerator(route, methods, apiBasePath)
+          const service = apiServiceGenerator(route, methods, apiBasePath, argv["use@"])
         const fileName = route.replace(/\W/g, "_") // Simplified filename formatting
         fs.writeFileSync(path.join(servicesDir, `${fileName}.ts`), service)
         subFolders.add(servicesDir)
@@ -290,7 +302,7 @@ const main = async () => {
       log("Skipping Redux slices generation (excluded)")
     }    log("Generating Redux hooks and store...")
     generateReduxHooks(outputDir)
-    generateReduxStore(outputDir, mainRoutes, argv.exclude, argv.apiBasePath)
+    generateReduxStore(outputDir, mainRoutes, argv.exclude, argv.apiBasePath, argv.reduxPath)
 
     log("Copying dependency files...")
     const reduxGlobalFiles = ["redux.d.ts", "index.d.ts"]
@@ -333,7 +345,31 @@ const main = async () => {
       apiConfigContent
     )
 
-    // Copy slices directory
+    // Copy authSlice and generate store to the specified reduxPath location
+    if (argv.reduxPath) {
+      log(`Generating store and authSlice to ${argv.reduxPath}...`)
+      const targetReduxPath = path.resolve(process.cwd(), argv.reduxPath)
+      
+      // Create the target directory if it doesn't exist
+      if (!fs.existsSync(targetReduxPath)) {
+        fs.mkdirSync(targetReduxPath, { recursive: true })
+      }
+      
+      // Copy authSlice to the target location
+      fs.copyFileSync(
+        path.resolve(__dirname, "../src/redux/slices/authSlice.ts"),
+        path.join(targetReduxPath, "authSlice.ts")
+      )
+      
+      // Generate a separate store.ts for the redux directory with updated import paths
+      // Calculate relative path from reduxPath to API directory
+      const apiRelativePath = path.relative(targetReduxPath, path.resolve(outputDir))
+        .replace(/\\/g, '/') // Normalize to forward slashes
+      
+      generateReduxStore(targetReduxPath, mainRoutes, argv.exclude, argv.apiBasePath, argv.reduxPath, apiRelativePath)
+    }
+
+    // Also copy slices to API directory for backward compatibility
     const slicesDir = path.join(sliceDir, "slices")
     if (!fs.existsSync(slicesDir)) {
       fs.mkdirSync(slicesDir, { recursive: true })
@@ -342,10 +378,6 @@ const main = async () => {
       path.resolve(__dirname, "../src/redux/slices/authSlice.ts"),
       path.join(slicesDir, "authSlice.ts")
     )
-    // fs.copyFileSync(
-    //   path.resolve(__dirname, "../src/redux/slices/branchStateSlice.ts"),
-    //   path.join(slicesDir, "branchStateSlice.ts")
-    // )
 
     fs.copyFileSync(
       path.resolve(__dirname, "../src/schema/api.ts"),

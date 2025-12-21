@@ -3,6 +3,7 @@ import Mustache from 'mustache';
 import { EndpointFactory } from '../utils/end-points';
 import { toCamelCase, toPascalCase } from '../utils/formater';
 import { loadTemplate } from '../utils/template-loader';
+import { stripApiBasePath as stripPath } from '../utils/name-cleaner';
 
 const serviceTemplate = loadTemplate('serviceTemplate.mustache');
 
@@ -77,7 +78,7 @@ const getModelDomain = (modelName: string): string => {
   return 'common';
 };
 
-export const apiServiceGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>, apiBasePath?: string): string => {
+export const apiServiceGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>, apiBasePath?: string, useAtAlias?: boolean): string => {
   const rawEndpoints = EndpointFactory.getEndpoints('service', path, methods, undefined, apiBasePath);
   
   // Helper to strip apiBasePath from route for name generation
@@ -93,22 +94,28 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     // Add response interface
     if (ep.interface && ep.modelName) {
       const domain = getModelDomain(ep.modelName);
+      const importPath = useAtAlias 
+        ? `@/api/models/${domain}/${ep.modelName}`
+        : `../../models/${domain}/${ep.modelName}`;
       importMap.set(`${ep.interface}|${ep.modelName}`, { 
         interface: ep.interface, 
         modelName: ep.modelName,
         domain: domain,
-        importPath: `${domain}/${ep.modelName}`
+        importPath: importPath
       });
     }
     // Add request body interface if different from response
     if (ep.requestBodyModelName && ep.requestBodyModelName !== ep.modelName) {
       const requestInterface = `I${ep.requestBodyModelName}Schema`;
       const domain = getModelDomain(ep.requestBodyModelName);
+      const importPath = useAtAlias 
+        ? `@/api/models/${domain}/${ep.requestBodyModelName}`
+        : `../../models/${domain}/${ep.requestBodyModelName}`;
       importMap.set(`${requestInterface}|${ep.requestBodyModelName}`, { 
         interface: requestInterface, 
         modelName: ep.requestBodyModelName,
         domain: domain,
-        importPath: `${domain}/${ep.requestBodyModelName}`
+        importPath: importPath
       });
     }
   });
@@ -407,14 +414,17 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       // Set correct request body type
       // Only set requestBodyType if there's actually a request body with $ref
       if (hasRequestBody && requestBodyRef) {
-        // Extract model name from $ref (e.g., "#/components/schemas/ModuleUpdate" => "ModuleUpdate")
-        const modelName = requestBodyRef.split('/').pop() || '';
-        enhanced.requestBodyType = `I${toPascalCase(modelName)}Schema`;
+        // Extract model name from $ref (e.g., "#/components/schemas/Body_login_api_v1_auth_login_post" => "BodyLoginPost")
+        const rawModelName = requestBodyRef.split('/').pop() || '';
+        const cleanedModelName = stripPath(rawModelName, apiBasePath);
+        enhanced.requestBodyType = `I${toPascalCase(cleanedModelName)}Schema`;
       } else if (hasRequestBody && ep.requestBodyModelName) {
         // Fallback to existing logic if we have requestBodyModelName but no ref
+        // ep.requestBodyModelName should already be cleaned by getNames function
         enhanced.requestBodyType = `I${ep.requestBodyModelName}Schema`;
       } else if (hasRequestBody && ep.modelName) {
         // Final fallback
+        // ep.modelName should already be cleaned by getNames function
         enhanced.requestBodyType = `I${ep.modelName}Schema`;
       }
       
@@ -441,6 +451,7 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     uniqueParamImports: Array.from(paramImports.values()),
     endpoints,
     apiBasePath,
+    useAtAlias,
   };
 
   return Mustache.render(serviceTemplate, modelData);
