@@ -13,10 +13,10 @@ import { getApiUrl } from '../../redux/config/api';
 {{#uniqueImports}}
 {{#modelName}}
 {{#useAtAlias}}
-import { {{interface}} } from '@/api/models/{{modelName}}';
+import { {{interface}} } from '@/api/models/{{{modelName}}}';
 {{/useAtAlias}}
 {{^useAtAlias}}
-import { {{interface}} } from '../../models/{{modelName}}';
+import { {{interface}} } from '../../models/{{{modelName}}}';
 {{/useAtAlias}}
 {{/modelName}}
 {{/uniqueImports}}
