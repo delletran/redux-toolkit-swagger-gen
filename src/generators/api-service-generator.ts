@@ -3,80 +3,10 @@ import Mustache from 'mustache';
 import { EndpointFactory } from '../utils/end-points';
 import { toCamelCase, toPascalCase } from '../utils/formater';
 import { loadTemplate } from '../utils/template-loader';
-import { stripApiBasePath as stripPath } from '../utils/name-cleaner';
+import { stripApiBasePath as stripPath, cleanSchemaName } from '../utils/name-cleaner';
+import { getModelDomain } from '../utils/domain-classifier';
 
 const serviceTemplate = loadTemplate('serviceTemplate.mustache');
-
-// Model domain mapping function (must match model-generator.ts)
-const getModelDomain = (modelName: string): string => {
-  const name = modelName.toLowerCase();
-  
-  // Authentication & Users
-  if (/^(user|login|token|refresh|account|password)/.test(name)) return 'auth';
-  
-  // Members
-  if (/^(member|membership)/.test(name)) return 'members';
-  
-  // Attendance
-  if (/^(attendance|checkin|checkout)/.test(name)) return 'attendance';
-  
-  // Transactions & Payments
-  if (/^(transaction|payment)/.test(name)) return 'transactions';
-  
-  // Branches
-  if (/^branch/.test(name)) return 'branches';
-  
-  // Leads
-  if (/^lead/.test(name)) return 'leads';
-  
-  // Goals
-  if (/^(goal|unit)/.test(name)) return 'goals';
-  
-  // Discounts & Referrals
-  if (/^(discount|referral)/.test(name)) return 'discounts';
-  
-  // Expenses
-  if (/^expense/.test(name)) return 'expenses';
-  
-  // Products & Inventory
-  if (/^(product|inventory|stock|sale)/.test(name)) return 'products';
-  
-  // Roles & Permissions
-  if (/^(role|permission|module|submodule|department)/.test(name)) return 'permissions';
-  
-  // Notifications
-  if (/^notification/.test(name)) return 'notifications';
-  
-  // Reports
-  if (/^(report|profit|revenue|export)/.test(name)) return 'reports';
-  
-  // Analytics
-  if (/^(analytics|churn|retention|cohort|segment|ltv|engagement|atrisk|renewal|prediction)/.test(name)) return 'analytics';
-  
-  // Settings
-  if (/^(setting|systemconfiguration|category)/.test(name)) return 'settings';
-  
-  // Files
-  if (/^(file|upload)/.test(name)) return 'files';
-  
-  // Billing & Automation
-  if (/^(billing|schedule|upcoming)/.test(name)) return 'billing';
-  
-  // Payment Gateway
-  if (/^(paymentintent|paymentstatus|cardtokenize|refund)/.test(name)) return 'payment-gateway';
-  
-  // Training
-  if (/^training/.test(name)) return 'training';
-  
-  // Common/Shared (validation errors, body schemas, etc.)
-  if (/^(validation|http|body_|app_schemas_|app__|peak|revenue|top|dead|inventory)/.test(name)) return 'common';
-  
-  // Dashboard
-  if (/^dashboard/.test(name)) return 'dashboard';
-  
-  // Default to common for everything else
-  return 'common';
-};
 
 export const apiServiceGenerator = (path: string, methods: Record<string, ReduxApiEndpointType>, apiBasePath?: string, useAtAlias?: boolean): string => {
   const rawEndpoints = EndpointFactory.getEndpoints('service', path, methods, undefined, apiBasePath);
@@ -414,10 +344,12 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       // Set correct request body type
       // Only set requestBodyType if there's actually a request body with $ref
       if (hasRequestBody && requestBodyRef) {
-        // Extract model name from $ref (e.g., "#/components/schemas/Body_login_api_v1_auth_login_post" => "BodyLoginPost")
+        // Extract model name from $ref (e.g., "#/components/schemas/app__schemas__billing_automation_schemas__ChargeCardRequest" => "BillingAutomationChargeCardRequest")
         const rawModelName = requestBodyRef.split('/').pop() || '';
-        const cleanedModelName = stripPath(rawModelName, apiBasePath);
-        enhanced.requestBodyType = `I${toPascalCase(cleanedModelName)}Schema`;
+        const stripped = stripPath(rawModelName, apiBasePath);
+        const cleaned = cleanSchemaName(stripped);
+        const cleanedModelName = toPascalCase(cleaned);
+        enhanced.requestBodyType = `I${cleanedModelName}Schema`;
       } else if (hasRequestBody && ep.requestBodyModelName) {
         // Fallback to existing logic if we have requestBodyModelName but no ref
         // ep.requestBodyModelName should already be cleaned by getNames function

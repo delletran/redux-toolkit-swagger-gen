@@ -45,3 +45,38 @@ export const stripApiBasePath = (schemaName: string, apiBasePath?: string): stri
   
   return schemaName;
 };
+
+/**
+ * Clean schema name by removing common patterns while preserving domain context
+ * to avoid name collisions. Returns the cleaned name but preserves underscores/hyphens
+ * for later PascalCase conversion:
+ * - app__schemas__billing_automation_schemas__ChargeCardRequest -> Billing_Automation_ChargeCardRequest
+ * - app__schemas__payment_gateway_schemas__ChargeCardRequest -> Payment_Gateway_ChargeCardRequest  
+ * - PaginatedResponse_ModelName_ -> PaginatedResponse_ModelName
+ * @param schemaName - The schema name to clean
+ * @returns Cleaned schema name with domain prefix and preserved separators
+ */
+export const cleanSchemaName = (schemaName: string): string => {
+  // Pattern 1: app__schemas__{domain}_schemas__ModelName -> {Domain}_ModelName
+  const pattern1 = /^app__schemas__([a-z_]+)_schemas__(.+)$/i;
+  const match1 = schemaName.match(pattern1);
+  if (match1) {
+    const domain = match1[1];
+    const modelName = match1[2];
+    // Keep domain and model name with underscore separator for PascalCase conversion
+    return `${domain}_${modelName}`;
+  }
+  
+  // Pattern 2: App_schemas_{domain}Schemas_ModelName -> {Domain}_ModelName
+  const pattern2 = /^App_schemas_([a-z]+)Schemas_(.+)$/i;
+  const match2 = schemaName.match(pattern2);
+  if (match2) {
+    const domain = match2[1];
+    const modelName = match2[2];
+    // Keep domain and model name with underscore separator
+    return `${domain}_${modelName}`;
+  }
+  
+  // Pattern 3: Remove trailing underscores (e.g., PaginatedResponse_ModelName_ -> PaginatedResponse_ModelName)
+  return schemaName.replace(/_+$/, '');
+};

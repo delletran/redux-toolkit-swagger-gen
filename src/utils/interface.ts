@@ -1,6 +1,6 @@
 import { ResponseStatus } from './constants';
 import { toPascalCase } from './formater';
-import { stripApiBasePath } from './name-cleaner';
+import { stripApiBasePath, cleanSchemaName } from './name-cleaner';
 
 export const getNames = (details: ReduxApiEndpointType, apiBasePath?: string): { 
   interfaceName: string, 
@@ -73,11 +73,13 @@ export const getNames = (details: ReduxApiEndpointType, apiBasePath?: string): {
   // const requestBodyModelName = requestBodyRef ? toPascalCase(requestBodyRef.split('/').pop() || '') : '';
   
   const refName = ref.split('/').pop() || '';
-  const cleanedRefName = stripApiBasePath(refName, apiBasePath);
+  const strippedRefName = stripApiBasePath(refName, apiBasePath);
+  const cleanedRefName = cleanSchemaName(strippedRefName);
   const paramModelName = ref ? toPascalCase(cleanedRefName) : '';
   
   const requestBodyRefName = requestBodyRef.split('/').pop() || '';
-  const cleanedRequestBodyRefName = stripApiBasePath(requestBodyRefName, apiBasePath);
+  const strippedRequestBodyRefName = stripApiBasePath(requestBodyRefName, apiBasePath);
+  const cleanedRequestBodyRefName = cleanSchemaName(strippedRequestBodyRefName);
   const requestBodyModelName = requestBodyRef ? toPascalCase(cleanedRequestBodyRefName) : '';
   
   // If no response ref but have request body ref, use that instead

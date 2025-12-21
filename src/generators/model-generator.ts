@@ -3,78 +3,8 @@ import * as path from "path"
 import Mustache from "mustache"
 import { loadTemplate } from "../utils/template-loader"
 import { toPascalCase } from "../utils/formater"
-import { stripApiBasePath } from "../utils/name-cleaner"
-
-// Model domain mapping based on naming patterns
-const getModelDomain = (modelName: string): string => {
-  const name = modelName.toLowerCase();
-  
-  // Authentication & Users
-  if (/^(user|login|token|refresh|account|password)/.test(name)) return 'auth';
-  
-  // Members
-  if (/^(member|membership)/.test(name)) return 'members';
-  
-  // Attendance
-  if (/^(attendance|checkin|checkout)/.test(name)) return 'attendance';
-  
-  // Transactions & Payments
-  if (/^(transaction|payment)/.test(name)) return 'transactions';
-  
-  // Branches
-  if (/^branch/.test(name)) return 'branches';
-  
-  // Leads
-  if (/^lead/.test(name)) return 'leads';
-  
-  // Goals
-  if (/^(goal|unit)/.test(name)) return 'goals';
-  
-  // Discounts & Referrals
-  if (/^(discount|referral)/.test(name)) return 'discounts';
-  
-  // Expenses
-  if (/^expense/.test(name)) return 'expenses';
-  
-  // Products & Inventory
-  if (/^(product|inventory|stock|sale)/.test(name)) return 'products';
-  
-  // Roles & Permissions
-  if (/^(role|permission|module|submodule|department)/.test(name)) return 'permissions';
-  
-  // Notifications
-  if (/^notification/.test(name)) return 'notifications';
-  
-  // Reports
-  if (/^(report|profit|revenue|export)/.test(name)) return 'reports';
-  
-  // Analytics
-  if (/^(analytics|churn|retention|cohort|segment|ltv|engagement|atrisk|renewal|prediction)/.test(name)) return 'analytics';
-  
-  // Settings
-  if (/^(setting|systemconfiguration|category)/.test(name)) return 'settings';
-  
-  // Files
-  if (/^(file|upload)/.test(name)) return 'files';
-  
-  // Billing & Automation
-  if (/^(billing|schedule|upcoming)/.test(name)) return 'billing';
-  
-  // Payment Gateway
-  if (/^(paymentintent|paymentstatus|cardtokenize|refund)/.test(name)) return 'payment-gateway';
-  
-  // Training
-  if (/^training/.test(name)) return 'training';
-  
-  // Common/Shared (validation errors, body schemas, etc.)
-  if (/^(validation|http|body_|app_schemas_|app__)/.test(name)) return 'common';
-  
-  // Dashboard
-  if (/^dashboard/.test(name)) return 'dashboard';
-  
-  // Default to common for everything else
-  return 'common';
-}
+import { stripApiBasePath, cleanSchemaName } from "../utils/name-cleaner"
+import { getModelDomain } from "../utils/domain-classifier"
 
 const modelTemplate = loadTemplate("modelTemplate.mustache")
 const enumTemplate = loadTemplate("enumTemplate.mustache")
@@ -322,7 +252,8 @@ const generateModelFileContent = (modelName: string, schema: any, currentDomain:
 export const generateModels = async (
   definitions: any,
   outputDir: string,
-  apiBasePath?: string
+  apiBasePath?: string,
+  openApiSpec?: any
 ): Promise<void> => {
   if (!definitions || typeof definitions !== "object") {
     console.warn("Warning: No definitions found in swagger file")
@@ -365,11 +296,13 @@ export const generateModels = async (
       console.warn(`Warning: Empty schema for ${name}`)
       continue
     }
-    const cleanedName = stripApiBasePath(name, apiBasePath);
+    // First strip API base path, then clean schema pattern prefix
+    const stripped = stripApiBasePath(name, apiBasePath);
+    const cleanedName = cleanSchemaName(stripped);
     const cleanName = toPascalCase(cleanedName)
     
-    // Determine domain for this model first (needed for generateModelFileContent)
-    const domain = getModelDomain(cleanName)
+    // Determine domain using ORIGINAL schema name from OpenAPI spec
+    const domain = getModelDomain(name)
     const modelContent = generateModelFileContent(cleanName, schema, domain, KNOWN_ENUM_TYPES_RUNTIME)
     
     // Check if this is an enum and save to constants dir

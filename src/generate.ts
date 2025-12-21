@@ -1,4 +1,3 @@
-// File with modified generate.ts
 import * as fs from "fs"
 import * as path from "path"
 import axios from "axios"
@@ -13,6 +12,7 @@ import { generateTags } from "./generators/tag-generator"
 import { generateReduxSlices } from "./generators/redux-slice-generator"
 import { ParamsGenerator } from "./generators/params-generator"
 import { generateReduxHooks, generateReduxStore } from "./generators/redux-hooks-generator"
+import { buildDomainMappings } from "./utils/domain-classifier"
 
 interface Arguments {
   url: string
@@ -281,8 +281,11 @@ const main = async () => {
 
     const apiBasePath = argv.apiBasePath ? argv.apiBasePath.replace(/\/$/, '') : ''
 
+    log("Building domain mappings from OpenAPI tags...")
+    buildDomainMappings(swagger, apiBasePath)
+
     log("Generating models...")
-    await generateModels(definitions, outputDir, apiBasePath)
+    await generateModels(definitions, outputDir, apiBasePath, swagger)
 
     log("Generating tags...")
     const tagsContent = generateTags(paths, apiBasePath)
@@ -297,7 +300,7 @@ const main = async () => {
 
     log("Generating Redux slices...")
     if (!argv.exclude.includes("slices")) {
-      await generateReduxSlices(definitions, outputDir, apiBasePath, argv["use@"])
+      await generateReduxSlices(definitions, outputDir, apiBasePath, argv["use@"], swagger)
     } else {
       log("Skipping Redux slices generation (excluded)")
     }    log("Generating Redux hooks and store...")

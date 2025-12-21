@@ -5,36 +5,9 @@ import Mustache from "mustache"
 import { loadTemplate } from "../utils/template-loader"
 import { toPascalCase } from "../utils/formater"
 import { stripApiBasePath } from "../utils/name-cleaner"
+import { getModelDomain } from "../utils/domain-classifier"
 
 const sliceTemplate = loadTemplate("sliceTemplate.mustache")
-
-const getModelDomain = (modelName: string): string => {
-  const name = modelName.toLowerCase();
-  
-  if (/^(user|login|token|refresh|account|password)/.test(name)) return 'auth';
-  if (/^(member|membership)/.test(name)) return 'members';
-  if (/^(attendance|checkin|checkout)/.test(name)) return 'attendance';
-  if (/^(transaction|payment)/.test(name)) return 'transactions';
-  if (/^branch/.test(name)) return 'branches';
-  if (/^lead/.test(name)) return 'leads';
-  if (/^(goal|unit)/.test(name)) return 'goals';
-  if (/^(discount|referral)/.test(name)) return 'discounts';
-  if (/^expense/.test(name)) return 'expenses';
-  if (/^(product|inventory|stock|sale)/.test(name)) return 'products';
-  if (/^(role|permission|module|submodule|department)/.test(name)) return 'permissions';
-  if (/^notification/.test(name)) return 'notifications';
-  if (/^(report|profit|revenue|export)/.test(name)) return 'reports';
-  if (/^(analytics|churn|retention|cohort|segment|ltv|engagement|atrisk|renewal|prediction)/.test(name)) return 'analytics';
-  if (/^(setting|systemconfiguration|category)/.test(name)) return 'settings';
-  if (/^(file|upload)/.test(name)) return 'files';
-  if (/^(billing|schedule|upcoming)/.test(name)) return 'billing';
-  if (/^(paymentintent|paymentstatus|cardtokenize|refund)/.test(name)) return 'payment-gateway';
-  if (/^training/.test(name)) return 'training';
-  if (/^dashboard/.test(name)) return 'dashboard';
-  if (/^(validation|http|body_|app_schemas_|app__)/.test(name)) return 'common';
-  
-  return 'common';
-}
 
 const toKebabCase = (str: string): string => {
   return str.replace(/[_\s]+/g, '-').replace(/([A-Z])/g, (g) => '-' + g.toLowerCase()).replace(/^-/, '')
@@ -112,7 +85,8 @@ export const generateReduxSlices = async (
   definitions: any,
   outputDir: string,
   apiBasePath?: string,
-  useAtAlias?: boolean
+  useAtAlias?: boolean,
+  openApiSpec?: any
 ): Promise<void> => {
   const slicesDir = path.resolve(outputDir, "slices")
   if (!fs.existsSync(slicesDir)) {
@@ -145,13 +119,29 @@ export const generateReduxSlices = async (
   // Continue with slice generation
   let sliceNames = []
   for (const [name, schema] of Object.entries(definitions)) {
-    const cleanedName = stripApiBasePath(name, apiBasePath);
+    // Skip enums - they go to constants directory, not slices
+    const schemaObj = schema as any;
+    if (schemaObj && schemaObj.type === 'string' && Array.isArray(schemaObj.enum) && schemaObj.enum.length > 0) {
+      continue;
+    }
+    
+    let cleanedName = stripApiBasePath(name, apiBasePath);
+    
+    // Strip common unwanted prefixes from OpenAPI schema names
+    cleanedName = cleanedName
+      .replace(/^App_schemas_/i, '')
+      .replace(/^app__schemas__/i, '')
+      .replace(/Schemas_/g, '_')
+      .replace(/schemas__/g, '')
+      .replace(/__+/g, '_') // Replace multiple underscores with single
+      .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+    
     const sliceName = cleanedName.replace(/Upsert$/, "").replace(/GetToAlter$/, "")
     const modelName = toPascalCase(cleanedName)
     const sliceFileName = toPascalCase(sliceName)
     
-    // Get domain for the model to construct correct import path
-    const modelDomain = getModelDomain(cleanedName)
+    // Get domain using ORIGINAL schema name from OpenAPI spec
+    const modelDomain = getModelDomain(name)
     const modelPath = `${modelDomain}/${modelName}`
     
     const uniqueImports = [{ interface: `I${modelName}Schema`, modelName: modelPath }]
