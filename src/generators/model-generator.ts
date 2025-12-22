@@ -257,6 +257,7 @@ const generateModelFileContent = (modelName: string, schema: any, currentDomain:
     nestedModels: nestedModelImports,
     enumImports: enumImports,
     hasRegexImport: usedPatterns.size > 0,
+    regexImports: Array.from(usedPatterns),
     constantsImportPrefix: constantsImportPrefix,
   })
 }
