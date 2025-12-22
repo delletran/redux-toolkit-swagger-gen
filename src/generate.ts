@@ -295,7 +295,7 @@ const main = async () => {
     const mainRoutes = generateServices(paths, definitions, true, apiBasePath)
 
     log("Generating parameters...")
-    const paramsGenerator = new ParamsGenerator(paths, outputDir, apiBasePath, argv["use@"])
+    const paramsGenerator = new ParamsGenerator(paths, outputDir, definitions, apiBasePath, argv["use@"])
     paramsGenerator.generate()
 
     log("Generating Redux slices...")

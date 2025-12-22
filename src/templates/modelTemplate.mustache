@@ -1,6 +1,6 @@
 import { z } from 'zod';
 {{#hasRegexImport}}
-import { {{#regexImports}}{{.}}{{^last}}, {{/last}}{{/regexImports}} } from '{{{constantsImportPrefix}}}/regex-constants';
+import { {{#regexImports}}{{name}}{{^last}}, {{/last}}{{/regexImports}} } from '{{{constantsImportPrefix}}}/regex-constants';
 {{/hasRegexImport}}
 {{#enumImports}}
 import { {{.}} } from '{{{constantsImportPrefix}}}/{{.}}';

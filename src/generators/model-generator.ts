@@ -5,6 +5,7 @@ import { loadTemplate } from "../utils/template-loader"
 import { toPascalCase } from "../utils/formater"
 import { stripApiBasePath, cleanSchemaName } from "../utils/name-cleaner"
 import { getModelDomain } from "../utils/domain-classifier"
+import { isEnumSchema } from '../utils/is-enum-schema'
 
 const modelTemplate = loadTemplate("modelTemplate.mustache")
 const enumTemplate = loadTemplate("enumTemplate.mustache")
@@ -30,10 +31,6 @@ const KNOWN_ENUM_TYPES = [
   'TESDALevel',
   'UserRole',
 ]
-
-const isEnumSchema = (schema: any): boolean => {
-  return schema && schema.type === 'string' && Array.isArray(schema.enum) && schema.enum.length > 0
-}
 
 const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<string>, knownEnumTypes: string[]): string => {
   if (!property) return "z.any()"
@@ -251,13 +248,18 @@ const generateModelFileContent = (modelName: string, schema: any, currentDomain:
 
   const constantsImportPrefix = useAtAlias ? '@/api/constants' : '../../constants';
 
+  const regexImportsArray = Array.from(usedPatterns).map((pattern, idx, arr) => ({
+    name: pattern,
+    last: idx === arr.length - 1,
+  }));
+
   return Mustache.render(modelTemplate, {
     modelName,
     properties,
     nestedModels: nestedModelImports,
     enumImports: enumImports,
     hasRegexImport: usedPatterns.size > 0,
-    regexImports: Array.from(usedPatterns),
+    regexImports: regexImportsArray,
     constantsImportPrefix: constantsImportPrefix,
   })
 }

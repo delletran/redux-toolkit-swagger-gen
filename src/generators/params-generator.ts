@@ -6,6 +6,7 @@ import { _parsePathParamType, _parseQueryParamType } from "../utils/params"
 import { loadTemplate } from "../utils/template-loader"
 import { stripApiBasePath } from "../utils/name-cleaner"
 import { getModelDomain } from "../utils/domain-classifier"
+import { isEnumSchema } from "../utils/is-enum-schema"
 
 interface IPaths {
   [key: string]: {
@@ -21,35 +22,35 @@ interface GroupedParams {
 
 const paramsTemplate = loadTemplate("paramsTemplate.mustache")
 
-// List of known enum types - these will be imported from constants
-const KNOWN_ENUM_TYPES = [
-  'EmploymentType',
-  'PayrollMethod',
-  'PersonStatus',
-  'ProjectStatus',
-  'ProjectType',
-  'RateType',
-  'ServiceCategory',
-  'SkillCategory',
-  'TESDALevel',
-  'UserRole',
-]
-
 export class ParamsGenerator {
   private readonly outputDir: string
   private readonly paths: IPaths
   private readonly apiBasePath?: string
   private readonly useAtAlias?: boolean
+  private readonly enumNames: Set<string>
 
-  constructor(paths: IPaths, outputDir: string, apiBasePath?: string, useAtAlias?: boolean) {
+  constructor(paths: IPaths, outputDir: string, definitions: any, apiBasePath?: string, useAtAlias?: boolean) {
     this.paths = paths
     this.outputDir = outputDir
     this.apiBasePath = apiBasePath
     this.useAtAlias = useAtAlias
+    
+    // Detect all enums from definitions
+    this.enumNames = new Set<string>()
+    if (definitions && typeof definitions === 'object') {
+      for (const [name, schema] of Object.entries(definitions)) {
+        if (!schema) continue
+        const cleanedName = stripApiBasePath(name, apiBasePath)
+        const cleanName = toPascalCase(cleanedName)
+        if (isEnumSchema(schema)) {
+          this.enumNames.add(cleanName)
+        }
+      }
+    }
   }
 
   private isEnumType(typeName: string): boolean {
-    return KNOWN_ENUM_TYPES.includes(typeName)
+    return this.enumNames.has(typeName)
   }
 
   public generate(): void {
@@ -193,6 +194,7 @@ export class ParamsGenerator {
           if (refName) {
             // For enums, import from constants, for models use models with Schema
             const isEnumType = this.isEnumType(refName);
+            // Enums always use just the enum name, models use domain path when useAtAlias is true
             const fileName = isEnumType ? refName : (this.useAtAlias ? `${getModelDomain(refName)}/${refName}` : refName);
             requiredImports.add({
               name: refName,
