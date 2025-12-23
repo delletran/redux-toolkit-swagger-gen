@@ -71,7 +71,7 @@ const parseArgs = () => {
       type: "array",
       description: "Exclude generation types: thunks, slices",
       default: [],
-      choices: ["thunks", "slices"],
+      choices: ["thunks", "slices", "hooks"],
     })
     .option("apiBasePath", {
       alias: "b",
