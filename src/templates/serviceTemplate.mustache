@@ -45,6 +45,10 @@ export const {{sliceName}} = createApi({
   }),
   tagTypes: Object.values(TAGS),
   endpoints: (builder) => ({ {{#endpoints}}
+    /**{{#summary}}
+     * {{summary}}{{/summary}}{{#description}}
+     * {{description}}{{/description}}
+     */
     {{name}}: builder.{{method}}<{{interface}}{{#isResponseArray}}[]{{/isResponseArray}}, {{#paramInterfaceName}}{{paramInterfaceName}}{{/paramInterfaceName}}{{^paramInterfaceName}}{{#requestBodyType}}{{requestBodyType}}{{#isRequestBodyArray}}[]{{/isRequestBodyArray}}{{/requestBodyType}}{{^requestBodyType}}{{{types}}}{{/requestBodyType}}{{/paramInterfaceName}}>({
       {{^isMutation}}{{#isListEndpoint}}
       query: ({{#hasPathParams}}{ {{pathParamsList}}, ...params }{{/hasPathParams}}{{^hasPathParams}}{{#params}}{{params}}{{/params}}{{^params}}_{{/params}}{{/hasPathParams}}) => {        

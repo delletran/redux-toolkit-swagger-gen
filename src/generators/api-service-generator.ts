@@ -80,11 +80,12 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     // Generate endpoint name from summary if available
     let cleanName = '';
     
-    // Try to get summary from methodObj
+    // Try to get summary and description from methodObj
     const normalizedPath = ep.path.replace(/\$\{([^}]+)\}/g, '{$1}');
     const methodKey = `${normalizedPath}_${ep.httpMethod.toLowerCase()}`;
     const methodObj = methods[methodKey]?.methodObj;
     const summary = methodObj?.summary;
+    const description = methodObj?.description;
     
     if (summary) {
       // Convert summary to camelCase endpoint name
@@ -236,6 +237,10 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     
     // Generate export name (capitalize first letter for hook generation)
     enhanced.exportName = enhanced.name.charAt(0).toUpperCase() + enhanced.name.slice(1);
+    
+    // Add summary and description for JSDoc
+    enhanced.summary = summary || null;
+    enhanced.description = description || null;
     
     // Generate param interface name based on route and method
     const routeParts = ep.path.split('/').filter((p: string) => p && !p.startsWith('$'));
