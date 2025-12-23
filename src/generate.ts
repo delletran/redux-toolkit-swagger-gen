@@ -26,6 +26,7 @@ interface Arguments {
   apiBasePath?: string
   "use@"?: boolean
   reduxPath?: string
+  skipAuthSlice?: boolean
   [x: string]: unknown
 }
 
@@ -88,6 +89,11 @@ const parseArgs = () => {
       type: "string",
       description: "Path to redux directory for authSlice and store imports (e.g., src/store/redux)",
       default: "src/store/redux",
+    })
+    .option("skipAuthSlice", {
+      type: "boolean",
+      description: "Skip copying authSlice.ts to reduxPath directory",
+      default: false,
     })
     .check((argv) => {
       if (argv.clean && !argv.output) {
@@ -269,18 +275,51 @@ const main = async () => {
       if (argv.clean && fs.existsSync(outputDir)) {
         log(`Cleaning output directory: ${outputDir}`)
         try {
+          // Backup authSlice.ts files if skipAuthSlice is enabled
+          let authSliceBackups: { source: string; content: string }[] = []
+          
+          if (argv.skipAuthSlice) {
+            const authSlicePaths = [
+              path.join(outputDir, "slices", "authSlice.ts")
+            ]
+            
+            authSliceBackups = authSlicePaths
+              .filter(p => fs.existsSync(p))
+              .map(p => ({ source: p, content: fs.readFileSync(p, "utf-8") }))
+            
+            if (authSliceBackups.length > 0) {
+              log(`Backing up ${authSliceBackups.length} authSlice.ts file(s)...`)
+            }
+          }
+          
           // Remove the entire output directory and recreate it
           fs.rmSync(outputDir, { recursive: true, force: true })
           log(`Successfully cleaned output directory`)
+          
+          // Restore authSlice.ts files if they were backed up
+          if (authSliceBackups.length > 0) {
+            authSliceBackups.forEach(({ source, content }) => {
+              const dir = path.dirname(source)
+              if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true })
+              }
+              fs.writeFileSync(source, content)
+              log(`Restored authSlice.ts to ${source}`)
+            })
+          }
+          
+          return authSliceBackups.length > 0
         } catch (error) {
           console.error(`Failed to clean output directory: ${error}`)
           process.exit(1)
         }
       }
+      return false
     }
     
+    
     log("Starting API generation...")
-    cleanOutputDirectory()
+    const authSliceWasRestored = cleanOutputDirectory()
     ensureDirectories()
 
     const swagger = await fetchSwagger(swaggerPath)
@@ -373,7 +412,7 @@ const main = async () => {
 
     // Copy authSlice and generate store to the specified reduxPath location
     if (argv.reduxPath) {
-      log(`Generating store and authSlice to ${argv.reduxPath}...`)
+      log(`Generating store${argv.skipAuthSlice ? '' : ' and authSlice'} to ${argv.reduxPath}...`)
       const targetReduxPath = path.resolve(process.cwd(), argv.reduxPath)
       
       // Create the target directory if it doesn't exist
@@ -381,11 +420,13 @@ const main = async () => {
         fs.mkdirSync(targetReduxPath, { recursive: true })
       }
       
-      // Copy authSlice to the target location
-      fs.copyFileSync(
-        path.resolve(__dirname, "../src/redux/slices/authSlice.ts"),
-        path.join(targetReduxPath, "authSlice.ts")
-      )
+      // Copy authSlice to the target location (unless skipped)
+      if (!argv.skipAuthSlice) {
+        fs.copyFileSync(
+          path.resolve(__dirname, "../src/redux/slices/authSlice.ts"),
+          path.join(targetReduxPath, "authSlice.ts")
+        )
+      }
       
       // Generate a separate store.ts for the redux directory with updated import paths
       // Calculate relative path from reduxPath to API directory
@@ -396,14 +437,17 @@ const main = async () => {
     }
 
     // Also copy slices to API directory for backward compatibility
-    const slicesDir = path.join(sliceDir, "slices")
-    if (!fs.existsSync(slicesDir)) {
-      fs.mkdirSync(slicesDir, { recursive: true })
+    // Skip if authSlice was already restored from backup
+    if (!argv.skipAuthSlice && !authSliceWasRestored) {
+      const slicesDir = path.join(sliceDir, "slices")
+      if (!fs.existsSync(slicesDir)) {
+        fs.mkdirSync(slicesDir, { recursive: true })
+      }
+      fs.copyFileSync(
+        path.resolve(__dirname, "../src/redux/slices/authSlice.ts"),
+        path.join(slicesDir, "authSlice.ts")
+      )
     }
-    fs.copyFileSync(
-      path.resolve(__dirname, "../src/redux/slices/authSlice.ts"),
-      path.join(slicesDir, "authSlice.ts")
-    )
 
     fs.copyFileSync(
       path.resolve(__dirname, "../src/schema/api.ts"),
