@@ -54,6 +54,7 @@ const getServiceEndpoint = (
     httpMethod: endpoint.httpMethod,
     params: endpoint.params,
     queryParams: endpoint.queryParams,
+    queryParamsArray: endpoint.queryParamsArray,
     bodyParam: endpoint.body,
     tag: endpoint.tag,
     isMutation: endpoint.isMutation,

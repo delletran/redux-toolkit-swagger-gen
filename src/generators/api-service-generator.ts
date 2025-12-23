@@ -281,14 +281,14 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
       enhanced.pathParamsList = pathParamsFromUrl.join(', ');
       
       // For mutations: build list of all non-body param names for destructuring
-      // Only include PATH parameters here - query params go in query string
       if (enhanced.isMutation && enhanced.paramInterfaceName) {
         const allParamNames = [...pathParamsFromUrl];
-        
-        // Do NOT include query params in destructuring - they should be in URL query string
-        // Query params are handled separately in the template via toQueryString()
-        
         enhanced.allNonBodyParams = allParamNames.length > 0 ? allParamNames.join(', ') : null;
+        
+        // Check if mutation has query params (from the endpoint's queryParamsArray)
+        // queryParamsArray contains the actual parameter names as an array
+        const hasQueryParamsFromEndpoint = Array.isArray(ep.queryParamsArray) && ep.queryParamsArray.length > 0;
+        enhanced.hasQueryParamsForMutation = hasQueryParamsFromEndpoint;
       }
     } else {
       // No parameters - don't set paramInterfaceName so template uses void

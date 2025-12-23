@@ -88,7 +88,7 @@ export const {{sliceName}} = createApi({
       providesTags: [TAGS.{{tag}}],
     }),
     {{/isListEndpoint}}{{/isMutation}}{{#isMutation}}
-      query: ({{#paramInterfaceName}}{{#requestBodyType}}{ {{#allNonBodyParams}}{{allNonBodyParams}}, {{/allNonBodyParams}}body }{{/requestBodyType}}{{^requestBodyType}}{{#hasPathParams}}{ {{pathParamsList}} }{{/hasPathParams}}{{^hasPathParams}}params{{/hasPathParams}}{{/requestBodyType}}{{/paramInterfaceName}}{{^paramInterfaceName}}body{{/paramInterfaceName}}) => {
+      query: ({{#paramInterfaceName}}{{#requestBodyType}}{ {{#allNonBodyParams}}{{allNonBodyParams}}, {{/allNonBodyParams}}body{{#hasQueryParamsForMutation}}, ...params{{/hasQueryParamsForMutation}} }{{/requestBodyType}}{{^requestBodyType}}{{#hasPathParams}}{ {{pathParamsList}}{{#hasQueryParamsForMutation}}, ...params{{/hasQueryParamsForMutation}} }{{/hasPathParams}}{{^hasPathParams}}params{{/hasPathParams}}{{/requestBodyType}}{{/paramInterfaceName}}{{^paramInterfaceName}}body{{/paramInterfaceName}}) => {
         let url = `{{{path}}}`;
         return {
           url,
@@ -96,7 +96,8 @@ export const {{sliceName}} = createApi({
           body,{{/requestBodyType}}
           headers: {
             'Content-Type': '{{{contentType}}}',
-          },
+          },{{#hasQueryParamsForMutation}}
+          params: params,{{/hasQueryParamsForMutation}}
         };
       },
       transformErrorResponse: transformErrorResponse,
