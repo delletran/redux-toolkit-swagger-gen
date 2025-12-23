@@ -1,0 +1,95 @@
+'use client';
+
+import { {{resourceName}} } from '{{{serviceImportPath}}}';
+{{#paramImports}}
+import type { {{interfaceName}} } from '@/api/params/{{resourceName}}.params';
+{{/paramImports}}
+{{#modelImports}}
+import type { {{interfaceName}} } from '@/api/models/{{domain}}/{{modelName}}';
+{{/modelImports}}
+{{#enumImports}}
+import { {{enumName}} } from '@/api/constants/{{enumName}}';
+{{/enumImports}}
+
+{{#hasListEndpoint}}
+/**{{#listEndpoint}}{{#summary}}
+ * {{summary}}{{/summary}}{{#description}}
+ * {{description}}{{/description}}{{/listEndpoint}}
+ */
+export function use{{resourceNamePascal}}(params?: {{#listEndpoint}}{{#paramInterfaceName}}{{paramInterfaceName}}{{/paramInterfaceName}}{{^paramInterfaceName}}Record<string, any>{{/paramInterfaceName}}{{/listEndpoint}}) {
+  const { data, isLoading, error, refetch } = {{resourceName}}.use{{listEndpoint.exportName}}Query(params || {});
+{{#hasCreateMutation}}
+  const [create{{resourceNameSingularPascal}}, createResult] = {{resourceName}}.use{{createMutation.exportName}}Mutation();
+{{/hasCreateMutation}}
+{{#hasUpdateMutation}}
+  const [update{{resourceNameSingularPascal}}, updateResult] = {{resourceName}}.use{{updateMutation.exportName}}Mutation();
+{{/hasUpdateMutation}}
+{{#hasDeleteMutation}}
+  const [delete{{resourceNameSingularPascal}}] = {{resourceName}}.use{{deleteMutation.exportName}}Mutation();
+{{/hasDeleteMutation}}
+{{#hasOtherMutations}}
+{{#otherMutations}}
+  const [{{shortVariableName}}] = {{resourceName}}.use{{exportName}}Mutation();
+{{/otherMutations}}
+{{/hasOtherMutations}}
+
+  return {
+    {{resourceName}}: data?.results || [],
+    total: data?.total || 0,
+    isLoading,
+    error,
+    refetch,
+{{#hasCreateMutation}}
+    create{{resourceNameSingularPascal}},
+    isCreating: createResult.isLoading,
+{{/hasCreateMutation}}
+{{#hasUpdateMutation}}
+    update{{resourceNameSingularPascal}},
+    isUpdating: updateResult.isLoading,
+{{/hasUpdateMutation}}
+{{#hasDeleteMutation}}
+    delete{{resourceNameSingularPascal}},
+{{/hasDeleteMutation}}
+{{#hasOtherMutations}}
+{{#otherMutations}}
+    {{shortVariableName}},
+{{/otherMutations}}
+{{/hasOtherMutations}}
+  };
+}
+{{/hasListEndpoint}}
+
+{{#hasDetailEndpoint}}
+/**{{#detailEndpoint}}{{#summary}}
+ * {{summary}}{{/summary}}{{#description}}
+ * {{description}}{{/description}}{{/detailEndpoint}}
+ */
+export function use{{resourceNameSingularPascal}}Detail({{#detailEndpoint}}{{idParamCamel}}: string{{/detailEndpoint}}) {
+  const { data: {{resourceNameSingular}}, isLoading, error, refetch } = {{resourceName}}.use{{detailEndpoint.exportName}}Query({ {{#detailEndpoint}}{{idParamName}}: {{idParamCamel}}{{/detailEndpoint}} });
+
+  return { {{resourceNameSingular}}, isLoading, error, refetch };
+}
+{{/hasDetailEndpoint}}
+
+{{#hasRelatedQueries}}
+{{#relatedQueries}}
+/**{{#summary}}
+ * {{summary}}{{/summary}}{{#description}}
+ * {{description}}{{/description}}
+ */
+export function {{hookName}}({{#hasRequiredParams}}{{requiredParamsSignature}}{{/hasRequiredParams}}{{^hasRequiredParams}}params?: {{#paramInterfaceName}}{{paramInterfaceName}}{{/paramInterfaceName}}{{^paramInterfaceName}}Record<string, any>{{/paramInterfaceName}}{{/hasRequiredParams}}) {
+  const {
+    data: {{returnDataName}},
+    isLoading,
+    error,
+    refetch,
+  } = {{resourceName}}.use{{exportName}}Query({{#hasRequiredParams}}{ {{requiredParamsObject}} }{{/hasRequiredParams}}{{^hasRequiredParams}}params || {}{{/hasRequiredParams}});
+{{#hasMutation}}
+  const [{{mutationVariableName}}] = {{resourceName}}.use{{mutationExportName}}Mutation();
+{{/hasMutation}}
+
+  return { {{returnDataName}}: {{returnDataName}} || [], isLoading, error, refetch{{#hasMutation}}, {{mutationVariableName}}{{/hasMutation}} };
+}
+
+{{/relatedQueries}}
+{{/hasRelatedQueries}}

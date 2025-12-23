@@ -12,6 +12,7 @@ import { generateTags } from "./generators/tag-generator"
 import { generateReduxSlices } from "./generators/redux-slice-generator"
 import { ParamsGenerator } from "./generators/params-generator"
 import { generateReduxHooks, generateReduxStore } from "./generators/redux-hooks-generator"
+import { customHooksGenerator } from "./generators/custom-hooks-generator"
 import { buildDomainMappings } from "./utils/domain-classifier"
 
 interface Arguments {
@@ -120,6 +121,7 @@ export const reduxDir = path.join(baseOutPath, "redux")
 export const thunkDir = path.join(baseOutPath, "thunks")
 export const schemaDir = path.join(baseOutPath, "schema")
 export const constantsDir = path.join(baseOutPath, "constants")
+export const hooksDir = path.join(baseOutPath, "hooks")
 
 const main = async () => {
   try {    const log = (message: string) => {
@@ -139,6 +141,11 @@ const main = async () => {
         // Only create thunk directory if thunks are not excluded
       if (!argv.exclude.includes("thunks")) {
         dirs.push(thunkDir)
+      }
+      
+      // Only create hooks directory if hooks are not excluded
+      if (!argv.exclude.includes("hooks")) {
+        dirs.push(hooksDir)
       }
       
       dirs.forEach((dir) => {
@@ -297,6 +304,22 @@ const main = async () => {
     log("Generating parameters...")
     const paramsGenerator = new ParamsGenerator(paths, outputDir, definitions, apiBasePath, argv["use@"])
     paramsGenerator.generate()
+
+    log("Generating custom hooks...")
+    if (!argv.exclude.includes("hooks")) {
+      // Generate hooks for each service using mainRoutes
+      Object.entries(mainRoutes).forEach(([servicePath, endpoints]) => {
+        const hookContent = customHooksGenerator(servicePath, Object.values(endpoints), argv["use@"], apiBasePath);
+        if (hookContent) {
+          const serviceNamePascal = servicePath.charAt(0).toUpperCase() + servicePath.slice(1).replace(/_/g, '')
+          const hookFilePath = path.join(hooksDir, `use${serviceNamePascal}.ts`)
+          fs.writeFileSync(hookFilePath, hookContent)
+          log(`Generated hook: ${hookFilePath}`)
+        }
+      })
+    } else {
+      log("Skipping custom hooks generation (excluded)")
+    }
 
     log("Generating Redux slices...")
     if (!argv.exclude.includes("slices")) {
