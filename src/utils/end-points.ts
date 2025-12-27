@@ -203,9 +203,27 @@ class Endpoint {
     const cleanedId = stripApiBasePath(details.id, apiBasePath)
     this._name = toCamelCase(cleanedId)
     this._exportName = toPascalCase(this._name)
+    
+    // Check if this is a list endpoint by multiple criteria:
+    // 1. URL or ID contains "list"
+    // 2. Has pagination parameters (skip, limit, page, page_size)
+    // 3. Returns a PaginatedResponse type
+    const hasPaginationParams = details.methodObj?.parameters?.some((p: any) => 
+      p.in === 'query' && (p.name === 'skip' || p.name === 'limit' || p.name === 'page' || p.name === 'page_size')
+    )
+    const response200 = details.methodObj?.responses?.['200']
+    const responseSchema = response200?.content?.['application/json']?.schema
+    const isPaginatedResponse = responseSchema?.$ref?.includes('PaginatedResponse') ||
+                               responseSchema?.$ref?.includes('Paginated') ||
+                               responseSchema?.properties?.results ||
+                               responseSchema?.properties?.items ||
+                               responseSchema?.properties?.data
+    const hasNoPathParams = !details.url.includes('{')
+    
     this._isListEndpoint =
       details.url.toLowerCase().includes("/list") ||
-      details.id.toLowerCase().includes("list")
+      details.id.toLowerCase().includes("list") ||
+      (httpMethod === "get" && hasPaginationParams && isPaginatedResponse && hasNoPathParams)
     this._isDeleteEndpoint = httpMethod === "delete"
     this._isQuery = httpMethod === "get"
 
