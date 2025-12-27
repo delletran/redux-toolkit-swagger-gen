@@ -18,6 +18,36 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     return route.startsWith(basePathPrefix) ? route.substring(basePathPrefix.length - 1) : route;
   };
   
+  // Helper to detect the array field name in paginated response schemas
+  const detectPaginatedArrayField = (methodObj: any): string => {
+    const responses = methodObj?.responses;
+    if (!responses) return 'results';
+    
+    // Look for successful response (200, 201, etc.)
+    const successResponse = responses['200'] || responses['201'];
+    if (!successResponse?.content) return 'results';
+    
+    const jsonContent = successResponse.content['application/json'];
+    if (!jsonContent?.schema) return 'results';
+    
+    const schema = jsonContent.schema;
+    
+    // If schema has $ref, we need to look it up (but we don't have access to full spec here)
+    // So we'll check if it has properties directly
+    if (schema.properties) {
+      // Common array field names in paginated responses
+      const commonFields = ['results', 'items', 'data', 'records', 'list', 'rows'];
+      for (const field of commonFields) {
+        if (schema.properties[field]?.type === 'array') {
+          return field;
+        }
+      }
+    }
+    
+    // Default to 'results'
+    return 'results';
+  };
+  
   // Collect all interfaces that need to be imported
   const importMap = new Map();
   rawEndpoints.forEach(ep => {
@@ -241,6 +271,11 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
     // Add summary and description for JSDoc
     enhanced.summary = summary || null;
     enhanced.description = description || null;
+    
+    // Detect paginated array field name for list endpoints
+    if (enhanced.isListEndpoint && methodObj) {
+      enhanced.paginatedArrayField = detectPaginatedArrayField(methodObj);
+    }
     
     // Generate param interface name based on route and method
     const routeParts = ep.path.split('/').filter((p: string) => p && !p.startsWith('$'));

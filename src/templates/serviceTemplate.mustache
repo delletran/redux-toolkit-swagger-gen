@@ -69,7 +69,13 @@ export const {{sliceName}} = createApi({
         {{/params}}
       },
       transformErrorResponse: transformErrorResponse,
-      providesTags: [TAGS.{{tag}}],
+      providesTags: (result) => 
+        result?.{{#paginatedArrayField}}{{paginatedArrayField}}{{/paginatedArrayField}}{{^paginatedArrayField}}results{{/paginatedArrayField}}
+          ? [
+              ...result.{{#paginatedArrayField}}{{paginatedArrayField}}{{/paginatedArrayField}}{{^paginatedArrayField}}results{{/paginatedArrayField}}.map(({ id }: any) => ({ type: TAGS.{{tag}}, id })),
+              { type: TAGS.{{tag}}, id: 'LIST' },
+            ]
+          : [{ type: TAGS.{{tag}}, id: 'LIST' }],
     }),
     {{/isListEndpoint}}
     {{^isListEndpoint}}
@@ -89,7 +95,7 @@ export const {{sliceName}} = createApi({
         {{/params}}
       },
       transformErrorResponse: transformErrorResponse,
-      providesTags: [TAGS.{{tag}}],
+      providesTags: {{#hasPathParams}}(result, error, { {{pathParamsList}} }) => [{ type: TAGS.{{tag}}, id: {{pathParamsList}} }]{{/hasPathParams}}{{^hasPathParams}}[TAGS.{{tag}}]{{/hasPathParams}},
     }),
     {{/isListEndpoint}}{{/isMutation}}{{#isMutation}}
       query: ({{#paramInterfaceName}}{{#requestBodyType}}{ {{#allNonBodyParams}}{{allNonBodyParams}}, {{/allNonBodyParams}}body{{#hasQueryParamsForMutation}}, ...params{{/hasQueryParamsForMutation}} }{{/requestBodyType}}{{^requestBodyType}}{{#hasPathParams}}{ {{pathParamsList}}{{#hasQueryParamsForMutation}}, ...params{{/hasQueryParamsForMutation}} }{{/hasPathParams}}{{^hasPathParams}}params{{/hasPathParams}}{{/requestBodyType}}{{/paramInterfaceName}}{{^paramInterfaceName}}body{{/paramInterfaceName}}) => {
@@ -105,7 +111,7 @@ export const {{sliceName}} = createApi({
         };
       },
       transformErrorResponse: transformErrorResponse,
-      invalidatesTags: [TAGS.{{tag}}],
+      invalidatesTags: {{#hasPathParams}}(result, error, { {{pathParamsList}} }) => [{ type: TAGS.{{tag}}, id: {{pathParamsList}} }, { type: TAGS.{{tag}}, id: 'LIST' }]{{/hasPathParams}}{{^hasPathParams}}[{ type: TAGS.{{tag}}, id: 'LIST' }]{{/hasPathParams}},
     }),
     {{/isMutation}}
   {{/endpoints}}
