@@ -46,6 +46,33 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
     return refName
   }
 
+  // Handle OpenAPI 3.x allOf - typically used for required references
+  if (property.allOf && Array.isArray(property.allOf)) {
+    // allOf with single $ref is common for required enum/object references
+    if (property.allOf.length === 1 && property.allOf[0].$ref) {
+      const refName = property.allOf[0].$ref.split("/").pop();
+      nestedModels.add(refName);
+      
+      if (knownEnumTypes.includes(refName)) {
+        return `z.enum(${refName})`;
+      }
+      return refName;
+    }
+    
+    // Multiple allOf schemas - merge them (advanced case)
+    // For now, handle the first ref if available
+    const refSchema = property.allOf.find((s: any) => s.$ref);
+    if (refSchema) {
+      const refName = refSchema.$ref.split("/").pop();
+      nestedModels.add(refName);
+      
+      if (knownEnumTypes.includes(refName)) {
+        return `z.enum(${refName})`;
+      }
+      return refName;
+    }
+  }
+
   // Handle OpenAPI 3.x anyOf and oneOf
   if (property.anyOf || property.oneOf) {
     const schemas = property.anyOf || property.oneOf;
@@ -150,8 +177,10 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
       break;
   }
 
-  if (property["x-nullable"] === true || !property.required) {
-    zodType += ".optional()"
+  // Note: Don't add .optional() here - it's handled by generateProperties based on the required array
+  // Only add .nullable() for x-nullable properties
+  if (property["x-nullable"] === true) {
+    zodType += ".nullable()"
   }
 
   return zodType
@@ -169,12 +198,19 @@ const generateProperties = (
   return Object.entries(properties).map(([name, prop]: [string, any]) => {
     const refName = prop && prop.$ref ? prop.$ref.split("/").pop() : null;
     const isEnum = refName && knownEnumTypes.includes(refName);
+    const isRequired = required.includes(name);
+    let zodType = getZodType(prop, nestedModels, usedPatterns, knownEnumTypes);
+    
+    // Add .optional() if field is not required
+    if (!isRequired) {
+      zodType += '.optional()';
+    }
+    
     return {
       name,
-      zodType: getZodType(prop, nestedModels, usedPatterns, knownEnumTypes),
+      zodType,
       isRef: prop && prop.$ref && !isEnum ? true : false,
-      isOptional:
-        !prop || prop["x-nullable"] === true || !required.includes(name),
+      isOptional: !isRequired,
       refName: refName,
     };
   })
