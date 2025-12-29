@@ -83,6 +83,7 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
   
   // Generate param interface imports and enhanced endpoint data
   const paramImports = new Map();
+  const additionalImports = new Map(); // Collect imports discovered during endpoint enhancement
   const endpoints = rawEndpoints.map((ep: any) => {
     // Create a new object with all original properties plus our additions
     const enhanced: any = {
@@ -406,6 +407,20 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
         const cleaned = cleanSchemaName(stripped);
         const cleanedModelName = toPascalCase(cleaned);
         enhanced.requestBodyType = `I${cleanedModelName}Schema`;
+        
+        // Add import for this request body type if not already imported
+        if (cleanedModelName && cleanedModelName !== ep.modelName) {
+          const domain = getModelDomain(cleanedModelName);
+          const importPath = useAtAlias 
+            ? `@/api/models/${domain}/${cleanedModelName}`
+            : `../../models/${domain}/${cleanedModelName}`;
+          additionalImports.set(`I${cleanedModelName}Schema|${cleanedModelName}`, { 
+            interface: `I${cleanedModelName}Schema`, 
+            modelName: cleanedModelName,
+            domain: domain,
+            importPath: importPath
+          });
+        }
       } else if (hasRequestBody && ep.requestBodyModelName) {
         // Fallback to existing logic if we have requestBodyModelName but no ref
         // ep.requestBodyModelName should already be cleaned by getNames function
@@ -429,6 +444,11 @@ export const apiServiceGenerator = (path: string, methods: Record<string, ReduxA
   const allImports = new Map();
   
   uniqueImports.forEach(imp => {
+    allImports.set(`${imp.interface}|${imp.modelName}`, imp);
+  });
+  
+  // Add imports discovered during endpoint enhancement
+  additionalImports.forEach(imp => {
     allImports.set(`${imp.interface}|${imp.modelName}`, imp);
   });
 
