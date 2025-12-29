@@ -10,6 +10,9 @@ import { {{name}} } from '{{{modelsImportPrefix}}}/{{{fileName}}}';
 {{#interfaces}}
 export interface {{name}} {
 {{#properties}}
+{{#description}}
+  /** {{description}} */
+{{/description}}
   {{name}}{{#optional}}?{{/optional}}: {{type}};
 {{/properties}}
 }

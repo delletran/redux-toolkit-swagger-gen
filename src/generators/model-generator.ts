@@ -212,6 +212,7 @@ const generateProperties = (
       isRef: prop && prop.$ref && !isEnum ? true : false,
       isOptional: !isRequired,
       refName: refName,
+      description: prop?.description || null,
     };
   })
 }

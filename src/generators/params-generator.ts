@@ -247,6 +247,7 @@ export class ParamsGenerator {
           name: paramName,
           type: paramType,
           optional: !param.required,
+          description: param.description || null,
         })
       })
     }

@@ -16,6 +16,7 @@ interface IEndpointParameter {
 interface IBodyParameter {
   name: string | "data";
   in: string | "body";
+  description?: string;
   required?: boolean;
   type?: string;
   schema?: {

@@ -11,6 +11,9 @@ import { {{name}} } from '{{{importPath}}}';
 
 export const {{modelName}} = z.object({
 {{#properties}}
+{{#description}}
+  /** {{description}} */
+{{/description}}
   {{name}}: {{#isRef}}{{refName}}{{/isRef}}{{^isRef}}{{{zodType}}}{{/isRef}},
 {{/properties}}
 });
