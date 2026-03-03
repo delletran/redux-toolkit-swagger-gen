@@ -32,12 +32,14 @@ const KNOWN_ENUM_TYPES = [
   'UserRole',
 ]
 
+const cleanRef = (rawRef: string): string => toPascalCase(cleanSchemaName(rawRef))
+
 const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<string>, knownEnumTypes: string[]): string => {
   if (!property) return "z.any()"
 
   // Handle $ref references
   if (property.$ref) {
-    const refName = property.$ref.split("/").pop()
+    const refName = cleanRef(property.$ref.split("/").pop())
     nestedModels.add(refName)
     // Wrap enums with z.enum() for TypeScript enums
     if (knownEnumTypes.includes(refName)) {
@@ -50,7 +52,7 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
   if (property.allOf && Array.isArray(property.allOf)) {
     // allOf with single $ref is common for required enum/object references
     if (property.allOf.length === 1 && property.allOf[0].$ref) {
-      const refName = property.allOf[0].$ref.split("/").pop();
+      const refName = cleanRef(property.allOf[0].$ref.split("/").pop());
       nestedModels.add(refName);
       
       if (knownEnumTypes.includes(refName)) {
@@ -63,7 +65,7 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
     // For now, handle the first ref if available
     const refSchema = property.allOf.find((s: any) => s.$ref);
     if (refSchema) {
-      const refName = refSchema.$ref.split("/").pop();
+      const refName = cleanRef(refSchema.$ref.split("/").pop());
       nestedModels.add(refName);
       
       if (knownEnumTypes.includes(refName)) {
@@ -84,7 +86,7 @@ const getZodType = (property: any, nestedModels: Set<string>, usedPatterns: Set<
     
     // Handle nullable reference (ref + null)
     if (refSchema && hasNull && schemas.length === 2) {
-      const refName = refSchema.$ref.split("/").pop();
+      const refName = cleanRef(refSchema.$ref.split("/").pop());
       nestedModels.add(refName);
       
       if (knownEnumTypes.includes(refName)) {

@@ -70,39 +70,36 @@ export const editFormAction = <T>(
 
 /**
  * Sets the form error state with the provided payload.
- * @template T - The type of the form state.
  * @param state - The current form state.
  * @param action - The action containing the error payload to set.
  */
-export const setFormErrorAction = <T>(
-  state: IReduxFormState<T>,
+export const setFormErrorAction = (
+  state: { error?: unknown },
   action: PayloadAction<Record<string, unknown>>
 ) => {
   const { payload } = action
-  state.error = payload as Partial<Record<keyof T, string>> | undefined
+  ;(state as any).error = payload
 }
 
 /**
  * Edits the form error state with the provided payload.
- * @template T - The type of the form state.
  * @param state - The current form state.
  * @param action - The action containing the error payload to update.
  */
-export const editFormErrorAction = <T>(
-  state: IReduxFormState<T>,
+export const editFormErrorAction = (
+  state: { error?: Record<string, unknown> },
   action: PayloadAction<Record<string, unknown>>
 ) => {
   const { payload } = action
-  state.error = { ...state.error, ...payload }
+  ;(state as any).error = { ...(state.error || {}), ...payload }
 }
 
 /**
  * Clears the form error state.
- * @template T - The type of the form state.
  * @param state - The current form state.
  */
-export const clearFormErrorAction = <T>(state: IReduxFormState<T>) => {
-  state.error = {}
+export const clearFormErrorAction = (state: { error?: unknown }) => {
+  ;(state as any).error = {}
 }
 
 /**

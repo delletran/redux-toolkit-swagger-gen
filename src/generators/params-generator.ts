@@ -4,7 +4,7 @@ import Mustache from "mustache"
 import { toPascalCase } from "../utils/formater"
 import { _parsePathParamType, _parseQueryParamType } from "../utils/params"
 import { loadTemplate } from "../utils/template-loader"
-import { stripApiBasePath } from "../utils/name-cleaner"
+import { stripApiBasePath, cleanSchemaName } from "../utils/name-cleaner"
 import { getModelDomain } from "../utils/domain-classifier"
 import { isEnumSchema } from "../utils/is-enum-schema"
 
@@ -170,7 +170,11 @@ export class ParamsGenerator {
     // Handle OpenAPI 2.0 parameters
     if (details.parameters) {
       details.parameters.forEach((param: IQueryParameter | IBodyParameter) => {
-        const paramName = param.name
+        // Quote names that are not valid JS identifiers (e.g. "x-paymongo-signature")
+        const rawParamName = param.name
+        const paramName = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(rawParamName)
+          ? rawParamName
+          : `"${rawParamName}"`
         let paramType: string
         if (param.in === "query") {
           paramType = _parseQueryParamType(param as IQueryParameter)
@@ -192,16 +196,16 @@ export class ParamsGenerator {
           }
           
           if (refName) {
-            // For enums, import from constants, for models use models with Schema
-            const isEnumType = this.isEnumType(refName);
-            // Enums always use just the enum name, models use domain path when useAtAlias is true
-            const fileName = isEnumType ? refName : (this.useAtAlias ? `${getModelDomain(refName)}/${refName}` : refName);
+            const cleanedRefName = toPascalCase(cleanSchemaName(refName));
+            // For enums, import from constants, for models use domain path when useAtAlias is true
+            const isEnumType = this.isEnumType(cleanedRefName);
+            const fileName = isEnumType ? cleanedRefName : (this.useAtAlias ? `${getModelDomain(cleanedRefName)}/${cleanedRefName}` : cleanedRefName);
             requiredImports.add({
-              name: refName,
+              name: cleanedRefName,
               fileName: fileName,
               isEnum: isEnumType,
             });
-            paramType = refName;
+            paramType = cleanedRefName;
           } else if (paramType.endsWith('Schema')) {
             // For schema types
             const modelName = paramType.replace(/^I/, '').replace(/Schema$/, '')
@@ -227,8 +231,8 @@ export class ParamsGenerator {
         } else if (param.in === "body" && param.schema) {
           if (param.schema.$ref) {
             const refType = param.schema.$ref.split("/").pop() || ""
-            const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
-            const modelName = toPascalCase(cleanedRefType);
+            const cleanedRefType = toPascalCase(cleanSchemaName(stripApiBasePath(refType, this.apiBasePath)))
+            const modelName = cleanedRefType;
             const schemaName = `I${modelName}Schema`
             const fileName = this.useAtAlias ? `${getModelDomain(refType)}/${modelName}` : modelName;
             requiredImports.add({
@@ -280,8 +284,8 @@ export class ParamsGenerator {
 
       if (refString) {
         const refType = refString.split("/").pop() || ""
-        const cleanedRefType = stripApiBasePath(refType, this.apiBasePath)
-        const modelName = toPascalCase(cleanedRefType);
+        const cleanedRefType = toPascalCase(cleanSchemaName(stripApiBasePath(refType, this.apiBasePath)))
+        const modelName = cleanedRefType;
         const schemaName = `I${modelName}Schema`
         const fileName = this.useAtAlias ? `${getModelDomain(refType)}/${modelName}` : modelName;
         requiredImports.add({

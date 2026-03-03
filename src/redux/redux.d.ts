@@ -7,7 +7,7 @@ type IValue = string | number
  */
 type IReduxFormState<T> = {
   error?: Partial<Record<keyof T, string>>
-} & Partial<T>
+} & Omit<Partial<T>, 'error'>
 
 type IFormState<T> = Partial<Record<keyof T, unknown>>
 
