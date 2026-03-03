@@ -331,11 +331,12 @@ export const generateModels = async (
   // Track domain directories created
   const createdDomains = new Set<string>()
   
-  // First pass: Identify all enums
+  // First pass: Identify all enums (must mirror the same cleaning pipeline as the second pass)
   const enumNames = new Set<string>()
   for (const [name, schema] of Object.entries(definitions)) {
     if (!schema) continue
-    const cleanedName = stripApiBasePath(name, apiBasePath);
+    const stripped = stripApiBasePath(name, apiBasePath);
+    const cleanedName = cleanSchemaName(stripped);
     const cleanName = toPascalCase(cleanedName)
     if (isEnumSchema(schema)) {
       enumNames.add(cleanName)

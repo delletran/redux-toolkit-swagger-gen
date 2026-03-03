@@ -77,6 +77,24 @@ export const cleanSchemaName = (schemaName: string): string => {
     return `${domain}_${modelName}`;
   }
   
-  // Pattern 3: Remove trailing underscores (e.g., PaginatedResponse_ModelName_ -> PaginatedResponse_ModelName)
+  // Pattern 3: App_schemas_{any_domain}_{PascalCaseModel} -> {PascalCaseModel}
+  // e.g. App_schemas_door_DoorControlRequest -> DoorControlRequest
+  // e.g. App_schemas_controller_DoorControlRequest -> DoorControlRequest
+  const pattern3 = /^App_schemas_[a-zA-Z0-9_]+_([A-Z][a-zA-Z0-9]+)$/;
+  const match3 = schemaName.match(pattern3);
+  if (match3) {
+    return match3[1];
+  }
+
+  // Pattern 4: app__schemas__{module}__ModelName (double-underscore, no _schemas_ infix)
+  // e.g. app__schemas__controller__DoorControlRequest -> DoorControlRequest
+  // e.g. app__schemas__door__DoorControlRequest -> DoorControlRequest
+  const pattern4 = /^app__schemas__[a-z][a-z0-9_]*__([A-Z][a-zA-Z0-9]+)$/i;
+  const match4 = schemaName.match(pattern4);
+  if (match4) {
+    return match4[1];
+  }
+
+  // Pattern 5: Remove trailing underscores (e.g., PaginatedResponse_ModelName_ -> PaginatedResponse_ModelName)
   return schemaName.replace(/_+$/, '');
 };

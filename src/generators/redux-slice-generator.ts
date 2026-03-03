@@ -4,7 +4,7 @@ import Mustache from "mustache"
 
 import { loadTemplate } from "../utils/template-loader"
 import { toPascalCase } from "../utils/formater"
-import { stripApiBasePath } from "../utils/name-cleaner"
+import { stripApiBasePath, cleanSchemaName } from "../utils/name-cleaner"
 import { getModelDomain } from "../utils/domain-classifier"
 
 const sliceTemplate = loadTemplate("sliceTemplate.mustache")
@@ -125,16 +125,7 @@ export const generateReduxSlices = async (
       continue;
     }
     
-    let cleanedName = stripApiBasePath(name, apiBasePath);
-    
-    // Strip common unwanted prefixes from OpenAPI schema names
-    cleanedName = cleanedName
-      .replace(/^App_schemas_/i, '')
-      .replace(/^app__schemas__/i, '')
-      .replace(/Schemas_/g, '_')
-      .replace(/schemas__/g, '')
-      .replace(/__+/g, '_') // Replace multiple underscores with single
-      .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+    let cleanedName = cleanSchemaName(stripApiBasePath(name, apiBasePath));
     
     const sliceName = cleanedName.replace(/Upsert$/, "").replace(/GetToAlter$/, "")
     const modelName = toPascalCase(cleanedName)
