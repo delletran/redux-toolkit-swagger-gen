@@ -69,10 +69,10 @@ export const {{sliceName}} = createApi({
         {{/params}}
       },
       transformErrorResponse: transformErrorResponse,
-      providesTags: (result) => 
-        result?.{{#paginatedArrayField}}{{paginatedArrayField}}{{/paginatedArrayField}}{{^paginatedArrayField}}results{{/paginatedArrayField}}
+      providesTags: (res: any) => 
+        res?.{{#paginatedArrayField}}{{paginatedArrayField}}{{/paginatedArrayField}}{{^paginatedArrayField}}results{{/paginatedArrayField}}
           ? [
-              ...result.{{#paginatedArrayField}}{{paginatedArrayField}}{{/paginatedArrayField}}{{^paginatedArrayField}}results{{/paginatedArrayField}}.map(({ id }: any) => ({ type: TAGS.{{tag}}, id })),
+              ...res.{{#paginatedArrayField}}{{paginatedArrayField}}{{/paginatedArrayField}}{{^paginatedArrayField}}results{{/paginatedArrayField}}.map(({ id }: any) => ({ type: TAGS.{{tag}}, id })),
               { type: TAGS.{{tag}}, id: 'LIST' },
             ]
           : [{ type: TAGS.{{tag}}, id: 'LIST' }],
