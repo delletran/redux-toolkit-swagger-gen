@@ -1,10 +1,11 @@
 // Configuration constants for the application
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8200',
   BASE_PATH: '{{{apiBasePath}}}', // API base path (e.g., 'api/v1')
   TIMEOUT: 10000, // 10 seconds
   // Use proxy in development to avoid CORS issues
-  USE_PROXY: process.env.NODE_ENV === 'development',
+  // USE_PROXY: process.env.NODE_ENV === 'development',
+  USE_PROXY: true,
 } as const
 
 export const getApiUrl = (endpoint: string): string => {
@@ -41,6 +42,11 @@ export const createBaseQuery = (baseUrl?: string) => {
     prepareHeaders: (headers: Headers) => {
       // Add common headers
       headers.set('Accept', 'application/json')
+      // Service-to-service key for direct browser→API calls in production
+      const serviceKey = process.env.NEXT_PUBLIC_GMS_SERVICE_KEY
+      if (serviceKey) {
+        headers.set('X-Service-Key', serviceKey)
+      }
       return headers
     },
   }

@@ -40,6 +40,10 @@ export const {{sliceName}} = createApi({
       if (access_token) {
         headers.set('Authorization', `Bearer ${access_token}`);
       }
+      const serviceKey = process.env.NEXT_PUBLIC_GMS_SERVICE_KEY;
+      if (serviceKey) {
+        headers.set('X-Service-Key', serviceKey);
+      }
       return headers;
     },
   }),
