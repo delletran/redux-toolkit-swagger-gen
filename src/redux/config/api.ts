@@ -1,7 +1,25 @@
 // Configuration constants for the application
 export const API_CONFIG = {
-  /** Backend base URL (e.g. http://192.168.254.129:8200). */
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8200',
+  /**
+   * Backend base URL — derived from the browser URL at runtime.
+   *   http://192.168.254.129:8080  → http://192.168.254.129:8200
+   *   https://gms.247fitclub.com   → NEXT_PUBLIC_API_URL_HTTPS env var
+   *   http://localhost:3000         → http://localhost:8200
+   *   SSR (server)                  → NEXT_PUBLIC_API_URL env var
+   */
+  get BASE_URL(): string {
+    if (typeof window !== 'undefined') {
+      const { protocol, hostname } = window.location
+      // Domain name → use HTTPS API URL from env
+      if (hostname !== 'localhost' && !/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+        return process.env.NEXT_PUBLIC_API_URL_HTTPS || `${protocol}//api.${hostname}`
+      }
+      // IP or localhost → same host, backend port
+      const port = process.env.NEXT_PUBLIC_API_PORT || '8200'
+      return `${protocol}//${hostname}:${port}`
+    }
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8200'
+  },
   BASE_PATH: '{{{apiBasePath}}}', // API base path (e.g., 'api/v1')
   TIMEOUT: 10000, // 10 seconds
 }
